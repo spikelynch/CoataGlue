@@ -1,0 +1,28 @@
+Data Capture Ingest Adaptor script - notes.
+
+Input
+
+DC18A - CSV file, one row of headers, one row of data.
+DC18B - haven't received sample metadata yet.
+
+Output
+Metadata Interchange XML
+
+
+Terminology
+-----------
+
+Instrument - a single instrument or software service
+Source     - a data capture source eg DC18A, DC18B - with a single 
+             metadata ingest format, harvest frequency etc
+             
+Harvest    - an action which scans a Source/Instrument and
+			 retrieves metadata records to be written out 
+			 as XML.
+	
+Classes
+-------
+
+UTSRDC::Instrument - represents an instrument. Not subclassed
+URSRDC::Source     - a data capture source. Typically subclassed
+                     to match the source's 
