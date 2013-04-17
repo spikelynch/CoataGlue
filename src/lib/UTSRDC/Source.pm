@@ -26,9 +26,9 @@ sub new {
 		$self->register_sources(%params);
 		return $self;
 	} else {
-		my @names = split('::', $class);
-		splice(@names, 0, 2);   # remove 'UTSRDC::Source;
-		$self->{name} = join('::', @names);
+		my @classparts = split('::', $class);
+		splice(@classparts, 0, 2);
+		$self->{name} = join('::', @classparts);
 		return $self->init(%params);
 	}
 }
@@ -38,35 +38,27 @@ sub new {
 sub init {
 	my ( $self ) = @_;
 	
-	$self->{log}->error("You need to provide an init method for " . ref($self));
+	$self->{log}->error("All UTSRDC::Source subclasses need an init method (" . ref($self) . ")");
 	die;
 }
 
-sub register_sources {
+
+
+sub register_plugins {
 	my ( $self, %params ) = @_;
 	
-	$self->{log}->debug("Registering sources...");
+	$self->{log}->debug("Registering plugins...");
 	
-	my @srcs = $self->plugins;
-	
-	for my $source ( $self->plugins ) {
+	for my $plugin ( $self->plugins ) {
 		
 		eval {
-			my $s_obj = $source->new(%params);
-			# 'Abstract' Source classes should return undef 
-			# when they are instantiated.
-			if( $s_obj ) {
-				$self->{sources}{$source} = $s_obj;
-				my $name = $s_obj->{name};
-				if( !$self->{conf}{$name} ) {
-					$self->{log}->warn("No config section found for $name");
-				} else {
-					$self->{sources}{$source}{conf} = $self->{conf}{$name};
-				}
+			my $p_obj = $plugin->new(%params);
+			if( $p_obj ) {
+				$self->{plugins}{$p_obj->{name}} = $p_obj;
 			}
 		};
 		if( $@ ) {
-			$self->{log}->warn("Source plugin $source failed to initialise: $@");
+			$self->{log}->warn("Source plugin $plugin failed to initialise: $@");
 		}
 	}
 }
