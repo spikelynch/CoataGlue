@@ -58,7 +58,8 @@ use Getopt::Std;
 use Config::Std;
 use Log::Log4perl;
 
-use UTSRDC::DataSource;
+use UTSRDC::Source;
+use UTSRDC::Dataset;
 
 my $LOGGER = 'UTSRDC.harvest';
 
@@ -69,22 +70,33 @@ Log::Log4perl->init($ENV{RDC_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $sources = UTSRDC::DataSource->new();
-
-$sources->scan();
+my $sources = UTSRDC::DataSource->new(conf => $ENV{RDC_CONFIG});
 
 
-#
-#my $rdc = UTSRDC->new();
-#
-#for my $source ( $rdc->sources ) {
-#	eval {
-#		my $datasets = $source->get_new_datasets;
-#		for my $dataset ( @$datasets ) {
-#			$dataset->write_metadata;
-#		}
-#	};
-#	if( $@ ) {
-#		$rdc->error("Error harvesting from " . $source->name());
-#	}
-#}
+SOURCE: for my $source ( $sources->sources ) {
+	my @datasets;
+	
+	eval {
+		@datasets = $source->scan;
+	};
+	
+	if( $@ ) {
+		$log->error("$source->{name} scan failed: $@")
+	}
+	
+	$log->info("Source $source->{name} datasets: " . scalar(@datasets));
+	
+	for my $dataset ( @datasets ) {
+		eval {
+			$dataset->write_xml;
+		};
+		if( $@ ) {
+			$log->error("Write XML $source->{name}: $dataset->{id} failed");
+			$log->error("Error: $@");
+		} else {
+			$log->info("Wrote XML: $source->{name}: $dataset->{id}")
+		}
+	}
+}
+
+
