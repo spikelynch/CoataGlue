@@ -1,8 +1,8 @@
-package UTSRDC::DataSource::MIF;
+package UTSRDC::Source::MIF;
 
 use strict;
 
-use parent 'UTSRDC::DataSource';
+use parent 'UTSRDC::Source';
 
 use Data::Dumper;
 use Text::CSV;
@@ -22,17 +22,11 @@ sub init {
 sub scan {
 	my ( $self ) = @_;
 	
-	my @directories = $self->scan_directories(
+	my @datasets = $self->scan_directories(
 		basedir => $self->{conf}{basedir},
-		dir     => qr/$self->{conf}{datadir}/,
-		
+		dir     => qr/$self->{conf}{datadir}/,		
 	);
-	
-	my @datasets = ();
-	for my $dir ( @directories ) {
-		push @datasets, $self->read_metadata(dir => $dir);
-	}
-	
+
 	return @datasets
 }
 

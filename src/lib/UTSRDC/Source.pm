@@ -21,13 +21,13 @@ sub new {
 	};
 
 	
-	if( $class eq 'UTSRDC::DataSource' ) {
+	if( $class eq 'UTSRDC::Source' ) {
 		$self->config() || die("Config failed");
 		$self->register_sources(%params);
 		return $self;
 	} else {
 		my @names = split('::', $class);
-		splice(@names, 0, 2);   # remove 'UTSRDC::DataSource;
+		splice(@names, 0, 2);   # remove 'UTSRDC::Source;
 		$self->{name} = join('::', @names);
 		return $self->init(%params);
 	}
@@ -53,7 +53,7 @@ sub register_sources {
 		
 		eval {
 			my $s_obj = $source->new(%params);
-			# 'Abstract' DataSource classes should return undef 
+			# 'Abstract' Source classes should return undef 
 			# when they are instantiated.
 			if( $s_obj ) {
 				$self->{sources}{$source} = $s_obj;
@@ -66,7 +66,7 @@ sub register_sources {
 			}
 		};
 		if( $@ ) {
-			$self->{log}->warn("DataSource plugin $source failed to initialise: $@");
+			$self->{log}->warn("Source plugin $source failed to initialise: $@");
 		}
 	}
 }
@@ -84,7 +84,7 @@ sub sources {
 sub config {
 	my  ($self, %params ) = @_;
 	
-	if( ref($self) ne 'UTSRDC::DataSource' ) {
+	if( ref($self) ne 'UTSRDC::Source' ) {
 		warn("called read_config on $self");		
 		$self->{log}->warn("Called read_config on $self");
 		return;

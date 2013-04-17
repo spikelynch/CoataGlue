@@ -70,7 +70,7 @@ Log::Log4perl->init($ENV{RDC_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $sources = UTSRDC::DataSource->new(conf => $ENV{RDC_CONFIG});
+my $sources = UTSRDC::Source->new(conf => $ENV{RDC_CONFIG});
 
 
 SOURCE: for my $source ( $sources->sources ) {
@@ -94,7 +94,7 @@ SOURCE: for my $source ( $sources->sources ) {
 			$log->error("Write XML $source->{name}: $dataset->{id} failed");
 			$log->error("Error: $@");
 		} else {
-			$log->info("Wrote XML: $source->{name}: $dataset->{id}")
+			$log->info("Dataset: $source->{name}: $dataset->{id} " . Dumper({ dataset => $dataset }));
 		}
 	}
 }

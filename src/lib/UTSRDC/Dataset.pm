@@ -22,7 +22,9 @@ use Log::Log4perl;
 
 my $LOGGER = 'UTSRDC::Dataset';
 
-Log::Log4perl::init($ENV{UTSRDC_LOG4J});
+
+
+Log::Log4perl->init($ENV{RDC_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
