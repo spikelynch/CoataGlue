@@ -1,0 +1,14 @@
+# Config file for the RDC Data Capture sources.
+# 
+
+[MIF]
+converter:    UTSRDC::Converter::FolderCSV
+basedir:      /home/mike/workspace/RDC Data Capture/test/metadata/MIF
+datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
+metadatafile: ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)\.csv$
+harvest:      /opt/redbox/alerts
+
+[LabShare]
+type:         UTSRDC::Converter::FolderCSV
+basedir:      WaveTank
+harvest:      /opt/redbox/alerts
