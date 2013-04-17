@@ -1,8 +1,8 @@
-package UTSRDC::DataSource;
+package UTSRDC::Source;
 
 use strict;
 
-use Module::Pluggable search_path => [ 'UTSRDC::DataSource' ], require => 1;
+use Module::Pluggable search_path => [ 'UTSRDC::Source' ], require => 1;
 use Log::Log4perl;
 use Carp qw(cluck);
 use Config::Std;
@@ -13,10 +13,10 @@ sub new {
 	my $self = {};
 	bless $self, $class;
 
-	$self->{log} = Log::Log4perl->get_logger('UTSRDC.DataSource');
+	$self->{log} = Log::Log4perl->get_logger('UTSRDC.Source');
 	
 	$self->{conffile} = $params{conf} || do {
-		$self->{log}->error("Need to pass URSRDC::DataSource->new a config file (conf => \$FILE)");
+		$self->{log}->error("Need to pass URSRDC::Source->new a config file (conf => \$FILE)");
 		die;
 	};
 
