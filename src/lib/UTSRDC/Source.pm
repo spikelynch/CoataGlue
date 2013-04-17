@@ -23,9 +23,9 @@ sub new {
 	
 	if( $class eq 'UTSRDC::Source' ) {
 		$self->config() || die("Config failed");
-		$self->register_sources(%params);
+		$self->register_plugins(%params);
 		return $self;
-	} else {
+	} else { # One of the plugin classes
 		my @classparts = split('::', $class);
 		splice(@classparts, 0, 2);
 		$self->{name} = join('::', @classparts);
@@ -58,20 +58,17 @@ sub register_plugins {
 			}
 		};
 		if( $@ ) {
-			$self->{log}->warn("Source plugin $plugin failed to initialise: $@");
+			$self->{log}->warn("Plugin $plugin failed to initialise: $@");
 		}
 	}
 }
 
+
 sub sources {
-	my ( $self ) = @_;
 	
-	my @names = sort keys %{$self->{sources}};
-	
-	my @sources = map { $self->{sources}{$_} } @names;
-	
-	return @sources;
 }
+
+
 
 sub config {
 	my  ($self, %params ) = @_;
