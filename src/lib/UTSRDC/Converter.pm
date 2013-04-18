@@ -1,11 +1,11 @@
-package UTSRDC::Source;
+package UTSRDC::Converter;
 
 use strict;
 
-use Module::Pluggable search_path => [ 'UTSRDC::Source' ], require => 1;
+use Module::Pluggable search_path => [ 'UTSRDC::Converter' ], require => 1;
 use Log::Log4perl;
 use Carp qw(cluck);
-use Config::Std;
+use Data::Dumper;
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -13,23 +13,14 @@ sub new {
 	my $self = {};
 	bless $self, $class;
 
-	$self->{log} = Log::Log4perl->get_logger('UTSRDC.Source');
+	$self->{log} = Log::Log4perl->get_logger($class);
 	
-	$self->{conffile} = $params{conf} || do {
-		$self->{log}->error("Need to pass URSRDC::Source->new a config file (conf => \$FILE)");
-		die;
-	};
-
-	
-	if( $class eq 'UTSRDC::Source' ) {
-		$self->config() || die("Config failed");
+	if( $class eq 'UTSRDC::Converter' ) {
 		$self->register_plugins(%params);
 		return $self;
-	} else { # One of the plugin classes
-		my @classparts = split('::', $class);
-		splice(@classparts, 0, 2);
-		$self->{name} = join('::', @classparts);
-		return $self->init(%params);
+	} else {
+		$self->init(%params);
+		return $self;
 	}
 }
 
@@ -38,7 +29,7 @@ sub new {
 sub init {
 	my ( $self ) = @_;
 	
-	$self->{log}->error("All UTSRDC::Source subclasses need an init method (" . ref($self) . ")");
+	$self->{log}->error("All UTSRDC::Converter subclasses need an init method (" . ref($self) . ")");
 	die;
 }
 
@@ -50,52 +41,26 @@ sub register_plugins {
 	$self->{log}->debug("Registering plugins...");
 	
 	for my $plugin ( $self->plugins ) {
-		
-		eval {
-			my $p_obj = $plugin->new(%params);
-			if( $p_obj ) {
-				$self->{plugins}{$p_obj->{name}} = $p_obj;
-			}
-		};
-		if( $@ ) {
-			$self->{log}->warn("Plugin $plugin failed to initialise: $@");
-		}
+		$self->{plugins}{$plugin} = 1;
 	}
 }
 
 
-sub sources {
-	
-}
+# $converter->converter(converter => $plugin_class, settings => $settings)
 
 
-
-sub config {
-	my  ($self, %params ) = @_;
+sub converter {
+	my ( $self, %params  ) = @_;
 	
-	if( ref($self) ne 'UTSRDC::Source' ) {
-		warn("called read_config on $self");		
-		$self->{log}->warn("Called read_config on $self");
-		return;
-	}
+	my $plugin = $params{converter};
+	my $settings = $params{settings};
 	
-	if( !-f $self->{conffile} ) {
-		$self->error("Config file $self->{conffile} not found");
+	if( $self->{plugins}{$plugin} ) {
+		return $plugin->new(%{$settings});
+	} else {
+		$self->{log}->error("Unknown converter '$plugin'");
 		return undef;
 	}
-	
-	
-	eval {
-		read_config($self->{conffile} => $self->{conf});
-	};
-	
-	if( $@ ) {
-		$self->{log}->error("Config file error: $@");
-		return undef;
-	}
-	
-	
-	return 1;
 }
 
 

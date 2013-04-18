@@ -19,14 +19,7 @@ $id       -> some sort of unique ID
 use strict;
 
 use Log::Log4perl;
-
-my $LOGGER = 'UTSRDC::Dataset';
-
-
-
-Log::Log4perl->init($ENV{RDC_LOG4J});
-
-my $log = Log::Log4perl->get_logger($LOGGER);
+use Data::Dumper;
 
 
 sub new {
@@ -35,6 +28,8 @@ sub new {
 	my $self = {};
 	bless $self, $class;
 	
+	$self->{log} = Log::Log4perl->get_logger($class);
+	
 	$self->{id}       = $params{id};
 	$self->{location} = $params{location};
 	$self->{metadata} = $params{metadata};
@@ -42,7 +37,7 @@ sub new {
 	my $error = undef;
 	for my $field ( qw(id location metadata) ) {
 		if( !$self->{$field} ) {
-			$log->error("Missing field $field in $class");
+			$self->{log}->error("Missing field $field in $class");
 			$error = 1;
 		}
 	}
@@ -50,6 +45,8 @@ sub new {
 	if( $error ) {
 		return undef;
 	}
+	
+	$self->{log}->debug(Dumper({dataset => $self}));
 	
 	return $self;
 }
@@ -60,3 +57,5 @@ sub write_xml {
 	my ( $class ) = @_;
 	
 }
+
+1;

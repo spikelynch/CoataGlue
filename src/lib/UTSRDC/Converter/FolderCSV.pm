@@ -1,8 +1,8 @@
-package UTSRDC::Source::CSV;
+package UTSRDC::Converter::FolderCSV;
 
 use strict;
 
-use parent 'UTSRDC::Source';
+use parent 'UTSRDC::Converter';
 
 use Data::Dumper;
 use Text::CSV;
@@ -13,7 +13,13 @@ UTSRDC::Source::CSV
 
 =head1 SYNOPSIS
 
-Generic data source for 
+Generic converter for data like this:
+
+/basedir/datadir/metadata.csv
+                 ... and data ...
+        /dd2/
+        /dd3/
+        
 
 
 
@@ -29,7 +35,21 @@ sub init {
 		die;
 	};
 	
-	return $self;	
+	my $missing = 0;
+	for my $field ( qw(basedir datadir outdir metadatafile) ) {
+		if( !$params{$field} ) {
+			$missing = 1;
+			$self->{log}->error("$self->{name} missing config $field");
+		} else {
+			$self->{$field} = $params{$field};
+		}
+	}
+	
+	if( $missing ) {
+		return undef;
+	} else {
+		return $self;
+	}
 }
 
 
@@ -37,8 +57,8 @@ sub scan {
 	my ( $self ) = @_;
 	
 	my @datasets = $self->scan_directories(
-		basedir => $self->{conf}{basedir},
-		dir     => qr/$self->{conf}{datadir}/,		
+		basedir => $self->{basedir},
+		dir     => qr/$self->{datadir}/,		
 	);
 
 	return @datasets
@@ -52,7 +72,7 @@ sub scan_directories {
 	my $basedir = $params{basedir} || die("scan_directories needs a dir");
 	
 	if( ! -d $basedir ) {
-		$self->error("$basedir is not a directory");
+		$self->{log}->error("$basedir is not a directory");
 		die;
 	}
 	
@@ -77,7 +97,6 @@ sub scan_directories {
 	return @datasets ;
 }
 
-
 sub get_metadata {
 	my ( $self, %params ) = @_;
 	
@@ -91,14 +110,27 @@ sub get_metadata {
 		return undef;
 	};
 	
-	my $file_re = $self->{conf}{metadatafile};
+	my @metadata = ();
+	
 	while( my $item = readdir($dh) ) {
 		if( $item =~ /$self->{metadatafile}/ && -f "$path/$item" ) {
 			my $dataset = $self->parse_metadata_file(file => "$path/$item");
-			return $dataset;
+			if( $dataset ) {
+				push @metadata, $dataset;
+			}
 		}
 	}
-	$self->{log}->error("No file matching $self->{metadatafile}")
+	
+	if( scalar(@metadata) > 1 ) {
+		$self->{log}->warn("Warning: $path has more than one metadata file");
+	}
+
+	if( @metadata ) {
+		return $metadata[0];
+	} else {
+		$self->{log}->error("File not found: $path/$self->{metadatafile}");
+		return undef;
+	}
 }
 
 

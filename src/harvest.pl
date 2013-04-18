@@ -58,19 +58,30 @@ use Getopt::Std;
 use Config::Std;
 use Log::Log4perl;
 
+use UTSRDC;
 use UTSRDC::Source;
+use UTSRDC::Converter;
 use UTSRDC::Dataset;
+
 
 my $LOGGER = 'UTSRDC.harvest';
 
 if( !$ENV{RDC_LOG4J} ) {
 	die("Need to set RDC_LOG4J to point at a Log4j config file");
 }
+
+
 Log::Log4perl->init($ENV{RDC_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $sources = UTSRDC::Source->new(conf => $ENV{RDC_CONFIG});
+if( !$ENV{RDC_CONFIG} ) {
+	$log->error("Need to set RDC_CONFIG to a data source config file");
+	die;
+}
+
+
+my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
 
 
 SOURCE: for my $source ( $sources->sources ) {
@@ -87,6 +98,7 @@ SOURCE: for my $source ( $sources->sources ) {
 	$log->info("Source $source->{name} datasets: " . scalar(@datasets));
 	
 	for my $dataset ( @datasets ) {
+		$log->debug(Dumper({"$source->{name} dataset" => $dataset}));
 		eval {
 			$dataset->write_xml;
 		};
