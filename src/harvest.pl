@@ -50,13 +50,13 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
 }
 
-
 use lib $ENV{RDC_PERLLIB};
 
 use Data::Dumper;
 use Getopt::Std;
 use Config::Std;
 use Log::Log4perl;
+
 
 use UTSRDC;
 use UTSRDC::Source;
@@ -83,10 +83,14 @@ if( !$ENV{RDC_CONFIG} ) {
 
 my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
 
+if( !$sources ) {
+	$log->error("Couldn't initialise UTSRDC");
+	die;
+}
 
 SOURCE: for my $source ( $sources->sources ) {
 	my @datasets;
-	
+	$log->info("Scanning data source $source->{name}");
 	eval {
 		@datasets = $source->scan;
 	};
@@ -94,19 +98,22 @@ SOURCE: for my $source ( $sources->sources ) {
 	if( $@ ) {
 		$log->error("$source->{name} scan failed: $@")
 	}
-	
-	$log->info("Source $source->{name} datasets: " . scalar(@datasets));
-	
+	$log->info("Found " . scalar(@datasets) . " datasets");
 	for my $dataset ( @datasets ) {
-		$log->debug(Dumper({"$source->{name} dataset" => $dataset}));
 		eval {
-			$dataset->write_xml;
+			# 
+			
+			
+			
+			
+			
+			#$dataset->write_xml;
 		};
 		if( $@ ) {
 			$log->error("Write XML $source->{name}: $dataset->{id} failed");
 			$log->error("Error: $@");
 		} else {
-			$log->info("Dataset: $source->{name}: $dataset->{id} " . Dumper({ dataset => $dataset }));
+			#$log->info("Wrote  XML for $source->{name}: $dataset->{id}");
 		}
 	}
 }

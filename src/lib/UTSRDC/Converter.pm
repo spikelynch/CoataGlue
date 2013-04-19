@@ -33,6 +33,12 @@ sub init {
 	die;
 }
 
+sub scan {
+	my ( $self ) = @_;
+	
+	$self->{log}->error("All UTSRDC::Converter subclasses need a scan method (" . ref($self) . ")");
+	die;
+}
 
 
 sub register_plugins {

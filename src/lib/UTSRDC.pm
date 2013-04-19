@@ -37,6 +37,16 @@ sub new {
 		$self->{log}->error("Config file error: $@");
 		die;
 	}
+	
+	# Global settings are stored with a hash key of '' - only
+	# the store directory so far.
+
+	$self->{store} = $self->{conf}{''}{store} || do {
+		$self->{log}->error("No store directory defined in config");
+		die;
+	};
+	
+	delete $self->{conf}{''};
 
 	$self->{converters} = UTSRDC::Converter->new();
 	

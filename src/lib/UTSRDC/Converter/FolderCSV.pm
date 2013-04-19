@@ -53,23 +53,18 @@ sub init {
 }
 
 
+
+
 sub scan {
-	my ( $self ) = @_;
-	
-	my @datasets = $self->scan_directories(
-		basedir => $self->{basedir},
-		dir     => qr/$self->{datadir}/,		
-	);
-
-	return @datasets
-}
-
-
-
-sub scan_directories {
 	my ( $self, %params ) = @_;
 	
-	my $basedir = $params{basedir} || die("scan_directories needs a dir");
+	my $source = $params{source} || do {
+		$self->{log}->error("Can't scan metadata without a source");
+		return undef;
+	};
+	
+	my $basedir = $self->{basedir};
+	my $datadir = $self->{datadir};
 	
 	if( ! -d $basedir ) {
 		$self->{log}->error("$basedir is not a directory");
@@ -178,7 +173,8 @@ sub parse_metadata_file {
 	my $ds = UTSRDC::Dataset->new(
 		id => $file,
 		metadata => $metadata,
-		location => $file
+		location => $file,
+		source => $self->{source}
 	);
 	return $ds
 }
