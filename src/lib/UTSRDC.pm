@@ -1,5 +1,7 @@
 package UTSRDC;
 
+use strict;
+
 use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
@@ -66,6 +68,7 @@ sub new {
 		);
 		my $source = UTSRDC::Source->new(
 			name => $name,
+			store => $self->{store},
 			converter => $converter,
 			settings => \%settings
 		);

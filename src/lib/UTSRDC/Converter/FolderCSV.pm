@@ -58,11 +58,6 @@ sub init {
 sub scan {
 	my ( $self, %params ) = @_;
 	
-	my $source = $params{source} || do {
-		$self->{log}->error("Can't scan metadata without a source");
-		return undef;
-	};
-	
 	my $basedir = $self->{basedir};
 	my $datadir = $self->{datadir};
 	
@@ -176,6 +171,7 @@ sub parse_metadata_file {
 		location => $file,
 		source => $self->{source}
 	);
+	
 	return $ds
 }
 

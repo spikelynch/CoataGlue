@@ -3,7 +3,8 @@ package UTSRDC::Source;
 use strict;
 
 use Log::Log4perl;
-use Storable;
+use Storable qw(lock_store lock_retrieve);
+use Data::Dumper;
 
 use UTSRDC::Converter;
 
@@ -45,6 +46,10 @@ sub new {
 		}
 	}
 	
+	# add this source to its converter so that the converter
+	# can do status lookups etc.
+	$self->{converter}{source} = $self;
+	
 	$self->{storefile} = join('/', $self->{store}, $self->{name});
 	
 	$self->load_history;
@@ -60,6 +65,8 @@ sub load_history {
 		$self->{log}->info("Source $self->{name} has no history");
 		$self->{history} = {};
 	}
+	
+	$self->{log}->debug(Dumper({"$self->{name} history" => $self->{history}}));
 }
 
 
@@ -83,8 +90,10 @@ sub scan {
 	
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
-		if( $status->{status} eq 'new ') {
+		if( $status->{status} eq 'new') {
 			push @datasets, $dataset;
+		} else {
+			$self->{log}->debug("Skipping $dataset->{id}: status = $status->{status}");
 		}
 	}
 	return @datasets;

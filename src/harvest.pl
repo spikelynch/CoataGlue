@@ -103,7 +103,7 @@ SOURCE: for my $source ( $sources->sources ) {
 		eval {
 			# 
 			
-			
+			$dataset->set_status_ingested;		
 			
 			
 			

@@ -81,7 +81,7 @@ sub new {
 		':', $self->{source}{name}, $self->{id}
 	);
 	
-	$self->{status} = $self->{source}->status(id => $self->{id});
+	$self->get_status;
 	
 	if( $error ) {
 		return undef;
@@ -105,7 +105,7 @@ sub global_id {
 }
 
 
-=item status()
+=item get_status()
 
 Returns this dataset's status as a hash:
 
@@ -119,10 +119,50 @@ Returns this dataset's status as a hash:
 
 sub get_status {
 	my ( $self ) = @_;
+
+	$self->{status} = $self->{source}->get_status(dataset => $self);
 	
-	return $self->{source}->get_status(id => $self->{id});
+	return $self->{status};
 }
 
+
+=item set_status_ingested
+
+Sets this dataset's status to ingested
+
+=cut
+
+sub set_status_ingested {
+	my ( $self ) = @_;
+	
+	$self->{source}->set_status(
+		dataset => $self,
+		status => 'ingested',
+		details => {
+			timestamp => time
+		}
+	);
+}
+
+
+=item set_status_error
+
+Sets this dataset's status to ingested
+
+=cut
+
+sub set_status_error {
+	my ( $self, %params ) = @_;
+		
+	$self->{source}->set_status(
+		dataset => $self,
+		status => 'error',
+		details => {
+			timestamp => time,
+			%params
+		}
+	);
+}
 
 
 =item write_redbox()
