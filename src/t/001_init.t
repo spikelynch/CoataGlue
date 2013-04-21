@@ -1,5 +1,16 @@
 #!/usr/bin/perl
 
+=head1 NAME
+
+001_init.t
+
+=head1 DESCRIPTION
+
+Basic initialisation tests
+
+=cut
+
+
 use Test::More;
 
 use UTSRDC;
@@ -7,11 +18,9 @@ use UTSRDC::Source;
 use UTSRDC::Converter;
 use UTSRDC::Dataset;
 
-
-my $self->
-
-
 my $LOGGER = 'UTSRDC.test.001';
+
+
 
 if( !$ENV{RDC_LOG4J} ) {
 	die("Need to set RDC_LOG4J to point at a Log4j config file");
