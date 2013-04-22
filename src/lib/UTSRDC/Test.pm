@@ -4,7 +4,7 @@ package UTSRDC::Test;
 
 use parent Exporter;
 
-our @EXPORT_OK = qw(buildup teardown);
+our @EXPORT_OK = qw(setup_tests teardown);
 
 
 use File::Path qw(remove_tree);
@@ -14,12 +14,18 @@ use strict;
 
 
 
-sub buildup {
+sub setup_tests {
 	my %params = @_;
 	
 	my $log = $params{log};
 	my $fixtures = $ENV{RDC_FIXTURES} || die("Need to set RDC_FIXTURES");
 	my $test = $ENV{RDC_TESTDIR} || die("Need to set RDC_TESTDIR");
+
+	if( !$ENV{RDC_CONFIG} ) {
+		$log && $log->error("Need to set RDC_CONFIG to a data source config file");
+		die;
+	}
+
 
 	if( ! -d $fixtures ) {
 		die("'$fixtures' is not a directory");
@@ -40,7 +46,9 @@ sub buildup {
 	my @results = dircopy($fixtures, $test) || die("Copy failed $!");
 	
 	
-	
+	return {
+		SOURCES => [ 'MIF' ]
+	};
 }
 
 sub teardown {

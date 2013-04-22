@@ -6,7 +6,8 @@
 
 =head1 DESCRIPTION
 
-Basic initialisation tests
+Basic initialisation: create a UTSRDC object and get
+data sources from it.
 
 =cut
 
@@ -19,17 +20,16 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More;
+use Test::More tests => 4;
+use Data::Dumper;
 
 use UTSRDC;
 use UTSRDC::Source;
 use UTSRDC::Converter;
 use UTSRDC::Dataset;
-use UTSRDC::Test qw(buildup);
+use UTSRDC::Test qw(setup_tests);
 
-my $LOGGER = 'UTSRDC.test.001';
-
-
+my $LOGGER = 'UTSRDC.tests.001';
 
 if( !$ENV{RDC_LOG4J} ) {
 	die("Need to set RDC_LOG4J to point at a Log4j config file");
@@ -39,9 +39,31 @@ Log::Log4perl->init($ENV{RDC_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
+my $fixtures = setup_tests(log => $log);
 
-buildup(log => $log);
+$log->debug(Dumper( { fixtures => $fixtures } ));
 
+my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
+
+ok($sources, "Initialised UTSRDC object");
+
+my @sources = $sources->sources;
+
+ok(@sources, "Got sources");
+
+cmp_ok(
+	scalar(@sources),
+	'==',
+	scalar(@{$fixtures->{SOURCES}}),
+	"Got correct number of sources"
+);
+
+cmp_ok(
+	$sources[0]->{name},
+	'eq',
+	$fixtures->{SOURCES}[0],
+	"Source name matches"
+);
 
 
 
