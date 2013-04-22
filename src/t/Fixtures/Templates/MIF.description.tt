@@ -1,0 +1,15 @@
+Cell Type/Tissue: <span id="celltype">[% Cell_Type_Tissue %]</span><br />
+Experiment Type: <span id="experimenttype">[% Experiment_Type %]</span><br />
+Slides: <span id="slides">[% Slides %]</span><br />
+Dishes: <span id="dishes">[% Dishes %]</span><br />
+Multiwell Chambers: <span id="multiwell">[% Multiwell_Chambers %]</span><br />
+[% IF Other_Equipment == "Yes" %]
+Other Equipment: <span id="">[% Specify_Other_Equipment %]</span><br />
+[% END %]
+[% IF Has_Fluorescent_Proteins == "Yes" %]
+Fluorescent Proteins: <span id="fluorescentproteins">[% Fluorescent_Protein_1 %] [% Fluorescent_Protein_2 %] [% Fluorescent_Protein_3 %]</span><br />
+[% END %]
+Specific Dyes: <span id="specificdyes">[% Specific_Dyes %]</span><br />
+[% IF Has_Immunoflorescence == "Yes" %]
+Immunoflorescence: <span id="immunoflorescence">[% Immunofluorescence_1 %][% Immunofluorescence_2 %][% Immunofluorescence_3 %]</span><br />
+[% END %]
