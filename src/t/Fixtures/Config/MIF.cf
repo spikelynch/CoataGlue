@@ -1,3 +1,11 @@
 # Crosswalk config file for DC18A/MIF metadata
 
-[ReDBox]
+[Dataset]
+title: 			Experiment_Name
+activity: 		Project_ID
+party: 			Project_Creator_Staff_Student_ID
+description:	MIF.description.tt
+service:		MIF.instruments.tt
+
+[Project]
+
