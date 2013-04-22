@@ -29,7 +29,7 @@ use UTSRDC::Converter;
 use UTSRDC::Dataset;
 use UTSRDC::Test qw(setup_tests);
 
-my $LOGGER = 'UTSRDC.tests.001';
+my $LOGGER = 'UTSRDC.tests.001_init';
 
 if( !$ENV{RDC_LOG4J} ) {
 	die("Need to set RDC_LOG4J to point at a Log4j config file");
@@ -62,7 +62,7 @@ cmp_ok(
 	$sources[0]->{name},
 	'eq',
 	$fixtures->{SOURCES}[0],
-	"Source name matches"
+	"Source name matches: $fixtures->{SOURCES}[0]"
 );
 
 

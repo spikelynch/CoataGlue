@@ -47,7 +47,8 @@ sub setup_tests {
 	
 	
 	return {
-		SOURCES => [ 'MIF' ]
+		SOURCES => [ 'MIF' ],
+		DATASETS => { MIF => 2 }
 	};
 }
 

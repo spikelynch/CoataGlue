@@ -101,13 +101,18 @@ SOURCE: for my $source ( $sources->sources ) {
 	$log->info("Found " . scalar(@datasets) . " datasets");
 	for my $dataset ( @datasets ) {
 		eval {
-			# 
-			
-			$dataset->set_status_ingested;		
-			
-			
-			
-			#$dataset->write_xml;
+#			if( $dataset->{metadata}{publish} ) {
+#				if( !$dataset->fc_publish() ) {
+#					$log->error("Fedora publish failed")
+#				}
+#				$dataset->{metadata}{publish} = undef;
+#			}
+			if( $dataset->write_xml ) {
+				$dataset->set_status_ingested;
+			} else {
+				$dataset->set_status_error()
+				$log->error("Write ingest XML failed");
+			}				
 		};
 		if( $@ ) {
 			$log->error("Write XML $source->{name}: $dataset->{id} failed");
