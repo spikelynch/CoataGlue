@@ -1,0 +1,5 @@
+[% IF Instrument == "1" %]
+InstrumentID1
+[% ELSE %]
+InstrumentID2
+[% END %]
