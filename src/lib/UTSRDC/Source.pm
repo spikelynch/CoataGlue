@@ -67,12 +67,12 @@ sub new {
 sub load_history {
 	my ( $self ) = @_;	
 	if( -f $self->{storefile} ) {
+		$self->{log}->debug("Loading history $self->{storefile}");
 		$self->{history} = lock_retrieve($self->{storefile});
 	} else {
-		$self->{log}->info("Source $self->{name} has no history");
+		$self->{log}->info("Empty history for $self->{name}");
 		$self->{history} = {};
 	}
-	
 }
 
 
@@ -179,7 +179,7 @@ sub load_templates {
 	}
 	
 	read_config($template_cf => $self->{template_cf});
-	$self->{log}->debug("Data source $self>{name} loaded template config $template_cf");
+	$self->{log}->debug("Data source $self->{name} loaded template config $template_cf");
 	$self->{tt} = Template->new({
 		INCLUDE_PATH => $ENV{RDC_TEMPLATES},
 	});

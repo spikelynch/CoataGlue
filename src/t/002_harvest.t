@@ -22,7 +22,7 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 4;
+use Test::More tests => 3;
 use Data::Dumper;
 
 use UTSRDC;
@@ -43,13 +43,14 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-$log->debug(Dumper( { fixtures => $fixtures } ));
+my $utsrdc = UTSRDC->new(
+	config => $ENV{RDC_CONFIG},
+	templates => $ENV{RDC_TEMPLATES}
+);
 
-my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
+ok($utsrdc, "Initialised UTSRDC object");
 
-ok($sources, "Initialised UTSRDC object");
-
-my @sources = $sources->sources;
+my @sources = $utsrdc->sources;
 
 ok(@sources, "Got sources");
 

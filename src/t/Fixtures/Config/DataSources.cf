@@ -1,7 +1,7 @@
 # Config file for the RDC Data Capture sources.
 # 
 
-store:		/home/mike/workspace/RDC Data Capture/test/store/
+store:		/home/mike/workspace/RDC Data Capture/src/t/Test/store/
 
 
 [MIF]
@@ -9,7 +9,7 @@ converter:    UTSRDC::Converter::FolderCSV
 basedir:      /home/mike/workspace/RDC Data Capture/test/metadata/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
-redbox:       /home/mike/workspace/RDC Data Capture/test/alerts/
+outdir:       /home/mike/workspace/RDC Data Capture/test/alerts/
 templates:	  MIF
 
 
