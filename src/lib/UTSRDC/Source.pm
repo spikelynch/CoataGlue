@@ -236,7 +236,7 @@ sub render_view {
 	}
 	my $output;
 	
-	my $writer = XML::Writer->new(OUTPUT => $output);
+	my $writer = XML::Writer->new(OUTPUT => \$output);
 	$writer->startTag($name);
 	for my $tag ( keys %$elements ) {
 		$writer->startTag($tag);

@@ -6,7 +6,7 @@
 
 =head1 DESCRIPTION
 
-Tests writing out XML versions of a dataset's metadata
+Tests generating XML versions of a dataset's metadata
 
 =cut
 
@@ -19,8 +19,9 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 4;
+use Test::More tests => 8;
 use Data::Dumper;
+use XML::Twig;
 
 use UTSRDC;
 use UTSRDC::Source;
@@ -62,3 +63,34 @@ my $ds = shift @datasets;
 my $xml = $ds->xml(view => 'Dataset');
 
 ok($xml, "Generated some XML");
+
+my ( $title, $activity, $party ) = ( '', '', '' );
+
+my $twig = XML::Twig->new(
+	twig_handlers => {
+		title => 	sub { $title = $_->text },
+		activity => sub { $activity = $_->text },
+		party =>	sub { $party = $_->text }
+	}
+); 
+
+eval {
+	$twig->parse($xml)
+};
+
+ok(!$@, "XML parsed OK");
+
+cmp_ok(
+	$title, 'eq', $ds->{metadata}{Experiment_Name},
+	"<title> = Experiment_Name"
+);
+
+cmp_ok(
+	$activity, 'eq', $ds->{metadata}{Project_ID},
+	"<activity> = Project_ID"
+);
+
+cmp_ok(
+	$party, 'eq', $ds->{metadata}{Project_Creator_Staff_Student_ID},
+	"<party> = Project_Creator_Staff_Student_ID"
+);

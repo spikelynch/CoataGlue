@@ -19,7 +19,6 @@ Variables:
 
 =back
 
-
 =cut
 
 use strict;
@@ -45,7 +44,8 @@ Create a new dataset object. All parameters are compulsory:
 
 =item location - the data itself - can be a filepath or URL
 
-=item metadata - a hashref
+=item metadata - a hashref.  Non-alphanumeric characters in keys are
+      converted to underscores.
 
 =back
 
@@ -71,6 +71,8 @@ sub new {
 			$error = 1;
 		}
 	}
+	
+	$self->clean_metadata_keys();
 	
 	if( $self->{id} =~ /:/ ) {
 		$self->{log}->error("Dataset IDs can't contain ':'");
@@ -104,6 +106,34 @@ sub global_id {
 	return $self->{global_id};
 }
 
+
+=item clean_metadata_keys()
+
+Goes through the metadata hash and replaces non-alphanumeric
+characters with underscores.  Throws an error if there's a
+key collision.
+
+=cut
+
+sub clean_metadata_keys {
+	my ( $self ) = @_;
+	
+	my $new_metadata = {};
+	
+	for my $key ( keys %{$self->{metadata}} ) {
+		my $value = $self->{metadata}{$key};
+		$key =~ s/[^A-Za-z0-9]/_/g;
+		if( exists $new_metadata->{$key} ) {
+			$self->{log}->fatal(
+				"$self->{id} key collision when cleaning metadata: $key"
+			);
+			die;
+		}
+		$new_metadata->{$key} = $value;
+	}
+	
+	$self->{metadata} = $new_metadata;
+}
 
 
 =item xml(view => $view)
