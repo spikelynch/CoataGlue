@@ -6,6 +6,7 @@ use Log::Log4perl;
 use Storable qw(lock_store lock_retrieve);
 use Data::Dumper;
 use Config::Std;
+use XML::Writer;
 
 use UTSRDC::Converter;
 
@@ -219,8 +220,9 @@ sub render_view {
 	
 	for my $field ( keys %$view ) {
 		if( $view->{$field} =~ /\.tt$/ ) {
+			$self->{log}->debug("Expanding template $field: $view->{$field}");
 			$elements->{$field} = $self->expand_template(
-				template => $view->{field},
+				template => $view->{$field},
 				metadata => $ds->{metadata}
 			);
 		} else {

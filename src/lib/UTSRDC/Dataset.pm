@@ -116,6 +116,11 @@ results.
 sub xml {
 	my ( $self, %params ) = @_;
 	
+	if( !$params{view} ) {
+		$self->{log}->error("xml needs a 'view' parameter");
+		return undef;
+	}
+	
 	return $self->{source}->render_view(
 		view => $params{view},
 		dataset => $self
