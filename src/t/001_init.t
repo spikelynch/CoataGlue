@@ -43,7 +43,10 @@ my $fixtures = setup_tests(log => $log);
 
 $log->debug(Dumper( { fixtures => $fixtures } ));
 
-my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
+my $sources = UTSRDC->new(
+	config => $ENV{RDC_CONFIG},
+	templates => $ENV{RDC_TEMPLATES}
+);
 
 ok($sources, "Initialised UTSRDC object");
 

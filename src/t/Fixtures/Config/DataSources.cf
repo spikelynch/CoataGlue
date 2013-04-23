@@ -9,7 +9,7 @@ converter:    UTSRDC::Converter::FolderCSV
 basedir:      /home/mike/workspace/RDC Data Capture/test/metadata/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
-outdir:       /home/mike/workspace/RDC Data Capture/test/alerts/
+redbox:       /home/mike/workspace/RDC Data Capture/test/alerts/
 templates:	  MIF
 
 

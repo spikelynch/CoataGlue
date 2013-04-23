@@ -81,14 +81,17 @@ if( !$ENV{RDC_CONFIG} ) {
 }
 
 
-my $sources = UTSRDC->new(conf => $ENV{RDC_CONFIG});
+my $utsrdc = UTSRDC->new(
+	conf => $ENV{RDC_CONFIG},
+	templates => $ENV{RDC_TEMPLATES}
+);
 
-if( !$sources ) {
+if( !$utsrdc ) {
 	$log->error("Couldn't initialise UTSRDC");
 	die;
 }
 
-SOURCE: for my $source ( $sources->sources ) {
+SOURCE: for my $source ( $utsrdc->sources ) {
 	my @datasets;
 	$log->info("Scanning data source $source->{name}");
 	eval {
@@ -107,13 +110,18 @@ SOURCE: for my $source ( $sources->sources ) {
 #				}
 #				$dataset->{metadata}{publish} = undef;
 #			}
-			if( $dataset->write_xml ) {
-				$dataset->set_status_ingested;
-			} else {
-				$dataset->set_status_error()
-				$log->error("Write ingest XML failed");
-			}				
+#			if( $dataset->write_xml ) {
+#				$dataset->set_status_ingested;
+#			} else {
+#				$dataset->set_status_error()
+#				$log->error("Write ingest XML failed");
+#			}				
 		};
+		
+		my $xml = $dataset->xml(view => 'Dataset');
+		
+		print $xml;
+		
 		if( $@ ) {
 			$log->error("Write XML $source->{name}: $dataset->{id} failed");
 			$log->error("Error: $@");

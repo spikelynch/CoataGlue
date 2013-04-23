@@ -105,6 +105,27 @@ sub global_id {
 }
 
 
+
+=item xml(view => $view)
+
+Apply the specified xml view to this dataset and return the
+results.
+
+=cut
+
+sub xml {
+	my ( $self, %params ) = @_;
+	
+	return $self->{source}->render_view(
+		view => $params{view},
+		dataset => $self
+	);
+}
+
+
+
+
+
 =item get_status()
 
 Returns this dataset's status as a hash:
@@ -165,18 +186,5 @@ sub set_status_error {
 }
 
 
-=item write_redbox()
-
-Writes the redbox metadata into the source's configured redbox alert
-directory
-
-=cut
-
-sub xml {
-	my ( $class ) = @_;
-	
-	
-	
-}
 
 1;

@@ -18,12 +18,13 @@ sub new {
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 	
-	if( !$params{conf} ) {
-		$self->{log}->error("$class needs a config file");
+	if( !$params{config} || !$params{templates}) {
+		$self->{log}->error("$class needs parameters conf (a file) and templates (a directory)");
 		die;
 	}
 	
-	$self->{conffile} = $params{conf};
+	$self->{conffile} = $params{config};
+	$self->{templates} = $params{templates};
 	$self->{log}->debug("Reading config from $self->{conffile}");
 
 	if( !-f $self->{conffile} ) {
@@ -90,6 +91,17 @@ sub sources {
 	my ( $self ) = @_;
 	
 	return map { $self->{sources}{$_} } sort keys %{$self->{sources}};
+}
+
+sub template {
+	my ( $self, %params ) = @_;
+	
+	my $template = $params{template} || do {
+		$self->{log}->error("Template filename missing");
+		return undef;
+	};
+	
+	$self->{tt} = Template->new();
 }
 
 
