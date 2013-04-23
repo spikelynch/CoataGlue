@@ -6,10 +6,11 @@
 
 =head1 DESCRIPTION
 
-Scan a metadata capture folder, check that it ingested
-the right number of datasets, then run it again and
-check that it doesn't rehavest the same datasets
-twice
+Tests the following:
+
+* scan a metadata harvest directory
+* flagging datasets as ingested
+* rescanning which doesn't pick up the flagged datasets.
 
 =cut
 
@@ -22,7 +23,7 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 3;
+use Test::More tests => 6;
 use Data::Dumper;
 
 use UTSRDC;
@@ -61,5 +62,23 @@ my $count_ds = $fixtures->{DATASETS}{$source->{name}};
 my @datasets = $source->scan;
 
 cmp_ok(scalar(@datasets), '==', $count_ds, "Got $count_ds datasets");
+
+my $ds = $datasets[0];
+
+my $status = $ds->get_status;
+cmp_ok($status->{status}, 'eq', 'new', "Status of dataset is 'new'");
+
+$ds->set_status_ingested;
+
+my $status = $ds->get_status;
+cmp_ok($status->{status}, 'eq', 'ingested', "Status of dataset is now 'ingested'");
+
+@datasets = ();
+
+@datasets = $source->scan;
+
+my $new_count_ds = $count_ds - 1;
+
+cmp_ok(scalar(@datasets), '==', $new_count_ds, "Got $new_count_ds datasets");
 
 

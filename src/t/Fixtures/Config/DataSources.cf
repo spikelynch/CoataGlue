@@ -1,7 +1,7 @@
 # Config file for the RDC Data Capture sources.
 # 
 
-store:		/home/mike/workspace/RDC Data Capture/src/t/Test/store/
+store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 
 
 [MIF]
