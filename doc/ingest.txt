@@ -1,0 +1,26 @@
+Steps to take place for metadata ingest.
+
+* Check to see if this dataset has already been ingested - if it has, ignore it
+  (we aren't updating existing datasets)
+
+* Check to see if the project exists in Mint.
+
+* If not -> write an activity record into Mint ingest
+
+* Check to see if the experiment creator exists in the mint
+
+* If not - ?
+
+* Write the HTML human/machine-readable document based on the template
+
+* Add the HTML as a datastream to the Fedora object
+
+* Write the Fedora ID into the XML
+
+* Build the description field according to the description template
+
+* Write the dataset XML for RedBox (this includes the templated description)
+
+* Add the dataset to Fedora
+
+ 
