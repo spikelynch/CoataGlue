@@ -109,9 +109,12 @@ sub global_id {
 
 =item clean_metadata_keys()
 
-Goes through the metadata hash and replaces non-alphanumeric
-characters with underscores.  Throws an error if there's a
-key collision.
+CLean up the metadata keys so that they can be used as
+variables in Template::Toolkit.  Any non-alphanumeric
+characters at the end are truncated; all other non-alphanumeric
+characters are replaced with underscores.
+
+Throws an error if two keys convert down to the same string.
 
 =cut
 
@@ -122,6 +125,7 @@ sub clean_metadata_keys {
 	
 	for my $key ( keys %{$self->{metadata}} ) {
 		my $value = $self->{metadata}{$key};
+		$key =~ s/[^A-Za-z0-9]+$//;
 		$key =~ s/[^A-Za-z0-9]/_/g;
 		if( exists $new_metadata->{$key} ) {
 			$self->{log}->fatal(

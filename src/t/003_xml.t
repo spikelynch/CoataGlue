@@ -19,9 +19,11 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Data::Dumper;
 use XML::Twig;
+use Text::Diff;
+
 
 use UTSRDC;
 use UTSRDC::Source;
@@ -64,13 +66,14 @@ my $xml = $ds->xml(view => 'Dataset');
 
 ok($xml, "Generated some XML");
 
-my ( $title, $activity, $party ) = ( '', '', '' );
+my ( $title, $activity, $party, $description ) = ( '', '', '', '', '' );
 
 my $twig = XML::Twig->new(
 	twig_handlers => {
-		title => 	sub { $title = $_->text },
-		activity => sub { $activity = $_->text },
-		party =>	sub { $party = $_->text }
+		title => 		sub { $title = $_->text },
+		activity => 	sub { $activity = $_->text },
+		party =>		sub { $party = $_->text },
+		description => 	sub { $description = $_->text }
 	}
 ); 
 
@@ -82,15 +85,23 @@ ok(!$@, "XML parsed OK");
 
 cmp_ok(
 	$title, 'eq', $ds->{metadata}{Experiment_Name},
-	"<title> = Experiment_Name"
+	"<title> = Experiment_Name = $title"
 );
 
 cmp_ok(
 	$activity, 'eq', $ds->{metadata}{Project_ID},
-	"<activity> = Project_ID"
+	"<activity> = Project_ID = $activity"
 );
 
 cmp_ok(
 	$party, 'eq', $ds->{metadata}{Project_Creator_Staff_Student_ID},
-	"<party> = Project_Creator_Staff_Student_ID"
+	"<party> = Project_Creator_Staff_Student_ID = $party"
 );
+
+cmp_ok(
+	$description, 'eq', $fixtures->{DESCRIPTION},
+	"<description> content as expected"
+) || do {
+	my $diff = diff \$fixtures->{DESCRIPTION}, \$description;
+	print "DIFF: \n$diff\n";
+};

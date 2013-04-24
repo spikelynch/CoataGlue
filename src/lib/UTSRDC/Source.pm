@@ -183,6 +183,7 @@ sub load_templates {
 	$self->{log}->debug("Data source $self->{name} loaded template config $template_cf");
 	$self->{tt} = Template->new({
 		INCLUDE_PATH => $ENV{RDC_TEMPLATES},
+		POST_CHOMP => 1
 	});
 }
 
@@ -226,11 +227,12 @@ sub render_view {
 				metadata => $ds->{metadata}
 			);
 		} else {
-			if( !defined $ds->{metadata}{$field} ) {
-				$self->{log}->warn("View $name: $field not defined for dataset $ds->{id}");
+			my $mdfield = $view->{$field};
+			if( !defined $ds->{metadata}{$mdfield} ) {
+				$self->{log}->warn("View $name: $mdfield not defined for dataset $ds->{id}");
 				$elements->{$field} = '';
 			} else {
-				$elements->{$field} = $ds->{metadata}{$field};
+				$elements->{$field} = $ds->{metadata}{$mdfield};
 			}
 		}
 	}
@@ -263,10 +265,13 @@ sub expand_template {
 
 	my $output = '';
 
+	$self->{log}->debug("Expanding temlate $params{template}");
+
 	if( $self->{tt}->process($params{template}, $metadata, \$output) ) {
 		return $output;
 	}
 	$self->{log}->error("Template error in $template " . $self->{tt}->error);
+	return undef;
 }
 
 1;

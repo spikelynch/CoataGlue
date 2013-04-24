@@ -13,6 +13,9 @@ use Data::Dumper;
 use strict;
 
 
+our $SAMPLE_DESCRIPTION = "$ENV{RDC_TESTDIR}/Extras/description.txt";
+
+
 
 sub setup_tests {
 	my %params = @_;
@@ -48,8 +51,20 @@ sub setup_tests {
 	
 	return {
 		SOURCES => [ 'MIF' ],
-		DATASETS => { MIF => 2 }
+		DATASETS => { MIF => 2 },
+		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION)
 	};
+}
+
+sub loadfile {
+	my ( %params ) = @_;
+	
+	my $file = $params{file};
+	local $/ = undef;
+	open(FILE, "<$file") || die("Can't open file $file: $!");
+	my $contents = <FILE>;
+	close FILE;
+	return $contents;
 }
 
 sub teardown {

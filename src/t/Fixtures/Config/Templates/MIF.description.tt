@@ -7,9 +7,13 @@ Multiwell Chambers: <span id="multiwell">[% Multiwell_Chambers %]</span><br />
 Other Equipment: <span id="">[% Specify_Other_Equipment %]</span><br />
 [% END %]
 [% IF Has_Fluorescent_Proteins == "Yes" %]
-Fluorescent Proteins: <span id="fluorescentproteins">[% Fluorescent_Protein_1 %] [% Fluorescent_Protein_2 %] [% Fluorescent_Protein_3 %]</span><br />
+Fluorescent Proteins: <span id="fluorescentproteins">[% Fluorescent_Protein_1 %]
+[% IF Fluorescent_Protein_2 %]; [% Fluorescent_Protein_2 %][% END %]
+[% IF Fluorescent_Protein_3 %]; [% Fluorescent_Protein_3 %][% END %]</span><br />
 [% END %]
-Specific Dyes: <span id="specificdyes">[% Specific_Dyes %]</span><br />
-[% IF Has_Immunoflorescence == "Yes" %]
-Immunoflorescence: <span id="immunoflorescence">[% Immunofluorescence_1 %][% Immunofluorescence_2 %][% Immunofluorescence_3 %]</span><br />
+Has Specific Dyes: <span id="hasspecificdyes">[% Has_Specific_Dyes %]</span><br />
+[% IF Has_Immunofluorescence == "Yes" %]
+Immunofluorescence: <span id="immunofluorescence">[% Immunofluorescence_1 %]
+[% IF Immunofluorescence_2 %]; [% Immunofluorescence_2 %][% END %]
+[% IF Immunofluorescence_3 %]; [% Immunofluorescence_3 %][% END %]</span><br />
 [% END %]
