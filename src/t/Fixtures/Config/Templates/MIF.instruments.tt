@@ -1,5 +1,3 @@
-[% IF Instrument == "1" %]
-InstrumentID1
-[% ELSE %]
-InstrumentID2
+[% IF Instrument_Name == "UTS Demo Microscope" %]
+MIF.service.1[% ELSE %]MIF.service.2
 [% END %]

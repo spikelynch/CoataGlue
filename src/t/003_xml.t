@@ -19,7 +19,7 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -66,14 +66,15 @@ my $xml = $ds->xml(view => 'Dataset');
 
 ok($xml, "Generated some XML");
 
-my ( $title, $activity, $party, $description ) = ( '', '', '', '', '' );
+my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
 
 my $twig = XML::Twig->new(
 	twig_handlers => {
 		title => 		sub { $title = $_->text },
 		activity => 	sub { $activity = $_->text },
 		party =>		sub { $party = $_->text },
-		description => 	sub { $description = $_->text }
+		description => 	sub { $description = $_->text },
+		service => 		sub { $service = $_->text }
 	}
 ); 
 
@@ -105,3 +106,11 @@ cmp_ok(
 	my $diff = diff \$fixtures->{DESCRIPTION}, \$description;
 	print "DIFF: \n$diff\n";
 };
+
+cmp_ok(
+	$service, 'eq', $fixtures->{SERVICE},
+	"<service> = $fixtures->{SERVICE}"
+);
+
+
+

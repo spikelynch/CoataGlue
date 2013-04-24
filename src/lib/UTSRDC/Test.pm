@@ -13,8 +13,8 @@ use Data::Dumper;
 use strict;
 
 
-our $SAMPLE_DESCRIPTION = "$ENV{RDC_TESTDIR}/Extras/description.txt";
-
+my $SAMPLE_DESCRIPTION = "$ENV{RDC_TESTDIR}/Extras/description.txt";
+my $SAMPLE_SERVICE = 'MIF.service.1';
 
 
 sub setup_tests {
@@ -52,7 +52,8 @@ sub setup_tests {
 	return {
 		SOURCES => [ 'MIF' ],
 		DATASETS => { MIF => 2 },
-		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION)
+		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION),
+		SERVICE => $SAMPLE_SERVICE
 	};
 }
 
