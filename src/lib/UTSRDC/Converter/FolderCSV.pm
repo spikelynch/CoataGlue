@@ -36,7 +36,7 @@ sub init {
 	};
 	
 	my $missing = 0;
-	for my $field ( qw(basedir datadir outdir metadatafile) ) {
+	for my $field ( qw(basedir datadir metadatafile) ) {
 		if( !$params{$field} ) {
 			$missing = 1;
 			$self->{log}->error("$self->{name} missing config $field");

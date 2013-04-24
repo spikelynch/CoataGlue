@@ -51,7 +51,7 @@ sub setup_tests {
 	
 	return {
 		SOURCES => [ 'MIF' ],
-		DATASETS => { MIF => 2 },
+		DATASETS => { MIF => 3 },
 		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION),
 		SERVICE => $SAMPLE_SERVICE
 	};

@@ -21,7 +21,7 @@ Basic object describing a data source
 
 name      - unique id
 converter - A UTSRDC::Converter object (passed in by UTSRDC)
-settings  - the config settings (these depend on the Converter)
+settings  - the config settings (some of which depend on the Converter)
 store     - the directory where the source histories are kept 
 
 =cut
@@ -29,6 +29,8 @@ store     - the directory where the source histories are kept
 our $STATUS_NEW      = 'new';
 our $STATUS_ERROR    = 'error';
 our $STATUS_INGESTED = 'ingested';
+
+our @MANDATORY_SETTINGS = qw(redboxdir templates);
 
 
 sub new {
@@ -44,6 +46,13 @@ sub new {
 	for my $field ( qw(name converter settings store) ) {
 		$self->{$field} = $params{$field} || do {
 			$self->{log}->error("Missing $field for $class");
+			$missing = 1;
+		}
+	}
+	
+	for my $field ( @MANDATORY_SETTINGS ) {
+		if( ! exists $self->{settings}{$field} ) {
+			$self->{log}->error("Missing field $field in settings for $class $self->{name}");
 			$missing = 1;
 		}
 	}

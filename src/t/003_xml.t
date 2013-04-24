@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-003_harvest.t
+003_xml.t
 
 =head1 DESCRIPTION
 

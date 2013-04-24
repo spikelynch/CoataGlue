@@ -41,8 +41,6 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-$log->debug(Dumper( { fixtures => $fixtures } ));
-
 my $sources = UTSRDC->new(
 	config => $ENV{RDC_CONFIG},
 	templates => $ENV{RDC_TEMPLATES}

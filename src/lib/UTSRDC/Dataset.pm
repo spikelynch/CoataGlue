@@ -161,8 +161,39 @@ sub xml {
 	);
 }
 
+=item write_redbox
+
+Writes the 'Dataset' XML to the redbox directory with what we hope
+is a globally unique filename
 
 
+sub write_redbox {
+	my ( $self ) = @_;
+	
+	my $xml = $self->xml(view => 'Dataset');
+	
+	if( !$xml ) {
+		$self->{log}->error("Problem creating XML");
+		return undef;
+	}
+	my $file = join('/', $self->{source}{settings}{redbox}, $self->global_id );
+	
+	if( -f $file ) {
+		$self->{log}->warn("Ingest $file already exists");
+		return undef;
+	}
+	
+	open(XMLFILE, ">$file") || do {
+		$self->{log}->error("Could not open $file for writing: $!");
+		return undef;
+	};
+	
+	print XMLFILE $file;
+	
+	close XMLFILE;
+	
+	return $file;
+}
 
 
 =item get_status()
