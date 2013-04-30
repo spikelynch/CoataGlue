@@ -83,8 +83,6 @@ cmp_ok($status->{status}, 'eq', 'ingested', "Status of dataset is now 'ingested'
 
 cmp_ok($ds->{id}, '==', 1, "Dataset has ID == 1");
 
-
-
 ok($source->close, "Source closed");
 
 ok($source->open, "Source re-opened");

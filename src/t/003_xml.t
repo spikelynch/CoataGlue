@@ -19,7 +19,7 @@ if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
 use lib $ENV{RDC_PERLLIB};
 
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -56,9 +56,13 @@ ok(@sources, "Got sources");
 
 my $source = $sources[0];
 
+ok($source->open, "Opened source $source->{name}") || die;
+
 my @datasets = $source->scan;
 
 ok(@datasets, "Got at least one dataset");
+
+$source->close;
 
 my $ds = shift @datasets;
 
