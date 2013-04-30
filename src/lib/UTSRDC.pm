@@ -67,10 +67,15 @@ sub new {
 			converter => $convclass,
 			settings => \%settings
 		);
+		if( !$settings{ids} ) {
+			$self->{log}->error("Data source $name has no ids (ID generator)");
+			next SOURCE;
+		}
 		my $source = UTSRDC::Source->new(
 			name => $name,
 			store => $self->{store},
 			converter => $converter,
+			ids => $settings{ids},
 			settings => \%settings
 		);
 		if( $source ) {

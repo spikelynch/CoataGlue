@@ -18,6 +18,7 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 
 [MIF]
 converter:    UTSRDC::Converter::FolderCSV
+ids:          UTSRDC::ID::NaiveSequence
 redboxdir:    /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 templates:	  MIF
 basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture

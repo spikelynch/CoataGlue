@@ -92,8 +92,25 @@ if( !$utsrdc ) {
 }
 
 SOURCE: for my $source ( $utsrdc->sources ) {
+	$source->lock;
+	eval {
+		run_harvest(source => $source);
+	};
+	if( $@ ) {
+		$log->error("$source->{name} harvest problem: $@");
+	}
+	$source->release;
+}
+
+
+
+sub run_harvest {
+	my %params = @_;
+	
+	my $source = $params{source};
 	my @datasets;
 	$log->info("Scanning data source $source->{name}");
+
 	eval {
 		@datasets = $source->scan;
 	};
@@ -104,6 +121,9 @@ SOURCE: for my $source ( $utsrdc->sources ) {
 	$log->info("Found " . scalar(@datasets) . " datasets");
 	for my $dataset ( @datasets ) {
 		eval {
+
+
+
 #			if( $dataset->{metadata}{publish} ) {
 #				if( !$dataset->fc_publish() ) {
 #					$log->error("Fedora publish failed")
@@ -126,9 +146,10 @@ SOURCE: for my $source ( $utsrdc->sources ) {
 			$log->error("Write XML $source->{name}: $dataset->{id} failed");
 			$log->error("Error: $@");
 		} else {
-			#$log->info("Wrote  XML for $source->{name}: $dataset->{id}");
+			$log->info("Wrote  XML for $source->{name}: $dataset->{id}");
 		}
 	}
+	
 }
 
 

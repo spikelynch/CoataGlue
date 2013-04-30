@@ -2,6 +2,8 @@ package UTSRDC::Source;
 
 use strict;
 
+use Carp qw(cluck);
+
 use Log::Log4perl;
 use Storable qw(lock_store lock_retrieve);
 use Data::Dumper;
@@ -9,7 +11,7 @@ use Config::Std;
 use XML::Writer;
 
 use UTSRDC::Converter;
-
+use UTSRDC::ID::NaiveSequence;
 
 =head1 NAME
 
@@ -24,11 +26,61 @@ converter - A UTSRDC::Converter object (passed in by UTSRDC)
 settings  - the config settings (some of which depend on the Converter)
 store     - the directory where the source histories are kept 
 
+=head1 SYNOPSIS
+
+    my @sources = $utsrdc->sources;
+    
+    for my $source ( @sources ) {
+    	my @datasets = $source->scan;
+    	
+    	for my $ds ( @datasets ) {
+    		if( $ds->write_xml ) { 
+ 		   		$ds->set_status_ingested()
+    		} else {
+    			$ds->set_status_error();
+    		}
+    	}
+    }
+    
+=head1 STATUS
+
+Each source has a history file in the store/ directory which keeps
+track of the status of each dataset which has been scanned. The
+process works like this:
+
+
+
+- The $source->scan() function uses the Converter object to 
+  scan whatever it scans (a directory within a directory, in
+  FolderCSV). The Converter gets datasets with a unique-to-
+  this-source string, typically a filepath.  
+  
+- The Source then gets an exclusive lock on its history file,
+  reads it, and looks up all the scanned datasets by their
+  filepath.  If they have already been ingested or have raised
+  errors, it ignores them.  The remaining datasets are new,
+  and get new IDs from the ID generator class (these are 
+  unique IDs which can be used as filenames).
+  
+- The Source passes the list of datasets back to the calling
+  code, which will attempt to Do Things (write out the XML
+  and add the datasets to Fedora etc).  Based on how successful
+  this is, the calling code sets the status for each dataset,
+  and the Source writes the status into the history
+  
+- At the end of this process, the calling code 
+  should call $source->close - which writes the history file
+  and releases the lock
+  
+- 
+
 =cut
 
 our $STATUS_NEW      = 'new';
 our $STATUS_ERROR    = 'error';
 our $STATUS_INGESTED = 'ingested';
+
+our @MANDATORY_PARAMS = qw(name converter ids settings store);
 
 our @MANDATORY_SETTINGS = qw(redboxdir templates);
 
@@ -43,13 +95,13 @@ sub new {
 	$self->{log} = Log::Log4perl->get_logger($class);
 
 	my $missing = undef;
-	for my $field ( qw(name converter settings store) ) {
+	for my $field ( @MANDATORY_PARAMS ) {
 		$self->{$field} = $params{$field} || do {
 			$self->{log}->error("Missing $field for $class");
 			$missing = 1;
 		}
 	}
-	
+		
 	for my $field ( @MANDATORY_SETTINGS ) {
 		if( ! exists $self->{settings}{$field} ) {
 			$self->{log}->error("Missing field $field in settings for $class $self->{name}");
@@ -65,37 +117,56 @@ sub new {
 	# can do status lookups etc.
 
 	$self->{converter}{source} = $self;
+
+	$self->{ids} = $self->{ids}->new(source => $self);
 	
 	$self->{storefile} = join('/', $self->{store}, $self->{name});
-	
-	$self->load_history;
+	$self->{locked} = 0;
 	$self->load_templates;
 	
 	return $self;
 }
 
-sub load_history {
+
+=item open
+
+This reads the Source's history file with an exclusive lock, 
+so if any other processes try to scan this source, they'll have
+to wait.
+
+=cut
+
+
+
+sub open {
 	my ( $self ) = @_;	
-	if( -f $self->{storefile} ) {
-		$self->{log}->debug("Loading history $self->{storefile}");
-		$self->{history} = lock_retrieve($self->{storefile});
-	} else {
+	if( !-f $self->{storefile} ) {
 		$self->{log}->info("Empty history for $self->{name}");
 		$self->{history} = {};
+		lock_store $self->{history}, $self->{storefile};
 	}
+	$self->{log}->debug("Loading history $self->{storefile}");
+	$self->{locked} = 1;
+	$self->{history} = lock_retrieve($self->{storefile});
+	return $self->{history};
 }
 
+=item close
 
-sub save_history {
+Saves the source's history hash to the store file and releases the
+lock.
+
+=cut
+
+
+sub close {
 	my ( $self ) = @_;
 	
 	lock_store $self->{history}, $self->{storefile};
+	$self->{locked} = 0;
+	
+	return 1;
 }
-
-
-
-
-
 
 
 =item get_status 
@@ -115,10 +186,17 @@ sub get_status {
 		die;
 	}
 	
-	if( $self->{history}{$dataset->{id}} ) {
-		return $self->{history}{$dataset->{id}};
+	if( $self->{history}{$dataset->{file}} ) {
+
+		return $self->{history}{$dataset->{file}};
 	} else {
-		return { status => 'new' };
+		$self->{log}->debug(
+			"Dataset not in history (file = $dataset->{file})"
+		);
+		
+		return {
+			status => 'new'
+		}
 	}
 }
 
@@ -127,17 +205,28 @@ sub set_status {
 	my ( $self, %params ) = @_;
 	
 	my $dataset = $params{dataset} || do {
-		$self->{log}->error("Can't sest status for empty dataset");
+		$self->{log}->error("Can't set status for empty dataset");
 		return undef;
 	};
-	my $status = { status => $params{status} };
+	
+	if( !$dataset->{file} || !$dataset->{id} ) {
+		$self->{log}->error("dataset needs 'file' and 'id', can't set status");
+		$self->{log}->error(Dumper({ dataset => $dataset }));
+		return undef;
+	}
+	
+	
+	my $status = {
+		status => $params{status},
+		id => $dataset->{id}
+	};
+	
 	
 	if( $params{details} ) {
 		$status->{details} = $params{details};
 	}
 	
-	$self->{history}{$dataset->{id}} = $status;
-	$self->save_history;
+	$self->{history}{$dataset->{file}} = $status;
 }
 
 
@@ -158,16 +247,63 @@ sub scan {
 	
 	my @datasets = ();
 	
+	if( !$self->{locked} ) {
+		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
+		return ();
+	}
+	
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
 		if( $status->{status} eq 'new') {
-			push @datasets, $dataset;
+			my $id = $self->{ids}->create_id;
+			if( $id ) {
+				$dataset->{id} = $id;
+				$self->set_status(
+					dataset => $dataset,
+					status => 'new'
+				);
+				
+				push @datasets, $dataset;
+				$self->{log}->debug("New id for dataset $dataset->{file}: $id");
+			} else {
+				$self->{log}->error("New id for dataset $dataset->{file} failed");
+			}
 		} else {
 			$self->{log}->debug("Skipping $dataset->{id}: status = $status->{status}");
 		}
 	}
 	return @datasets;
 }
+
+
+=item dataset()
+
+Creates a new dataset.
+=cut
+
+
+sub dataset {
+	my ( $self, %params ) = @_;
+	
+	my $metadata = $params{metadata};
+	my $file = $params{file};
+	
+	if( !$metadata || ! $file ) {
+		$self->{log}->error("New dataset needs metadata and file");
+		return undef;
+	}
+	
+	my $dataset = UTSRDC::Dataset->new(
+		source => $self,
+		file => $file,
+		metadata => $metadata
+	)|| do {
+		$self->{log}->error("Error creating dataset");
+		return undef;	
+	};
+	
+	return $dataset;
+}	
 
 
 

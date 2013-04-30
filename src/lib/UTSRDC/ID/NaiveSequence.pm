@@ -2,6 +2,7 @@ package UTSRDC::ID::NaiveSequence;
 
 use strict;
 use Log::Log4perl;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -51,7 +52,7 @@ sub new {
 }
 
 
-sub new_id {
+sub create_id {
 	my ( $self ) = @_;
 	
 	my $history = $self->{source}{history} || die(
@@ -61,13 +62,17 @@ sub new_id {
 	my $id = undef;
 	
 	if( ! keys %$history ) {
+		$self->{log}->debug("Empty history");
 		$id = 1;
 	} else {
-		my @ids = sort {
-			$history->{$b}{id} <=> $history->{$a}{id}
-		} keys %$history;		
-		$id = $ids[0] + 1;
+		# Find the highest ID in the history and add one to it.
+		$self->{log}->debug("Finding ids");
+		my @ids = sort { $history->{$b}{id} <=> $history->{$a}{id} } keys %$history;
+		$id = $history->{$ids[0]}{id};
+		$self->{log}->debug("Highest id = $id");
+		$id++;
 	}
+	$self->{log}->debug("New id = $id");
 	return $id;
 }
 
@@ -79,3 +84,6 @@ sub release {
 	# module, this would release a lockfile.
 	
 }
+
+
+1;

@@ -64,7 +64,7 @@ my $ds = shift @datasets;
 
 my $file = $ds->write_redbox;
 
-if( ok($file, "Wrote XML to $file") ) {
+if( ok($file, "Wrote XML to file: $file") ) {
 	
 	my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
 
@@ -79,7 +79,7 @@ if( ok($file, "Wrote XML to $file") ) {
 	); 
 
 	eval {
-		$twig->parsefile($xml)
+		$twig->parsefile($file)
 	};
 
 	if(  ok(!$@, "XML parsed OK") ) {

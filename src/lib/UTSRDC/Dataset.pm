@@ -12,6 +12,7 @@ Variables:
 
 =over 4
 
+=item file     -> the metadata file
 =item location -> where the data is: a directory, a file, a URL, a physical location
 =item metadata -> a hashref of metadata
 =item id       -> unique to this datasource.  No colons.
@@ -51,6 +52,8 @@ Create a new dataset object. All parameters are compulsory:
 
 =cut
 
+our @MANDATORY_PARAMS = qw(file metadata source);
+
 sub new {
 	my ( $class, %params ) = @_;
 	
@@ -58,14 +61,13 @@ sub new {
 	bless $self, $class;
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
-	
-	$self->{id}       = $params{id};
-	$self->{location} = $params{location};
+
+	$self->{file} 	  = $params{file};
 	$self->{metadata} = $params{metadata};
 	$self->{source}   = $params{source};
 
 	my $error = undef;
-	for my $field ( qw(id location metadata source) ) {
+	for my $field ( @MANDATORY_PARAMS ) {
 		if( !$self->{$field} ) {
 			$self->{log}->error("Missing field $field in $class");
 			$error = 1;
@@ -74,14 +76,6 @@ sub new {
 	
 	$self->clean_metadata_keys();
 	
-	if( $self->{id} =~ /:/ ) {
-		$self->{log}->error("Dataset IDs can't contain ':'");
-		$error = 1;
-	}
-	
-	$self->{global_id} = join(
-		':', $self->{source}{name}, $self->{id}
-	);
 	
 	$self->get_status;
 	
@@ -102,6 +96,21 @@ $SOURCE->{name}:$self->{id}
 
 sub global_id {
 	my ( $self ) = @_;
+
+	if( ! $self->{id} ) {
+		$self->{log}->error("Can't generate global_id without id");
+		return undef;
+	}
+
+	if( $self->{id} =~ /:/ ) {
+		$self->{log}->error("Dataset IDs can't contain ':'");
+		return undef;
+	}
+	
+	$self->{global_id} = join(
+		':', $self->{source}{name}, $self->{id}
+	);
+
 	
 	return $self->{global_id};
 }
@@ -166,6 +175,8 @@ sub xml {
 Writes the 'Dataset' XML to the redbox directory with what we hope
 is a globally unique filename
 
+=cut
+
 
 sub write_redbox {
 	my ( $self ) = @_;
@@ -176,7 +187,14 @@ sub write_redbox {
 		$self->{log}->error("Problem creating XML");
 		return undef;
 	}
-	my $file = join('/', $self->{source}{settings}{redbox}, $self->global_id );
+	
+	my $global_id = $self->global_id;
+	if( !$global_id ) {
+		$self->{log}->error("Dataset $self->{file} has not got a global_id");
+		return undef;	
+	}
+	
+	my $file = join('/', $self->{source}{settings}{redboxdir}, $self->global_id );
 	
 	if( -f $file ) {
 		$self->{log}->warn("Ingest $file already exists");

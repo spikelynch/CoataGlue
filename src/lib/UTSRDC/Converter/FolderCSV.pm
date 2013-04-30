@@ -9,7 +9,7 @@ use Text::CSV;
 
 =head1 NAME
 
-UTSRDC::Source::CSV
+UTSRDC::Converter::FolderCSV
 
 =head1 SYNOPSIS
 
@@ -20,8 +20,9 @@ Generic converter for data like this:
         /dd2/
         /dd3/
         
-
-
+        
+If the CSV file does not specify a location (in a column headed
+'location') then the folder is used.
 
 =cut
 
@@ -78,9 +79,16 @@ sub scan {
 		my $path = "$basedir/$item";
 		next ITEM unless -d $path;
 		
-		my $dataset = $self->get_metadata(path => $path);
-		if( $dataset ) {
-			push @datasets, $dataset;
+		my $md = $self->get_metadata(path => $path);
+		
+		if( $md ) {
+			my $dataset = $self->{source}->dataset(
+				metadata => $md->{metadata},
+				file => $md->{file}
+			);	
+			if( $dataset ) {
+				push @datasets, $dataset;
+			}
 		} 
 	}
 	closedir($dh);
@@ -100,29 +108,41 @@ sub get_metadata {
 		return undef;
 	};
 	
-	my @metadata = ();
+	my %metadata = ();
 	
 	while( my $item = readdir($dh) ) {
-		if( $item =~ /$self->{metadatafile}/ && -f "$path/$item" ) {
-			my $dataset = $self->parse_metadata_file(file => "$path/$item");
-			if( $dataset ) {
-				push @metadata, $dataset;
+		if( $item =~ /$self->{metadatafile}/ ) {
+			my $file = "$path/$item";
+			if( -f $file ) {
+				if( my $md = $self->parse_metadata_file(file => "$path/$item") ) {
+					if( !$md->{location} ) {
+						$md->{location} = $path;
+					}
+					$metadata{$file} = $md;
+				}
 			}
 		}
 	}
 	
-	if( scalar(@metadata) > 1 ) {
-		$self->{log}->warn("Warning: $path has more than one metadata file");
-	}
-
-	if( @metadata ) {
-		return $metadata[0];
-	} else {
-		$self->{log}->error("File not found: $path/$self->{metadatafile}");
+	
+	if( ! keys %metadata ) {
+		$self->{log}->error("Error: no file matches $path/$self->{metadatafile}");
 		return undef;
 	}
-}
 
+	my ( $file ) = sort keys %metadata;
+	my $md = $metadata{$file};
+	
+	if( scalar(keys %metadata) > 1 ) {
+		$self->{log}->warn("Warning: $path has more than one metadata file - using $file");
+	}
+	
+	return {
+		file => $file,
+		metadata => $md
+	};
+
+}
 
 sub parse_metadata_file {
 	my ( $self, %params ) = @_;
@@ -164,15 +184,8 @@ sub parse_metadata_file {
 	if( @$values ) {
 		$self->{log}->warn("Suspect CSV in $file: more values than headers");
 	}
-	
-	my $ds = UTSRDC::Dataset->new(
-		id => $file,
-		metadata => $metadata,
-		location => $file,
-		source => $self->{source}
-	);
-	
-	return $ds
+
+	return $metadata;	
 }
 
 
