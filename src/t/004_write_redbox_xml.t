@@ -56,6 +56,8 @@ ok(@sources, "Got sources");
 
 my $source = $sources[0];
 
+ok($source->open, "Opened source '$source->{name}'");
+
 my @datasets = $source->scan;
 
 ok(@datasets, "Got at least one dataset");
@@ -112,6 +114,8 @@ if( ok($file, "Wrote XML to file: $file") ) {
 			"<service> = $fixtures->{SERVICE}"
 		);
 
+	} else {
+		diag("XML parse error: $@");
 	}
 
 	

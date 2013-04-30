@@ -194,7 +194,7 @@ sub write_redbox {
 		return undef;	
 	}
 	
-	my $file = join('/', $self->{source}{settings}{redboxdir}, $self->global_id );
+	my $file = $self->xml_filename;
 	
 	if( -f $file ) {
 		$self->{log}->warn("Ingest $file already exists");
@@ -206,12 +206,33 @@ sub write_redbox {
 		return undef;
 	};
 	
-	print XMLFILE $file;
+	print XMLFILE $xml;
 	
 	close XMLFILE;
 	
 	return $file;
 }
+
+
+=item xml_filename()
+
+Returns the full path of the xml file built from the source's
+ReDBox directory and the dataset's global ID.
+
+=cut
+
+sub xml_filename {
+	my ( $self ) = @_;
+	
+	my $filename = join(
+		'/',
+		$self->{source}{settings}{redboxdir}, $self->global_id
+	) . '.xml';
+	
+	return $filename;
+}
+
+
 
 
 =item get_status()
