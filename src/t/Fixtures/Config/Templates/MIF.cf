@@ -1,11 +1,13 @@
 # Crosswalk config file for DC18A/MIF metadata
 
-[Dataset]
+# XML files get an 'rdc' element with essential
+# metadata - the UTSRDC::ID id, and the Fedora object
+# stuff.
+
+[redbox]
 title: 			Experiment_Name
 activity: 		Project_ID
 party: 			Project_Creator_Staff_Student_ID
 description:	MIF.description.tt
 service:		MIF.instruments.tt
-
-[Project]
 

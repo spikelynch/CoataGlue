@@ -102,14 +102,16 @@ sub global_id {
 		return undef;
 	}
 
-	if( $self->{id} =~ /:/ ) {
-		$self->{log}->error("Dataset IDs can't contain ':'");
+	if( $self->{id} =~ /\./ ) {
+		$self->{log}->error("Dataset IDs can't contain '.'");
 		return undef;
 	}
 	
 	$self->{global_id} = join(
-		':', $self->{source}{name}, $self->{id}
+		'.', $self->{source}{name}, $self->{id}
 	);
+	
+	$self->{log}->debug("Global ID for dataset $self->{file}: $self->{global_id}");
 
 	
 	return $self->{global_id};
@@ -181,7 +183,7 @@ is a globally unique filename
 sub write_redbox {
 	my ( $self ) = @_;
 	
-	my $xml = $self->xml(view => 'Dataset');
+	my $xml = $self->xml(view => 'redbox');
 	
 	if( !$xml ) {
 		$self->{log}->error("Problem creating XML");

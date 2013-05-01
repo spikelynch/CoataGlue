@@ -342,6 +342,10 @@ fields, or an expansion of a template.  The templates have access
 to all of the metadata of the dataset, so (for example) technical
 metadata fields can be combined into a single 'description' element.
 
+All XML views get an 'rdc' element at the top which contains
+the dataset's origin file, global ID, Fedora object ID (if one
+is created)
+
 Returns the resulting XML.
 
 =cut
