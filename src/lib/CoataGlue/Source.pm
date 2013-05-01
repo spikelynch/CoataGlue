@@ -1,4 +1,4 @@
-package UTSRDC::Source;
+package CoataGlue::Source;
 
 use strict;
 
@@ -10,19 +10,19 @@ use Data::Dumper;
 use Config::Std;
 use XML::Writer;
 
-use UTSRDC::Converter;
-use UTSRDC::ID::NaiveSequence;
+use CoataGlue::Converter;
+use CoataGlue::ID::NaiveSequence;
 
 =head1 NAME
 
-UTSRDC::Source
+CoataGlue::Source
 
 =head1 DESCRIPTION
 
 Basic object describing a data source
 
 name      - unique id
-converter - A UTSRDC::Converter object (passed in by UTSRDC)
+converter - A CoataGlue::Converter object (passed in by UTSRDC)
 settings  - the config settings (some of which depend on the Converter)
 store     - the directory where the source histories are kept 
 
@@ -293,7 +293,7 @@ sub dataset {
 		return undef;
 	}
 	
-	my $dataset = UTSRDC::Dataset->new(
+	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
 		file => $file,
 		metadata => $metadata

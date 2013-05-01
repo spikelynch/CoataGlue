@@ -1,8 +1,8 @@
-package UTSRDC::Converter;
+package CoataGlue::Converter;
 
 use strict;
 
-use Module::Pluggable search_path => [ 'UTSRDC::Converter' ], require => 1;
+use Module::Pluggable search_path => [ 'CoataGlue::Converter' ], require => 1;
 use Log::Log4perl;
 use Carp qw(cluck);
 use Data::Dumper;
@@ -15,7 +15,7 @@ sub new {
 
 	$self->{log} = Log::Log4perl->get_logger($class);
 	
-	if( $class eq 'UTSRDC::Converter' ) {
+	if( $class eq 'CoataGlue::Converter' ) {
 		$self->register_plugins(%params);
 		return $self;
 	} else {
@@ -29,14 +29,14 @@ sub new {
 sub init {
 	my ( $self ) = @_;
 	
-	$self->{log}->error("All UTSRDC::Converter subclasses need an init method (" . ref($self) . ")");
+	$self->{log}->error("All CoataGlue::Converter subclasses need an init method (" . ref($self) . ")");
 	die;
 }
 
 sub scan {
 	my ( $self ) = @_;
 	
-	$self->{log}->error("All UTSRDC::Converter subclasses need a scan method (" . ref($self) . ")");
+	$self->{log}->error("All CoataGlue::Converter subclasses need a scan method (" . ref($self) . ")");
 	die;
 }
 

@@ -24,7 +24,7 @@ If any of these is missing, the script won't run:
 
 =over 4
 
-=item RDC_PERLLIB - location of UTSRDC::* perl libraries
+=item RDC_PERLLIB - location of CoataGlue::* perl libraries
 
 =item RDC_LOG4J - location of the log4j.properties file
 
@@ -59,9 +59,9 @@ use Log::Log4perl;
 
 
 use UTSRDC;
-use UTSRDC::Source;
-use UTSRDC::Converter;
-use UTSRDC::Dataset;
+use CoataGlue::Source;
+use CoataGlue::Converter;
+use CoataGlue::Dataset;
 
 
 my $LOGGER = 'UTSRDC.harvest';

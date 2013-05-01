@@ -1,4 +1,4 @@
-package UTSRDC::Test;
+package CoataGlue::Test;
 
 # Buildup routines for the tests
 

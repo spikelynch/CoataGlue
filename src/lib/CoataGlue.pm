@@ -1,4 +1,4 @@
-package UTSRDC;
+package CoataGlue;
 
 use strict;
 
@@ -51,7 +51,7 @@ sub new {
 	
 	delete $self->{conf}{''};
 
-	$self->{converters} = UTSRDC::Converter->new();
+	$self->{converters} = CoataGlue::Converter->new();
 	
 	
 	SOURCE: for my $name ( keys %{$self->{conf}} ) {
@@ -71,7 +71,7 @@ sub new {
 			$self->{log}->error("Data source $name has no ids (ID generator)");
 			next SOURCE;
 		}
-		my $source = UTSRDC::Source->new(
+		my $source = CoataGlue::Source->new(
 			name => $name,
 			store => $self->{store},
 			converter => $converter,

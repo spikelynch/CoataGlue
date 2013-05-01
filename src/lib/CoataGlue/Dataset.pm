@@ -1,8 +1,8 @@
-package UTSRDC::Dataset;
+package CoataGlue::Dataset;
 
 =head1 NAME
 
-UTSRDC::Dataset
+CoataGlue::Dataset
 
 =head1 SYNOPSIS
 
@@ -39,7 +39,7 @@ Create a new dataset object. All parameters are compulsory:
 
 =over 4
 
-=item source - the UTSRDC::Source (a data capture source)
+=item source - the CoataGlue::Source (a data capture source)
 
 =item id - a unique ID within this Source.  Any character apart from ':'
 

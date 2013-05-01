@@ -1,4 +1,4 @@
-package UTSRDC::ID::NaiveSequence;
+package CoataGlue::ID::NaiveSequence;
 
 use strict;
 use Log::Log4perl;
@@ -6,7 +6,7 @@ use Data::Dumper;
 
 =head1 NAME
 
-UTSRDC::ID::NaiveSequence
+CoataGlue::ID::NaiveSequence
 
 =head1 SYNOPSIS
 
