@@ -10,6 +10,49 @@ Metadata Interchange XML
 HTML dataset description (a la Peter Sefton's idea of machine and human readable docs)
 Register the object with FC via Catmandu
 
+Fedora Questions
+----------------
+
+- A separate file storage for published datasets.
+
+- Keep the datastreams in Fedora's "native" file system, or point 
+  to a location?
+  
+- How does the publication workflow work?
+
+* Experiment creates data
+* Data is placed in a UTSRDC::Source directory
+* Scanned by UTSRDC and the following happens
+   - Create an FC object for this dataset
+   - Write out an XML file for ingest by ReDBox, which has
+     the Fedora object's digital ID
+
+* If the object is to be published immediately, do the following:
+
+   - copy the dataset onto Fedora storage
+ 
+* At some later state, the user may publish the
+  object.  When they do, 
+  
+   - copy the dataset onto Fedora storage (Don't know how this is 
+     going to work yet.)
+
+
+
+* Later - the Perl wrapper around FC does the following
+  when a request is made:
+  
+  datasets.uts.edu.au/datasets/FEDORAID
+  
+  - look up FEDORAID in the RDC, and check its publication status.
+  
+  - Not Published: return a 404
+  - Internal Publication: if the request is from UTS, return the
+      cover page
+  - Publication: return the cover page
+
+
+
 Terminology
 -----------
 
@@ -20,6 +63,9 @@ Converter  - Perl class which does the metadata scanning for a particular
              delivery method (eg, folders with csv files in them)
              
 Dataset    - Perl class representing a dataset - has an id and a metadata record	
+
+ID  	-  - Mints IDs.  Deliberately decoupled from Converter
+
 
 Classes
 -------
@@ -32,3 +78,5 @@ UTSRDC::Converter::FolderCSV
 UTSRDC::Source
 
 UTSRDC::Dataset
+
+UTSRDC::ID::NaiveSequence
