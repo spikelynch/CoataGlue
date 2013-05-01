@@ -1,12 +1,27 @@
 package CoataGlue::Dataset;
 
+
+
 =head1 NAME
 
 CoataGlue::Dataset
 
 =head1 SYNOPSIS
 
-An object for datasets.  As simple as it can be.
+CoataGlue's main job is creating metadata records in the RDC for
+datasets from a variety of sources (data capture, mostly).  The
+CoataGlue::Dataset class represents a single dataset and its
+metadata, and has methods for the following useful operations:
+
+=over 4
+
+=item Writing out XML for ReDBox ingest
+=item Writing out other XML representations, controlled by a fairly
+flexible templating system
+=item Adding an object to Fedora representing the dataset
+=item Copying the payload to a Fedora-hosted file system when the
+data object is published
+=back 
 
 Variables:
 
@@ -28,6 +43,8 @@ use Log::Log4perl;
 use Data::Dumper;
 use Template;
 use XML::Twig;
+use Catmandu;
+use Catmandu::Store::FedoraCommons;
 
 =head1 METHODS
 
@@ -118,123 +135,6 @@ sub global_id {
 }
 
 
-=item clean_metadata_keys()
-
-CLean up the metadata keys so that they can be used as
-variables in Template::Toolkit.  Any non-alphanumeric
-characters at the end are truncated; all other non-alphanumeric
-characters are replaced with underscores.
-
-Throws an error if two keys convert down to the same string.
-
-=cut
-
-sub clean_metadata_keys {
-	my ( $self ) = @_;
-	
-	my $new_metadata = {};
-	
-	for my $key ( keys %{$self->{metadata}} ) {
-		my $value = $self->{metadata}{$key};
-		$key =~ s/[^A-Za-z0-9]+$//;
-		$key =~ s/[^A-Za-z0-9]/_/g;
-		if( exists $new_metadata->{$key} ) {
-			$self->{log}->fatal(
-				"$self->{id} key collision when cleaning metadata: $key"
-			);
-			die;
-		}
-		$new_metadata->{$key} = $value;
-	}
-	
-	$self->{metadata} = $new_metadata;
-}
-
-
-=item xml(view => $view)
-
-Apply the specified xml view to this dataset and return the
-results.
-
-=cut
-
-sub xml {
-	my ( $self, %params ) = @_;
-	
-	if( !$params{view} ) {
-		$self->{log}->error("xml needs a 'view' parameter");
-		return undef;
-	}
-	
-	return $self->{source}->render_view(
-		view => $params{view},
-		dataset => $self
-	);
-}
-
-=item write_redbox
-
-Writes the 'Dataset' XML to the redbox directory with what we hope
-is a globally unique filename
-
-=cut
-
-
-sub write_redbox {
-	my ( $self ) = @_;
-	
-	my $xml = $self->xml(view => 'redbox');
-	
-	if( !$xml ) {
-		$self->{log}->error("Problem creating XML");
-		return undef;
-	}
-	
-	my $global_id = $self->global_id;
-	if( !$global_id ) {
-		$self->{log}->error("Dataset $self->{file} has not got a global_id");
-		return undef;	
-	}
-	
-	my $file = $self->xml_filename;
-	
-	if( -f $file ) {
-		$self->{log}->warn("Ingest $file already exists");
-		return undef;
-	}
-	
-	open(XMLFILE, ">$file") || do {
-		$self->{log}->error("Could not open $file for writing: $!");
-		return undef;
-	};
-	
-	print XMLFILE $xml;
-	
-	close XMLFILE;
-	
-	return $file;
-}
-
-
-=item xml_filename()
-
-Returns the full path of the xml file built from the source's
-ReDBox directory and the dataset's global ID.
-
-=cut
-
-sub xml_filename {
-	my ( $self ) = @_;
-	
-	my $filename = join(
-		'/',
-		$self->{source}{settings}{redboxdir}, $self->global_id
-	) . '.xml';
-	
-	return $filename;
-}
-
-
 
 
 =item get_status()
@@ -294,6 +194,125 @@ sub set_status_error {
 			%params
 		}
 	);
+}
+
+
+
+
+=item clean_metadata_keys()
+
+CLean up the metadata keys so that they can be used as
+variables in Template::Toolkit.  Any non-alphanumeric
+characters at the end are truncated; all other non-alphanumeric
+characters are replaced with underscores.
+
+Throws an error if two keys convert down to the same string.
+
+=cut
+
+sub clean_metadata_keys {
+	my ( $self ) = @_;
+	
+	my $new_metadata = {};
+	
+	for my $key ( keys %{$self->{metadata}} ) {
+		my $value = $self->{metadata}{$key};
+		$key =~ s/[^A-Za-z0-9]+$//;
+		$key =~ s/[^A-Za-z0-9]/_/g;
+		if( exists $new_metadata->{$key} ) {
+			$self->{log}->fatal(
+				"$self->{id} key collision when cleaning metadata: $key"
+			);
+			die;
+		}
+		$new_metadata->{$key} = $value;
+	}
+	
+	$self->{metadata} = $new_metadata;
+}
+
+
+=item xml(view => $view)
+
+Apply the specified xml view to this dataset and return the
+results.
+
+=cut
+
+sub xml {
+	my ( $self, %params ) = @_;
+	
+	if( !$params{view} ) {
+		$self->{log}->error("xml needs a 'view' parameter");
+		return undef;
+	}
+	
+	return $self->{source}->render_view(
+		view => $params{view},
+		dataset => $self
+	);
+}
+
+=item write_redbox
+
+Writes the 'redbox' XML to the redbox directory, using the global_id
+as the filename.
+
+=cut
+
+
+sub write_redbox {
+	my ( $self ) = @_;
+	
+	my $xml = $self->xml(view => 'redbox');
+	
+	if( !$xml ) {
+		$self->{log}->error("Problem creating XML");
+		return undef;
+	}
+	
+	my $global_id = $self->global_id;
+	if( !$global_id ) {
+		$self->{log}->error("Dataset $self->{file} has not got a global_id");
+		return undef;	
+	}
+	
+	my $file = $self->xml_filename;
+	
+	if( -f $file ) {
+		$self->{log}->warn("Ingest $file already exists");
+		return undef;
+	}
+	
+	open(XMLFILE, ">$file") || do {
+		$self->{log}->error("Could not open $file for writing: $!");
+		return undef;
+	};
+	
+	print XMLFILE $xml;
+	
+	close XMLFILE;
+	
+	return $file;
+}
+
+
+=item xml_filename()
+
+Returns the full path of the xml file built from the source's
+ReDBox directory and the dataset's global ID.
+
+=cut
+
+sub xml_filename {
+	my ( $self ) = @_;
+	
+	my $filename = join(
+		'/',
+		$self->{source}{settings}{redboxdir}, $self->global_id
+	) . '.xml';
+	
+	return $filename;
 }
 
 

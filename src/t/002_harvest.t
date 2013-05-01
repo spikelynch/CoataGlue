@@ -45,7 +45,8 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 my $fixtures = setup_tests(log => $log);
 
 my $CoataGlue = CoataGlue->new(
-	config => $ENV{COATAGLUE_CONFIG},
+	global => $ENV{COATAGLUE_CONFIG},
+	sources => $ENV{COATAGLUE_SOURCES},
 	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 

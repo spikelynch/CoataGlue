@@ -7,6 +7,12 @@ use Log::Log4perl;
 use Data::Dumper;
 
 
+my @MANDATORY_PARAMS = qw(global sources templates);
+
+my %MANDATORY_CONFIG = (
+	Store => [ 'store' ],
+	Fedora => [ 'url', 'username', 'password', 'model' ]
+);
 
 
 sub new {
@@ -18,44 +24,63 @@ sub new {
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 	
-	if( !$params{config} || !$params{templates}) {
-		$self->{log}->error("$class needs parameters conf (a file) and templates (a directory)");
-		die;
+	my $missing = 0;
+	for my $field ( @MANDATORY_PARAMS ) {
+		if( !$params{$field} ) {
+			$self->{log}->error("$class needs a $field param");
+			$missing = 1;			
+		}
 	}
 	
-	$self->{conffile} = $params{config};
+	die if $missing;
+	
+	$self->{globalcf} = $params{global};
+	$self->{sourcescf} = $params{sources};
 	$self->{templates} = $params{templates};
 	$self->{log}->debug("Reading config from $self->{conffile}");
 
-	if( !-f $self->{conffile} ) {
-		$self->{log}->error("Config file $self->{conffile} not found");
-		die;
-	}
-		
-	eval {
-		read_config($self->{conffile} => $self->{conf});
-	};
-	
-	if( $@ ) {
-		$self->{log}->error("Config file error: $@");
-		die;
-	}
-	
-	# Global settings are stored with a hash key of '' - only
-	# the store directory so far.
+	for my $conf ( qw(global sources) ) {
+		my $file = $self->{$conf . 'cf'};
+		if( !-f $file ) {
+			$self->{log}->error("Config file $file not found");
+			die;
+		}
 
-	$self->{store} = $self->{conf}{''}{store} || do {
-		$self->{log}->error("No store directory defined in config");
-		die;
-	};
+		eval {
+			read_config($file => $self->{conf}{$conf});
+		};
+		if( $@ ) {
+            $self->{log}->error("Error parsing $conf - $file: $@");
+            die;
+        }
+    }
+
+	my $missing = 0;
+	for my $section ( keys %MANDATORY_CONFIG ) {
+		if( !$self->{conf}{global}{$section} ) {
+			$self->{log}->error("Missing section $section from global config");
+			$missing = 1;
+		} else {
+			for my $var ( @{$MANDATORY_CONFIG{$section}} ) {
+				if( !$self->{conf}{global}{$section}{$var} ) {
+					$self->{log}->error("Missing var $section.$var from global config");
+					$missing = 1;
+				}
+			}
+		}
+	}
 	
-	delete $self->{conf}{''};
+	die if $missing;
+	
+	$self->{store} = $self->{conf}{global}{Store}{store};
+	$self->{fedora} = $self->{conf}{global}{Fedora};
+		
 
 	$self->{converters} = CoataGlue::Converter->new();
 	
 	
-	SOURCE: for my $name ( keys %{$self->{conf}} ) {
-		my %settings = %{$self->{conf}{$name}};
+	SOURCE: for my $name ( keys %{$self->{conf}{sources}} ) {
+		my %settings = %{$self->{conf}{sources}{$name}};
 
 		my $convclass = $settings{converter};
 		if( !$convclass ) {
@@ -73,7 +98,7 @@ sub new {
 		}
 		my $source = CoataGlue::Source->new(
 			name => $name,
-			store => $self->{store},
+			store => $self->{conf}{global}{Store}{store},
 			converter => $converter,
 			ids => $settings{ids},
 			settings => \%settings

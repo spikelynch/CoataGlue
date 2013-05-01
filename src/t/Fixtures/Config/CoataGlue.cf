@@ -1,0 +1,11 @@
+# Global config settings for CoataGlue
+
+[Store]
+store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
+
+[Fedora]
+url:		http://localhost:8080/fedora
+username:	fedoraAdmin
+password:	hce39alp
+model:		Catmandu::Store::FedoraCommons::DC
+

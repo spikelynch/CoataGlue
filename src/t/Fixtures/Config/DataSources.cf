@@ -1,11 +1,6 @@
 # Config file for the RDC Data Capture sources.
 
 
-# Global config: store is a directory where each source's history
-# file is kept
-
-store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
-
 
 # Each data source has a section in [Brackets]
 #
