@@ -12,11 +12,11 @@ Tests generating XML versions of a dataset's metadata
 
 use strict;
 
-if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
+if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
 }
 
-use lib $ENV{RDC_PERLLIB};
+use lib $ENV{COATAGLUE_PERLLIB};
 
 
 use Test::More tests => 11;
@@ -25,32 +25,32 @@ use XML::Twig;
 use Text::Diff;
 
 
-use UTSRDC;
-use UTSRDC::Source;
-use UTSRDC::Converter;
-use UTSRDC::Dataset;
-use UTSRDC::Test qw(setup_tests);
+use CoataGlue;
+use CoataGlue::Source;
+use CoataGlue::Converter;
+use CoataGlue::Dataset;
+use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = 'UTSRDC.tests.003_xml';
+my $LOGGER = 'CoataGlue.tests.003_xml';
 
-if( !$ENV{RDC_LOG4J} ) {
-	die("Need to set RDC_LOG4J to point at a Log4j config file");
+if( !$ENV{COATAGLUE_LOG4J} ) {
+	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
 }
 
-Log::Log4perl->init($ENV{RDC_LOG4J});
+Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $utsrdc = UTSRDC->new(
-	config => $ENV{RDC_CONFIG},
-	templates => $ENV{RDC_TEMPLATES}
+my $CoataGlue = CoataGlue->new(
+	config => $ENV{COATAGLUE_CONFIG},
+	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
-ok($utsrdc, "Initialised UTSRDC object");
+ok($CoataGlue, "Initialised CoataGlue object");
 
-my @sources = $utsrdc->sources;
+my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
@@ -66,7 +66,7 @@ $source->close;
 
 my $ds = shift @datasets;
 
-my $xml = $ds->xml(view => 'Dataset');
+my $xml = $ds->xml(view => 'redbox');
 
 ok($xml, "Generated some XML");
 

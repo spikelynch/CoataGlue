@@ -10,15 +10,15 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 # Each data source has a section in [Brackets]
 #
 # mandatory fields:
-#   converter - a UTSRDC::Converter class
+#   converter - a CoataGlue::Converter class
 #   redboxdir - the directory in which to write XML for ReDBox
 #   templates - the directory containing XML templates
 #
 # All the other fields depend on the converter class 
 
 [MIF]
-converter:    UTSRDC::Converter::FolderCSV
-ids:          UTSRDC::ID::NaiveSequence
+converter:    CoataGlue::Converter::FolderCSV
+ids:          CoataGlue::ID::NaiveSequence
 redboxdir:    /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 templates:	  MIF
 basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture

@@ -13,7 +13,7 @@ use Data::Dumper;
 use strict;
 
 
-my $SAMPLE_DESCRIPTION = "$ENV{RDC_TESTDIR}/Extras/description.txt";
+my $SAMPLE_DESCRIPTION = "$ENV{COATAGLUE_TESTDIR}/Extras/description.txt";
 my $SAMPLE_SERVICE = 'MIF.service.1';
 
 
@@ -21,11 +21,11 @@ sub setup_tests {
 	my %params = @_;
 	
 	my $log = $params{log};
-	my $fixtures = $ENV{RDC_FIXTURES} || die("Need to set RDC_FIXTURES");
-	my $test = $ENV{RDC_TESTDIR} || die("Need to set RDC_TESTDIR");
+	my $fixtures = $ENV{COATAGLUE_FIXTURES} || die("Need to set COATAGLUE_FIXTURES");
+	my $test = $ENV{COATAGLUE_TESTDIR} || die("Need to set COATAGLUE_TESTDIR");
 
-	if( !$ENV{RDC_CONFIG} ) {
-		$log && $log->error("Need to set RDC_CONFIG to a data source config file");
+	if( !$ENV{COATAGLUE_CONFIG} ) {
+		$log && $log->error("Need to set COATAGLUE_CONFIG to a data source config file");
 		die;
 	}
 

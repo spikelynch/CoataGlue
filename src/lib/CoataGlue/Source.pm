@@ -22,13 +22,13 @@ CoataGlue::Source
 Basic object describing a data source
 
 name      - unique id
-converter - A CoataGlue::Converter object (passed in by UTSRDC)
+converter - A CoataGlue::Converter object (passed in by CoataGlue)
 settings  - the config settings (some of which depend on the Converter)
 store     - the directory where the source histories are kept 
 
 =head1 SYNOPSIS
 
-    my @sources = $utsrdc->sources;
+    my @sources = $CoataGlue->sources;
     
     for my $source ( @sources ) {
     	my @datasets = $source->scan;
@@ -317,7 +317,7 @@ Loads this data source's template config.
 sub load_templates {
 	my ( $self ) = @_;
 	
-	my $template_cf = "$ENV{RDC_TEMPLATES}/$self->{settings}{templates}.cf";
+	my $template_cf = "$ENV{COATAGLUE_TEMPLATES}/$self->{settings}{templates}.cf";
 	
 	if( !-f $template_cf ) {
 		$self->{log}->error("$self->{name}: Template config $template_cf not found");
@@ -327,7 +327,7 @@ sub load_templates {
 	read_config($template_cf => $self->{template_cf});
 	$self->{log}->debug("Data source $self->{name} loaded template config $template_cf");
 	$self->{tt} = Template->new({
-		INCLUDE_PATH => $ENV{RDC_TEMPLATES},
+		INCLUDE_PATH => $ENV{COATAGLUE_TEMPLATES},
 		POST_CHOMP => 1
 	});
 }

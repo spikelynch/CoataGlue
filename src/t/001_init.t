@@ -6,47 +6,47 @@
 
 =head1 DESCRIPTION
 
-Basic initialisation: create a UTSRDC object and get
+Basic initialisation: create a CoataGlue object and get
 data sources from it.
 
 =cut
 
 use strict;
 
-if( ! $ENV{RDC_PERLLIB} || ! $ENV{RDC_LOG4J}) {
+if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
 }
 
-use lib $ENV{RDC_PERLLIB};
+use lib $ENV{COATAGLUE_PERLLIB};
 
 
 use Test::More tests => 4;
 use Data::Dumper;
 
-use UTSRDC;
-use UTSRDC::Source;
-use UTSRDC::Converter;
-use UTSRDC::Dataset;
-use UTSRDC::Test qw(setup_tests);
+use CoataGlue;
+use CoataGlue::Source;
+use CoataGlue::Converter;
+use CoataGlue::Dataset;
+use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = 'UTSRDC.tests.001_init';
+my $LOGGER = 'CoataGlue.tests.001_init';
 
-if( !$ENV{RDC_LOG4J} ) {
-	die("Need to set RDC_LOG4J to point at a Log4j config file");
+if( !$ENV{COATAGLUE_LOG4J} ) {
+	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
 }
 
-Log::Log4perl->init($ENV{RDC_LOG4J});
+Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $sources = UTSRDC->new(
-	config => $ENV{RDC_CONFIG},
-	templates => $ENV{RDC_TEMPLATES}
+my $sources = CoataGlue->new(
+	config => $ENV{COATAGLUE_CONFIG},
+	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
-ok($sources, "Initialised UTSRDC object");
+ok($sources, "Initialised CoataGlue object");
 
 my @sources = $sources->sources;
 
