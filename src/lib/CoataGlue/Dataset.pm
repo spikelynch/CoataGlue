@@ -395,6 +395,10 @@ anything accessible via Catmandu::Store)
 
 sub add_to_repository {
 	my ( $self ) = @_;
+
+	my $repo = $self->{source}->repository;
+	
+	my $
 	
 	
 }

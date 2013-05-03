@@ -2,11 +2,13 @@
 
 =head1 NAME
 
-003_xml.t
+004_xml.t
 
 =head1 DESCRIPTION
 
 Tests generating XML versions of a dataset's metadata
+
+TODO: this should test the contents of the <header> element.
 
 =cut
 

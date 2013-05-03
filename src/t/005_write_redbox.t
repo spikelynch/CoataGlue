@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-004_write_redbox_xml.t
+005_write_redbox_xml.t
 
 =head1 DESCRIPTION
 

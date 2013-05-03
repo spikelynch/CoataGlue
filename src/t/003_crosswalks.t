@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-003_xml.t
+003_crosswalks.t
 
 =head1 DESCRIPTION
 
@@ -50,6 +50,7 @@ my $CoataGlue = CoataGlue->new(
 );
 
 ok($CoataGlue, "Initialised CoataGlue object");
+
 
 my @sources = $CoataGlue->sources;
 

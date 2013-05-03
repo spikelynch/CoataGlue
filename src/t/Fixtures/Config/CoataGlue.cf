@@ -6,7 +6,7 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 # What would be really good here is if it could use any kind of
 # Catmandu::Store
 
-[Fedora]
+[Repository]
 url:		http://localhost:8080/fedora
 username:	fedoraAdmin
 password:	hce39alp

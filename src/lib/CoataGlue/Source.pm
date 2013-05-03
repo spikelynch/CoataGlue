@@ -80,7 +80,7 @@ our $STATUS_NEW      = 'new';
 our $STATUS_ERROR    = 'error';
 our $STATUS_INGESTED = 'ingested';
 
-our @MANDATORY_PARAMS = qw(name converter ids settings store);
+our @MANDATORY_PARAMS = qw(coataglue name converter ids settings store);
 
 our @MANDATORY_SETTINGS = qw(redboxdir templates);
 
@@ -505,6 +505,20 @@ sub expand_template {
 	}
 	$self->{log}->error("Template error in $template " . $self->{tt}->error);
 	return undef;
+}
+
+
+=item repository
+
+Initialises a connection to the Fedora repository if it's not
+already been made, and returns it as a Catmandu::Store object
+
+=cut
+
+sub repository {
+	my ( $self ) = @_;
+	
+	return $self->{coataglue}->repository;
 }
 
 1;

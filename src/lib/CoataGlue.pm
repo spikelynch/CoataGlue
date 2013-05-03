@@ -5,13 +5,14 @@ use strict;
 use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
+use Catmandu::Store::FedoraCommons;
 
 
 my @MANDATORY_PARAMS = qw(global sources templates);
 
 my %MANDATORY_CONFIG = (
 	Store => [ 'store' ],
-	Fedora => [ 'url', 'username', 'password', 'model' ]
+	Repository => [ 'url', 'username', 'password', 'model' ]
 );
 
 
@@ -73,7 +74,6 @@ sub new {
 	die if $missing;
 	
 	$self->{store} = $self->{conf}{global}{Store}{store};
-	$self->{fedora} = $self->{conf}{global}{Fedora};
 		
 
 	$self->{converters} = CoataGlue::Converter->new();
@@ -97,6 +97,7 @@ sub new {
 			next SOURCE;
 		}
 		my $source = CoataGlue::Source->new(
+			coataglue => $self,
 			name => $name,
 			store => $self->{conf}{global}{Store}{store},
 			converter => $converter,
@@ -136,7 +137,22 @@ sub template {
 }
 
 
-
+sub repository {
+	my ( $self ) = @_;
+	
+	if( !$self->{repository} ) {
+		$self->{repository} = Catmandu::Store::FedoraCommons->new(
+			%{$self->{conf}{Repository}}
+		) || do {
+			$self->{log}->fatal("Can't connect to repository:" . Dumper(
+				{ credentials => $self->{conf}{Repository} }
+			));
+			die;
+		};
+	}
+	
+	return $self->{repository};
+}
 
 
 
