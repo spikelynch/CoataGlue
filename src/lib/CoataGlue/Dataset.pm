@@ -296,7 +296,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryid => $self->{repositoryid},
-		date_converted => $self->{dateconverted}
+		dateconverted => $self->{dateconverted}
 	};
 }
 
@@ -398,9 +398,15 @@ sub add_to_repository {
 
 	my $repo = $self->{source}->repository;
 	
-	my $
+	my $dc = $self->metadata;
+
+	$self->{log}->info(Dumper({addmetadata => $dc}));	
 	
+	my $rv = $repo->bag->add($dc);
 	
+	$self->{log}->info(Dumper({fedora => $rv}));
+	
+	return $rv;
 }
 
 

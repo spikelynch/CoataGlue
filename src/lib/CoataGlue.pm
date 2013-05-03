@@ -12,7 +12,7 @@ my @MANDATORY_PARAMS = qw(global sources templates);
 
 my %MANDATORY_CONFIG = (
 	Store => [ 'store' ],
-	Repository => [ 'url', 'username', 'password', 'model' ]
+	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ]
 );
 
 
@@ -74,6 +74,8 @@ sub new {
 	die if $missing;
 	
 	$self->{store} = $self->{conf}{global}{Store}{store};
+	
+	$self->{log}->info(Dumper({conf=> $self->{conf}}));
 		
 
 	$self->{converters} = CoataGlue::Converter->new();
@@ -141,11 +143,19 @@ sub repository {
 	my ( $self ) = @_;
 	
 	if( !$self->{repository} ) {
-		$self->{repository} = Catmandu::Store::FedoraCommons->new(
-			%{$self->{conf}{Repository}}
+		my $conf = $self->{conf}{global}{Repository};
+		my $class = $conf->{class} || do {
+			$self->{log}->fatal("No repository class");
+			die;
+		};
+		$self->{repository} = $class->new(
+			baseurl => $conf->{baseurl},
+			username => $conf->{username},
+			password => $conf->{password},
+			model => $conf->{model}
 		) || do {
-			$self->{log}->fatal("Can't connect to repository:" . Dumper(
-				{ credentials => $self->{conf}{Repository} }
+			$self->{log}->fatal("Can't connect to $class repository:" . Dumper(
+				{ conf  => $conf }
 			));
 			die;
 		};

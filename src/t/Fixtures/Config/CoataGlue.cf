@@ -7,7 +7,8 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 # Catmandu::Store
 
 [Repository]
-url:		http://localhost:8080/fedora
+class:      Catmandu::Store::FedoraCommons
+baseurl:	http://localhost:8080/fedora
 username:	fedoraAdmin
 password:	hce39alp
 model:		Catmandu::Store::FedoraCommons::DC
