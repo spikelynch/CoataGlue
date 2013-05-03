@@ -67,11 +67,9 @@ $source->close;
 
 my $ds = shift @datasets;
 
-my $xml = $ds->xml(view => 'redbox');
+my $xml = $ds->xml();
 
 ok($xml, "Generated some XML");
-
-diag($xml);
 
 my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
 
@@ -91,18 +89,20 @@ eval {
 
 ok(!$@, "XML parsed OK");
 
+my $raw = $ds->{raw_metadata};
+
 cmp_ok(
-	$title, 'eq', $ds->{metadata}{Experiment_Name},
+	$title, 'eq', $raw->{Experiment_Name},
 	"<title> = Experiment_Name = $title"
 );
 
 cmp_ok(
-	$activity, 'eq', $ds->{metadata}{Project_ID},
+	$activity, 'eq', $raw->{Project_ID},
 	"<activity> = Project_ID = $activity"
 );
 
 cmp_ok(
-	$party, 'eq', $ds->{metadata}{Project_Creator_Staff_Student_ID},
+	$party, 'eq', $raw->{Project_Creator_Staff_Student_ID},
 	"<party> = Project_Creator_Staff_Student_ID = $party"
 );
 

@@ -303,20 +303,22 @@ sub header {
 =item xml(view => $view)
 
 Apply the specified xml view to this dataset and return the
-results.
+results.  The default view is 'metadata'
 
 =cut
 
 sub xml {
 	my ( $self, %params ) = @_;
 	
-	if( !$params{view} ) {
-		$self->{log}->error("xml needs a 'view' parameter");
-		return undef;
-	}
+	my $view = $params{view};
+	
+	if( !$view ) {
+		$self->{log}->info("Default view: metadata");
+		$view = 'metadata'
+	};
 	
 	return $self->{source}->render_view(
-		view => $params{view},
+		view => $view,
 		dataset => $self
 	);
 }
@@ -332,7 +334,7 @@ as the filename.
 sub write_redbox {
 	my ( $self ) = @_;
 	
-	my $xml = $self->xml(view => 'redbox');
+	my $xml = $self->xml;
 	
 	if( !$xml ) {
 		$self->{log}->error("Problem creating XML");
