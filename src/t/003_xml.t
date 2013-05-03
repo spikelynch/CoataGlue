@@ -71,6 +71,8 @@ my $xml = $ds->xml(view => 'redbox');
 
 ok($xml, "Generated some XML");
 
+diag($xml);
+
 my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
 
 my $twig = XML::Twig->new(

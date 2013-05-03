@@ -37,8 +37,6 @@ Fedora Questions
    - copy the dataset onto Fedora storage (Don't know how this is 
      going to work yet.)
 
-
-
 * Later - the Perl wrapper around FC does the following
   when a request is made:
   
@@ -50,6 +48,24 @@ Fedora Questions
   - Internal Publication: if the request is from UTS, return the
       cover page
   - Publication: return the cover page
+
+
+
+Bare Minimum metadata
+---------------------
+
+This is the minimum metadata set which will get written into
+the repository and into ReDBox.
+
+I need to separate the crosswalk-to-common-fields bit from the 
+write-to-XML bit.  This is in Source::render_view - should work
+like this
+
+my $dc = $dataset->extract_metadata() # returns a hashref
+
+my $xml = $dataset->redbox_xml()      # returns actual XML
+
+
 
 
 

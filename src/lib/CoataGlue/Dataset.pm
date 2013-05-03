@@ -27,13 +27,41 @@ Variables:
 
 =over 4
 
-=item file     -> the metadata file
-=item location -> where the data is: a directory, a file, a URL, a physical location
-=item metadata -> a hashref of metadata
-=item id       -> unique to this datasource.  No colons.
-=item source   -> the datasource
+=item file           -> the metadata file
+=item location       -> dataset location
+=item raw_metadata   -> a hashref of the raw metadata from the
+                        Converter
+=item metadata       -> the crosswalked metadata
+=item id             -> a unique ID, unique to this datasource.
+					    No special characters, as it's used to build
+					    filename.
+=item global_id      -> Source name + id
+=item repository_id  -> The ID in Fedora
+=item source         -> the datasource name
+=item date_converted -> date it was converted
 
 =back
+
+The standard metadata fields are as follows. 
+
+=over 4
+
+=item title
+=item description
+=item activity
+=item service
+=item collection_date
+=item group
+=item creator
+=item supervisor
+=item share
+=item access
+=item spatial
+=item temporal
+=item location
+
+=back
+
 
 =cut
 
@@ -62,14 +90,14 @@ Create a new dataset object. All parameters are compulsory:
 
 =item location - the data itself - can be a filepath or URL
 
-=item metadata - a hashref.  Non-alphanumeric characters in keys are
+=item metadata - a hashref of the raw metadata as read by the converter  Non-alphanumeric characters in keys are
       converted to underscores.
 
 =back
 
 =cut
 
-our @MANDATORY_PARAMS = qw(file metadata source);
+our @MANDATORY_PARAMS = qw(file raw_metadata source);
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -80,7 +108,7 @@ sub new {
 	$self->{log} = Log::Log4perl->get_logger($class);
 
 	$self->{file} 	  = $params{file};
-	$self->{metadata} = $params{metadata};
+	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
 
 	my $error = undef;
@@ -93,8 +121,9 @@ sub new {
 	
 	$self->clean_metadata_keys();
 	
-	
 	$self->get_status;
+	
+	$self->{log}->debug("Dataset metadata = " . Dumper({metadata => $self->{metadata}}));
 	
 	if( $error ) {
 		return undef;
@@ -215,8 +244,8 @@ sub clean_metadata_keys {
 	
 	my $new_metadata = {};
 	
-	for my $key ( keys %{$self->{metadata}} ) {
-		my $value = $self->{metadata}{$key};
+	for my $key ( keys %{$self->{raw_metadata}} ) {
+		my $value = $self->{raw_metadata}{$key};
 		$key =~ s/[^A-Za-z0-9]+$//;
 		$key =~ s/[^A-Za-z0-9]/_/g;
 		if( exists $new_metadata->{$key} ) {
@@ -228,9 +257,48 @@ sub clean_metadata_keys {
 		$new_metadata->{$key} = $value;
 	}
 	
-	$self->{metadata} = $new_metadata;
+	$self->{raw_metadata} = $new_metadata;
 }
 
+
+=item metadata()
+
+Crosswalk the raw metadata into the basic metadata fields for FC
+or ReDBox and return a hash.
+
+=cut
+
+sub metadata {
+	my ( $self ) = @_;
+	
+	if ( $self->{source}->crosswalk(dataset => $self) ) {
+		return $self->{metadata};
+	} else {
+		return undef;
+	}
+	
+	
+}
+
+=item header()
+
+This returns the source, id, repository_id etc.  Metadata about
+metadata, which is why it's called 'header'
+
+=cut
+
+sub header {
+	my ( $self ) = @_;
+	
+	return {
+		id => $self->{id},
+		source => $self->{source}{name},
+		file => $self->{file},
+		location => $self->{location},
+		repositoryid => $self->{repositoryid},
+		date_converted => $self->{dateconverted}
+	};
+}
 
 =item xml(view => $view)
 
@@ -313,6 +381,20 @@ sub xml_filename {
 	) . '.xml';
 	
 	return $filename;
+}
+
+=item add_to_repository()
+
+Create a digital object representing this dataset in the repository
+(Fedora Commons for now although we should eventually make it
+anything accessible via Catmandu::Store)
+
+=cut
+
+sub add_to_repository {
+	my ( $self ) = @_;
+	
+	
 }
 
 

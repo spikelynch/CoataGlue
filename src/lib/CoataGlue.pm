@@ -123,6 +123,7 @@ sub sources {
 	return map { $self->{sources}{$_} } sort keys %{$self->{sources}};
 }
 
+
 sub template {
 	my ( $self, %params ) = @_;
 	
@@ -133,6 +134,11 @@ sub template {
 	
 	$self->{tt} = Template->new();
 }
+
+
+
+
+
 
 
 

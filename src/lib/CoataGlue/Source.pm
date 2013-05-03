@@ -289,6 +289,9 @@ sub dataset {
 	my $file = $params{file};
 	
 	if( !$metadata || ! $file ) {
+		print "AHOY $self";
+		cluck("Phooey");
+		print Dumper({self => $self});
 		$self->{log}->error("New dataset needs metadata and file");
 		return undef;
 	}
@@ -296,7 +299,7 @@ sub dataset {
 	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
 		file => $file,
-		metadata => $metadata
+		raw_metadata => $metadata
 	)|| do {
 		$self->{log}->error("Error creating dataset");
 		return undef;	
@@ -333,6 +336,77 @@ sub load_templates {
 }
 
 
+=item crosswalk(dataset => $ds, view => $view)
+
+Applies a crosswalk from this view's template file.  If
+no view is supplied, it applies the standard metadata crosswalk
+to the raw metadata from the converter.  If a view is supplied,
+and it isn't 'metadata', it runs one of the other views defined
+in the file on the standard metadata (and creates this first
+if it hasn't yet been built)
+
+=cut
+
+sub crosswalk {
+	my ( $self, %params ) = @_;
+	
+	my $view = $params{view} || 'metadata';
+
+	my $ds = $params{dataset};
+	
+	if( !$self->{template_cf}{$view} ) {
+		$self->{log}->error("View '$view' not defined in template file for $self->{name}");
+		return undef;
+	}
+	if( !$ds ) {
+		$self->{log}->error("crosswalk needs a dataset");
+		return undef;
+	}
+	my $view_name = $view;
+	my $view = $self->{template_cf}{$view_name};
+
+	my $original;	
+	if( $view eq 'metadata' ) {
+		$original = $ds->{raw_metadata};
+	} else {
+		if( !defined $ds->{metadata} ) {
+			$self->crosswalk(
+				view => 'metadata',
+				dataset => $ds
+			)
+		}
+		$original = $ds->{metadata};
+	}
+	my $new = {};
+	
+	for my $field ( keys %$view ) {
+		if( $view->{$field} =~ /\.tt$/ ) {
+			$self->{log}->debug("Expanding template $field: $view->{$field}");
+			$new->{$field} = $self->expand_template(
+				template => $view->{$field},
+				metadata => $original
+			);
+		} else {
+			my $mdfield = $view->{$field};
+			if( !defined $original->{$mdfield} ) {
+				$self->{log}->warn("View $view: $mdfield not defined for dataset $ds->{id}");
+				$new->{$field} = '';
+			} else {
+				$new->{$field} = $original->{$mdfield};
+			}
+		}
+	}
+	
+	if( $view_name eq 'metadata' ) {
+		$ds->{metadata} = $new;
+	} else {
+		$ds->{views}{$view_name} = $new;
+	}
+
+	return $new;
+}
+
+
 =item render_view(dataset => $ds, view => $view)
 
 Generate an XML view of a dataset.  Expansion works like this:
@@ -353,42 +427,27 @@ Returns the resulting XML.
 sub render_view {
 	my ( $self, %params ) = @_;
 	
-	my $name = $params{view};
-	my $ds = $params{dataset};
+	my $view = $params{view} || 'metadata';
+	my $dataset = $params{dataset};
 	
-	if( !$self->{template_cf}{$name} ) {
-		$self->{log}->error("View '$name' not defined in template config");
-		return undef;
-	}
-	if( !$ds ) {
-		$self->{log}->error("render_xml needs a dataset");
+	if( !$dataset ) {
+		$self->{log}->error("render_view needs a dataset");
 		return undef;
 	}
 	
-	my $view = $self->{template_cf}{$name};
-	my $elements = {};
+	my $elements = $self->crosswalk(
+		view => $view,
+		dataset => $dataset
+	);
 	
-	for my $field ( keys %$view ) {
-		if( $view->{$field} =~ /\.tt$/ ) {
-			$self->{log}->debug("Expanding template $field: $view->{$field}");
-			$elements->{$field} = $self->expand_template(
-				template => $view->{$field},
-				metadata => $ds->{metadata}
-			);
-		} else {
-			my $mdfield = $view->{$field};
-			if( !defined $ds->{metadata}{$mdfield} ) {
-				$self->{log}->warn("View $name: $mdfield not defined for dataset $ds->{id}");
-				$elements->{$field} = '';
-			} else {
-				$elements->{$field} = $ds->{metadata}{$mdfield};
-			}
-		}
-	}
 	my $output;
 	
 	my $writer = XML::Writer->new(OUTPUT => \$output);
-	$writer->startTag($name);
+	$writer->startTag($view);
+	$self->write_header_XML(
+		writer => $writer,
+		dataset => $dataset
+	);
 	for my $tag ( keys %$elements ) {
 		$writer->startTag($tag);
 		$writer->characters($elements->{$tag});
@@ -397,6 +456,30 @@ sub render_view {
 	$writer->endTag();
 	
 	return $output;
+}
+
+
+=item write_header_XML(writer => $writer)
+
+Add the standard header tag
+
+=cut
+
+sub write_header_XML {
+	my ( $self, %params ) = @_;
+	
+	my $dataset = $params{dataset};
+	my $writer = $params{writer};
+	
+	my $header = $dataset->header();
+
+	$writer->startTag('header');	
+	for my $field ( qw(source id file location repositoryid dateconverted) ) {
+		$writer->startTag($field);
+		$writer->characters($header->{$field});
+		$writer->endTag();
+	}
+	$writer->endTag();
 }
 
 

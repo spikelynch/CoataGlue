@@ -1,10 +1,13 @@
 # Crosswalk config file for DC18A/MIF metadata
 
-# XML files get an 'rdc' element with essential
-# metadata - the UTSRDC::ID id, and the Fedora object
-# stuff.
+# All XML files get an 'header' element with essential
+# metadata: datasource, local ID, metadata file, repository ID etc
 
-[redbox]
+# 'metadata' is the ReDBox minimum metadata, and is also pushed into
+# the data repository.
+
+
+[metadata]
 title: 			Experiment_Name
 activity: 		Project_ID
 party: 			Project_Creator_Staff_Student_ID
