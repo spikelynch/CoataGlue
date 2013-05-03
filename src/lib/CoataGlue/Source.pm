@@ -365,8 +365,9 @@ sub crosswalk {
 	my $view_name = $view;
 	my $view = $self->{template_cf}{$view_name};
 
-	my $original;	
-	if( $view eq 'metadata' ) {
+	my $original;
+	
+	if( $view_name eq 'metadata' ) {
 		$original = $ds->{raw_metadata};
 	} else {
 		if( !defined $ds->{metadata} ) {

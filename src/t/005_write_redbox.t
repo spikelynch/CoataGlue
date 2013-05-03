@@ -31,7 +31,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = 'CoataGlue.tests.004_write_redbox_xml';
+my $LOGGER = "CoataGlue.tests.005";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
