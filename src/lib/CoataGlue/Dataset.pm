@@ -398,9 +398,24 @@ sub add_to_repository {
 
 	my $repo = $self->{source}->repository;
 	
-	my $dc = $self->metadata;
+	my $metadata = $self->metadata;
 
-	$self->{log}->info(Dumper({addmetadata => $dc}));	
+	my $dc = $self->{source}->repository_crosswalk(
+		metadata => $metadata
+	);
+	
+	# Catmandu::Bag::add expects values to be arrayrefs, and
+	# complains if it gets an undef rather than an empty string
+	
+	for my $field ( keys %$dc ) {
+		if( $dc->{$field} ) {
+			$dc->{$field} = [ $dc->{$field} ];
+		} else {
+			$dc->{$field} = [ '' ];
+		}
+	}
+
+	$self->{log}->debug(Dumper({addmetadata => $dc}));	
 	
 	my $rv = $repo->bag->add($dc);
 	

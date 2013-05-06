@@ -12,7 +12,8 @@ my @MANDATORY_PARAMS = qw(global sources templates);
 
 my %MANDATORY_CONFIG = (
 	Store => [ 'store' ],
-	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ]
+	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ],
+	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ]
 );
 
 
@@ -75,9 +76,6 @@ sub new {
 	
 	$self->{store} = $self->{conf}{global}{Store}{store};
 	
-	$self->{log}->info(Dumper({conf=> $self->{conf}}));
-		
-
 	$self->{converters} = CoataGlue::Converter->new();
 	
 	
@@ -165,7 +163,26 @@ sub repository {
 }
 
 
-
+sub repository_crosswalk {
+	my ( $self, %params ) = @_;
+	
+	my $metadata = $params{metadata} || do {
+		$self->{log}->fatal("Need a metadata to do crosswalk");
+		die;
+	};
+	
+	my $dc = {};
+	
+	my $cw = $self->{conf}{global}{RepositoryCrosswalk};
+	
+	for my $field ( keys %$cw ) {
+		$dc->{$field} = $metadata->{$cw->{$field}};
+	}
+	
+	$self->{log}->debug(Dumper({crosswalk => $dc}));
+	
+	return $dc;
+}
 
 
 1;

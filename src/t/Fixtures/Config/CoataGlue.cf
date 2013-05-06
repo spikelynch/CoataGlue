@@ -3,13 +3,18 @@
 [Store]
 store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 
-# What would be really good here is if it could use any kind of
-# Catmandu::Store
-
 [Repository]
+
 class:      Catmandu::Store::FedoraCommons
 baseurl:	http://localhost:8080/fedora
 username:	fedoraAdmin
 password:	hce39alp
 model:		Catmandu::Store::FedoraCommons::DC
 
+[RepositoryCrosswalk]
+title:			title
+description:	description
+creator:		party
+date:			datecreated
+identifier:		id
+source:			service

@@ -521,4 +521,18 @@ sub repository {
 	return $self->{coataglue}->repository;
 }
 
+=item repository_crosswalk
+
+Crosswalks a standard metadata hashref into a DC hashref to
+be added to the Fedora repository
+
+=cut
+
+sub repository_crosswalk {
+	my ( $self, %params ) = @_;
+	
+	return $self->{coataglue}->repository_crosswalk(%params);
+}
+
+
 1;
