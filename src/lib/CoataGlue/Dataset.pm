@@ -35,10 +35,11 @@ Variables:
 =item id             -> a unique ID, unique to this datasource.
 					    No special characters, as it's used to build
 					    filename.
-=item global_id      -> Source name + id
-=item repository_id  -> The ID in Fedora
+=item globalid       -> Source name + id
+=item repositoryid   -> The ID in Fedora
 =item source         -> the datasource name
-=item date_converted -> date it was converted
+=item datecreated    -> experiment date from the source
+=item dateconverted  -> date it was converted
 
 =back
 
@@ -50,7 +51,8 @@ The standard metadata fields are as follows.
 =item description
 =item activity
 =item service
-=item collection_date
+=item creationdate
+=item collectiondate
 =item group
 =item creator
 =item supervisor
@@ -417,11 +419,20 @@ sub add_to_repository {
 
 	$self->{log}->debug(Dumper({addmetadata => $dc}));	
 	
-	my $rv = $repo->bag->add($dc);
+	my $rv;
 	
-	$self->{log}->info(Dumper({fedora => $rv}));
+	eval {
+		$rv = $repo->bag->add($dc);
+	};
 	
-	return $rv;
+	if( $@ ) {
+		$self->{log}->error("Couldn't add object to repository: $@");
+		return 0;
+	}
+	
+	$self->{repositoryid} = $rv->{_id};
+
+	return $self->{repositoryid};	
 }
 
 

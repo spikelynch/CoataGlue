@@ -24,6 +24,10 @@ Generic converter for data like this:
 If the CSV file does not specify a location (in a column headed
 'location') then the folder is used.
 
+TODO: scan the directory with the .csv file for other files
+and add them to a 'payload' arrayref.  These can then be 
+imported into Fedora if required.
+
 =cut
 
 

@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 11;
+use Test::More tests => 7;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -71,7 +71,7 @@ my $ds = shift @datasets;
 
 ok($ds->add_to_repository, "Added dataset to Fedora");
 
-ok($ds->{repositoryid}, "Dataset has repostoryid: ");
+ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
 
 
 
