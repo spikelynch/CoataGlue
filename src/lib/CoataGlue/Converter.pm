@@ -6,6 +6,9 @@ use Module::Pluggable search_path => [ 'CoataGlue::Converter' ], require => 1;
 use Log::Log4perl;
 use Carp qw(cluck);
 use Data::Dumper;
+use POSIX qw(strftime);
+
+my $TIMEFORMAT = "%FT%T%z";
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -67,6 +70,16 @@ sub converter {
 		$self->{log}->error("Unknown converter '$plugin'");
 		return undef;
 	}
+}
+
+# Returns the current time in a standard format for all converters
+
+sub timestamp {
+	my ( $self ) = @_;
+	
+	my $format = $self->{source}->conf('General', 'timeformat');
+	
+	return strftime($format, localtime);
 }
 
 

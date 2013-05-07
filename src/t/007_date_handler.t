@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-006_fedora.t
+007_time_convert.t
 
 =head1 DESCRIPTION
 
-Tests adding a record to Fedora.
+Test for the date-format-frobbing code in Coataglue::Source
 
 =cut
 
@@ -19,11 +19,8 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 7;
+use Test::More tests => 4;
 use Data::Dumper;
-use XML::Twig;
-use Text::Diff;
-
 
 use CoataGlue;
 use CoataGlue::Source;
@@ -31,7 +28,17 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = "CoataGlue.tests.006";
+my @DATES = (
+	'01/01/2001',
+	'31/12/1999',
+	'4/5/2006',
+	'11/11/2011',
+	'//232',
+	'05/05/05'
+);
+
+
+my $LOGGER = "CoataGlue.tests.007";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
@@ -43,40 +50,25 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $CoataGlue = CoataGlue->new(
+my $sources = CoataGlue->new(
 	global => $ENV{COATAGLUE_CONFIG},
 	sources => $ENV{COATAGLUE_SOURCES},
 	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
-ok($CoataGlue, "Initialised CoataGlue object");
+ok($sources, "Initialised CoataGlue object");
 
-my $repo = $CoataGlue->repository;
-
-ok($repo, "Connected to Fedora Commons");
-
-my @sources = $CoataGlue->sources;
+my @sources = $sources->sources;
 
 ok(@sources, "Got sources");
 
 my $source = $sources[0];
 
-ok($source->open, "Opened source '$source->{name}'");
+my $handler = $source->{template_handlers}{metadata}{datecreated};
 
-my @datasets = $source->scan;
-
-ok(@datasets, "Got at least one dataset");
-
-my $ds = shift @datasets;
-
-ok($ds->add_to_repository, "Added dataset to Fedora");
-
-ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
-
-my $file = $ds->write_redbox;
-
-if( ok($file, "Wrote XML: $file") ) {
-	diag("TODO");
+if( cmp_ok(ref($handler), 'eq', 'CODE', "Got a CODE reference for handler") ) {
+	for my $date ( @DATES ) {
+		my $cooked = &$handler($date);
+		diag("$date => $cooked");
+	}
 }
-
-

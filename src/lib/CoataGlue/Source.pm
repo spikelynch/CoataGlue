@@ -328,6 +328,27 @@ sub load_templates {
 	}
 	
 	read_config($template_cf => $self->{template_cf});
+	
+	for my $view ( keys %{$self->{template_cf}} ) {
+		my $crosswalk = $self->{template_cf}{$view};
+		for my $field ( keys %$crosswalk ) {
+			# generate code snippets for converting dates etc
+			my ( $mdf, $expr ) = split(/\s+/, $crosswalk->{$field});
+			if( $expr ) {
+				my $handler = $self->make_handler(
+					expr => $expr
+				);
+				if( $handler ) {
+ 					$self->{template_handlers}{$view}{$field} = $handler; 
+					$self->{log}->debug("Added $view.$field handler: $handler");
+				} else {
+					$self->{log}->error("Handler init failed for $view.$field: check config");
+				}
+			}
+		}
+	}
+	
+	
 	$self->{log}->debug("Data source $self->{name} loaded template config $template_cf");
 	$self->{tt} = Template->new({
 		INCLUDE_PATH => $ENV{COATAGLUE_TEMPLATES},
@@ -364,7 +385,8 @@ sub crosswalk {
 	}
 	my $view_name = $view;
 	my $view = $self->{template_cf}{$view_name};
-
+	my $handlers = $self->{template_handlers}{$view_name} || undef;
+	
 	my $original;
 	
 	if( $view_name eq 'metadata' ) {
@@ -393,17 +415,24 @@ sub crosswalk {
 				$self->{log}->warn("View $view: $mdfield not defined for dataset $ds->{id}");
 				$new->{$field} = '';
 			} else {
-				$new->{$field} = $original->{$mdfield};
+				if( $handlers && $handlers->{$field} ) {
+					my $h = $handlers->{$field};
+					$new->{$field} = &$h($original->{$mdfield});
+					$self->{log}->debug("Applying $field handler: $original->{$mdfield} => $new->{$field}");		
+				} else {
+					$new->{$field} = $original->{$mdfield};
+				}
 			}
 		}
 	}
 	
 	if( $view_name eq 'metadata' ) {
 		$ds->{metadata} = $new;
+		$ds->{datecreated} = $ds->{metadata}{datecreated};
+		$self->{log}->debug("Date created = $ds->{datecreated}");
 	} else {
 		$ds->{views}{$view_name} = $new;
 	}
-
 	return $new;
 }
 
@@ -532,6 +561,100 @@ sub repository_crosswalk {
 	my ( $self, %params ) = @_;
 	
 	return $self->{coataglue}->repository_crosswalk(%params);
+}
+
+=item conf
+
+Get config values from the Coataglue object
+
+=cut
+
+sub conf {
+	my ( $self, $section, $field ) = @_;
+	
+	return $self->{coataglue}->conf($section, $field);
+}
+
+
+=item make_handler
+
+This might be a bit half-baked: 
+
+=cut
+
+sub make_handler {
+	my ( $self, %params ) = @_;
+	
+	my $expr = $params{expr};
+	
+	if( $expr =~ /^date\(.*\)/ ) {
+		return $self->date_handler(format => $1);
+	} else {
+		$self->{log}->error("Only support date() handlers");
+		return undef;
+	}
+}
+
+
+=item date_handler
+
+date($RE, $f1, $f2, $f3)
+
+Where $RE is a regular expression matching groups for date
+components, and the $f1... are YEAR MON DAY HOUR MIN SEC.
+
+For example.
+
+date((\d+)\/(\d+)\/(\d+), DAY, MON, YEAR)
+
+will match and convert dates like 31/12/1969
+
+It's assumed that MON is 1..12 and the year is four digits:
+other years will throw an error.
+
+=cut
+
+sub date_handler {
+	my ( $self, %params ) = @_;
+	
+	my $expr = $params{expr};
+	
+	my ( $re, @fields ) = split(/,\s*/, $expr);
+	my $timefmt = $self->conf('General', 'timeformat');
+	
+	my %check = map { $_ => 1 } @fields;
+	
+	if( ! ( $check{YEAR} && $check{MON} && $check{DAY} ) ) {
+		$self->{log}->error("Date handler must have at least DAY, MONTH, YEAR");
+		return undef;
+	}
+	
+	my $handler = sub {
+		my ( $value ) = @_;
+		my @matches = ( $value =~ /$re/ );
+		my $val = {};
+		my $i = 0;
+		for my $v ( @matches ) {
+			$val->{$fields[$i]} = $v;
+			$i++;
+		}
+		if( $val->{YEAR} && $val->{MON} && $val->{DAY} ) {
+			if( $val->{YEAR} !~ /^\d\d\d\d$/ ) {
+				$self->{log}->error("Invalid date '$value' (year must be four digits)");
+				return undef;
+			}
+			return strftime(
+				$timefmt, $val->{SEC}, $val->{MIN}, $val->{HOUR},
+				$val->{DAY}, $val->{MON} - 1, $val->{YEAR} - 1900
+ 				);
+		} else {
+			$self->{log}->error("Invalid date '$value'");
+		}
+	};
+		
+	$self->{log}->debug("Built date handler $handler");
+	return $handler;
+	
 }
 
 

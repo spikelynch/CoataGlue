@@ -10,6 +10,10 @@ Metadata Interchange XML
 HTML dataset description (a la Peter Sefton's idea of machine and human readable docs)
 Register the object with FC via Catmandu
 
+TODO: date handling 
+
+
+
 Fedora Questions
 ----------------
 

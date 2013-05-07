@@ -11,6 +11,7 @@ use Catmandu::Store::FedoraCommons;
 my @MANDATORY_PARAMS = qw(global sources templates);
 
 my %MANDATORY_CONFIG = (
+	General => [ 'timeformat' ],
 	Store => [ 'store' ],
 	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ]
@@ -124,6 +125,16 @@ sub sources {
 	return map { $self->{sources}{$_} } sort keys %{$self->{sources}};
 }
 
+sub conf {
+	my ( $self, $section, $field ) = @_;
+	
+	if( exists $self->{conf}{global}{$section} ) {
+		return $self->{conf}{global}{$section}{$field};
+	} else {
+		$self->{log}->error("No config section '$section'");
+	}
+}
+
 
 sub template {
 	my ( $self, %params ) = @_;
@@ -178,8 +189,6 @@ sub repository_crosswalk {
 	for my $field ( keys %$cw ) {
 		$dc->{$field} = $metadata->{$cw->{$field}};
 	}
-	
-	$self->{log}->debug(Dumper({crosswalk => $dc}));
 	
 	return $dc;
 }

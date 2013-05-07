@@ -23,7 +23,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 use Data::Dumper;
 
 use CoataGlue;
@@ -107,6 +107,7 @@ cmp_ok($status->{status}, 'eq', 'ingested', "Status of dataset is now 'ingested'
 
 cmp_ok($ds->{id}, '>', 1, "Dataset has ID > 1");
 
+ok($ds->{dateconverted}, "Has a value for dateconverted '$ds->{dateconverted}'");
 
 ok($source->close, "Source closed");
 

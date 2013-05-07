@@ -112,6 +112,7 @@ sub new {
 	$self->{file} 	  = $params{file};
 	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
+	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};
 
 	my $error = undef;
 	for my $field ( @MANDATORY_PARAMS ) {
@@ -125,7 +126,6 @@ sub new {
 	
 	$self->get_status;
 	
-	$self->{log}->debug("Dataset metadata = " . Dumper({metadata => $self->{metadata}}));
 	
 	if( $error ) {
 		return undef;
@@ -417,8 +417,6 @@ sub add_to_repository {
 		}
 	}
 
-	$self->{log}->debug(Dumper({addmetadata => $dc}));	
-	
 	my $rv;
 	
 	eval {

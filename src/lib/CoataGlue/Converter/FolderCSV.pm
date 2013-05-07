@@ -188,6 +188,8 @@ sub parse_metadata_file {
 	if( @$values ) {
 		$self->{log}->warn("Suspect CSV in $file: more values than headers");
 	}
+	
+	$metadata->{dateconverted} = $self->timestamp;
 
 	return $metadata;	
 }

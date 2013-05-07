@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -100,7 +100,12 @@ if( ok($md, "Got metadata hash") ) {
 		$md->{service}, 'eq', $fixtures->{SERVICE},
 		"service = $fixtures->{SERVICE}"
 	);
+	
+	
 }
+
+ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
+	
 
 
 
