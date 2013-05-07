@@ -9,6 +9,7 @@ use Storable qw(lock_store lock_retrieve);
 use Data::Dumper;
 use Config::Std;
 use XML::Writer;
+use POSIX qw(strftime);
 
 use CoataGlue::Converter;
 use CoataGlue::ID::NaiveSequence;
@@ -333,10 +334,10 @@ sub load_templates {
 		my $crosswalk = $self->{template_cf}{$view};
 		for my $field ( keys %$crosswalk ) {
 			# generate code snippets for converting dates etc
-			my ( $mdf, $expr ) = split(/\s+/, $crosswalk->{$field});
-			if( $expr ) {
+			my ( $mdf, @expr ) = split(/\s+/, $crosswalk->{$field});
+			if( @expr ) {
 				my $handler = $self->make_handler(
-					expr => $expr
+					expr => \@expr
 				);
 				if( $handler ) {
  					$self->{template_handlers}{$view}{$field} = $handler; 
@@ -586,9 +587,10 @@ sub make_handler {
 	my ( $self, %params ) = @_;
 	
 	my $expr = $params{expr};
-	
-	if( $expr =~ /^date\(.*\)/ ) {
-		return $self->date_handler(format => $1);
+
+	if( $expr->[0] eq 'date' ) {
+		shift @$expr;
+		return $self->date_handler(expr => $expr);
 	} else {
 		$self->{log}->error("Only support date() handlers");
 		return undef;
@@ -619,13 +621,24 @@ sub date_handler {
 	
 	my $expr = $params{expr};
 	
-	my ( $re, @fields ) = split(/,\s*/, $expr);
+	my $re = shift @$expr;
+	my @fields = @$expr;
+	
 	my $timefmt = $self->conf('General', 'timeformat');
 	
 	my %check = map { $_ => 1 } @fields;
+
+	my $missing = 0;
+	for my $p ( qw(DAY MON YEAR) ) {
+		if( !$check{$p} ) {
+			$self->{log}->error("No $p field");
+			$missing = 1;
+		}
+	}
 	
-	if( ! ( $check{YEAR} && $check{MON} && $check{DAY} ) ) {
-		$self->{log}->error("Date handler must have at least DAY, MONTH, YEAR");
+	if( $missing ) {
+		$self->{log}->error("Date handler must have a  DAY, MON and YEAR");
+		$self->{log}->error("Got: " . join(', ', @fields));
 		return undef;
 	}
 	
@@ -649,6 +662,7 @@ sub date_handler {
  				);
 		} else {
 			$self->{log}->error("Invalid date '$value'");
+			return undef;
 		}
 	};
 		

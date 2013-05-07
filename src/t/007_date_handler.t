@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 4;
+use Test::More tests => 10;
 use Data::Dumper;
 
 use CoataGlue;
@@ -28,13 +28,18 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my @DATES = (
-	'01/01/2001',
-	'31/12/1999',
-	'4/5/2006',
-	'11/11/2011',
-	'//232',
-	'05/05/05'
+# undefined values in this hash are invalid dates
+
+my %GOODDATES = (
+	'01/01/2001' => '2001-01-01T00:00:00',
+	'31/12/1999' => '1999-12-31T00:00:00',
+	'4/5/2006' => '2006-05-04T00:00:00',
+	'11/11/2011' => '2011-11-11T00:00:00');
+	
+my %BADDATES = (
+	'//232' => undef,
+	'05/05/05' => undef,
+	'20/Jan/2020' => undef,
 );
 
 
@@ -67,8 +72,14 @@ my $source = $sources[0];
 my $handler = $source->{template_handlers}{metadata}{datecreated};
 
 if( cmp_ok(ref($handler), 'eq', 'CODE', "Got a CODE reference for handler") ) {
-	for my $date ( @DATES ) {
+	for my $date ( sort keys %GOODDATES ) {
 		my $cooked = &$handler($date);
-		diag("$date => $cooked");
+		cmp_ok($cooked, 'eq', $GOODDATES{$date}, "Date converted '$date' => '$cooked'");
+	}
+	for my $date ( sort keys %BADDATES ) {
+		my $cooked = &$handler($date);
+		ok(!$cooked, "Invalid date '$date' returned undef") || do {
+			diag("Value returned = '$cooked'");				
+		};
 	}
 }
