@@ -345,6 +345,8 @@ sub load_templates {
 				} else {
 					$self->{log}->error("Handler init failed for $view.$field: check config");
 				}
+				# Take the converter fields out of the metadata field
+				$crosswalk->{$field} = $mdf;
 			}
 		}
 	}
@@ -413,7 +415,7 @@ sub crosswalk {
 		} else {
 			my $mdfield = $view->{$field};
 			if( !defined $original->{$mdfield} ) {
-				$self->{log}->warn("View $view: $mdfield not defined for dataset $ds->{id}");
+				$self->{log}->warn("Raw metadata '$mdfield' not defined for dataset $ds->{id}");
 				$new->{$field} = '';
 			} else {
 				if( $handlers && $handlers->{$field} ) {
