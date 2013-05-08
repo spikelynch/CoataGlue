@@ -36,7 +36,7 @@ Variables:
 					    No special characters, as it's used to build
 					    filename.
 =item globalid       -> Source name + id
-=item repositoryid   -> The ID in Fedora
+=item repositoryURL  -> The URL in Fedora
 =item source         -> the datasource name
 =item datecreated    -> experiment date from the source
 =item dateconverted  -> date it was converted
@@ -297,10 +297,25 @@ sub header {
 		source => $self->{source}{name},
 		file => $self->{file},
 		location => $self->{location},
-		repositoryid => $self->{repositoryid},
+		repositoryURL => $self->repositoryURL,
 		dateconverted => $self->{dateconverted}
 	};
 }
+
+
+sub repositoryURL {
+	my ( $self ) = @_;
+	
+	my $base = $self->{source}->conf('Repository', 'publishurl');
+	
+	if( $base !~ /\/$/ ) {
+		return join('/', $base, $self->{repositoryid});
+	} else {
+		return join('', $base, $self->{repositoryid});
+	}
+}
+
+
 
 =item xml(view => $view)
 
@@ -379,11 +394,10 @@ ReDBox directory and the dataset's global ID.
 sub xml_filename {
 	my ( $self ) = @_;
 	
-	my $filename = join(
-		'/',
-		$self->{source}{settings}{redboxdir}, $self->global_id
-	) . '.xml';
+	my $ext = $self->{source}->conf('Redbox', 'extension');
+	my $dir = $self->{source}->conf('Redbox', 'directory');
 	
+	my $filename = join('/', $dir, $self->global_id . '.' . $ext);
 	return $filename;
 }
 

@@ -14,7 +14,8 @@ my %MANDATORY_CONFIG = (
 	General => [ 'timeformat' ],
 	Store => [ 'store' ],
 	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ],
-	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ]
+	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
+	Redbox => [ 'directory', 'extension' ]
 );
 
 

@@ -83,7 +83,7 @@ our $STATUS_INGESTED = 'ingested';
 
 our @MANDATORY_PARAMS = qw(coataglue name converter ids settings store);
 
-our @MANDATORY_SETTINGS = qw(redboxdir templates);
+our @MANDATORY_SETTINGS = qw(templates);
 
 
 sub new {
@@ -507,7 +507,7 @@ sub write_header_XML {
 	my $header = $dataset->header();
 
 	$writer->startTag('header');	
-	for my $field ( qw(source id file location repositoryid dateconverted) ) {
+	for my $field ( qw(source id file location repositoryURL dateconverted) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
 		$writer->endTag();

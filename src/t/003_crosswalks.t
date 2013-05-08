@@ -79,13 +79,13 @@ if( ok($md, "Got metadata hash") ) {
 	);
 
 	cmp_ok(
-		$md->{activity}, 'eq', $ds->{raw_metadata}{Project_ID},
-		"activity = Project_ID = $md->{activity}"
+		$md->{projectname}, 'eq', $ds->{raw_metadata}{Project_Name},
+		"projectname = Project_Name = $md->{projectname}"
 	);
 
 	cmp_ok(
-		$md->{party}, 'eq', $ds->{raw_metadata}{Project_Creator_Staff_Student_ID},
-		"party = Project_Creator_Staff_Student_ID = $md->{party}"
+		$md->{creator}, 'eq', $ds->{raw_metadata}{Project_Creator_Staff_Student_ID},
+		"creator = Project_Creator_Staff_Student_ID = $md->{creator}"
 	);
 
 	cmp_ok(

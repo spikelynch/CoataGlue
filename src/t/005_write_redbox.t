@@ -69,60 +69,55 @@ my $file = $ds->write_redbox;
 
 if( ok($file, "Wrote XML to file: $file") ) {
 	
-	my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
+	my ( $title, $projectname, $creator, $description, $service ) = ( '', '', '', '', '', '' );
 
 	my $twig = XML::Twig->new(
 		twig_handlers => {
-			title => 		sub { $title = $_->text },
-			activity => 	sub { $activity = $_->text },
-			party =>		sub { $party = $_->text },
+			title => 		sub { $title       = $_->text },
+			projectname =>  sub { $projectname = $_->text },
+			creator =>		sub { $creator     = $_->text },
 			description => 	sub { $description = $_->text },
-			service => 		sub { $service = $_->text }
+			service => 		sub { $service     = $_->text }
 		}
 	); 
 
 	eval {
-		$twig->parsefile($file)
+		$twig->parse($xml)
 	};
 
-	if(  ok(!$@, "XML parsed OK") ) {
-		my $raw = $ds->{raw_metadata};
+	ok(!$@, "XML parsed OK");
 
-		cmp_ok(
-			$title, 'eq', $raw->{Experiment_Name},
-			"<title> = Experiment_Name = $title"
+	my $raw = $ds->{raw_metadata};
+
+	cmp_ok(
+		$title, 'eq', $raw->{Experiment_Name},
+		"<title> = Experiment_Name = $title"
+	);
+
+	cmp_ok(
+		$projectname, 'eq', $raw->{Project_Name},
+		"<projectname> = Project_ID = $projectname"
+	);
+
+	cmp_ok(
+		$creator, 'eq', $raw->{Project_Creator_Staff_Student_ID},
+		"<creator> = Project_Creator_Staff_Student_ID = $creator"
+	);
+
+	cmp_ok(
+		$description, 'eq', $fixtures->{DESCRIPTION},
+		"<description> content as expected"
+	) || do {
+		my $diff = diff \$fixtures->{DESCRIPTION}, \$description;
+		print "DIFF: \n$diff\n";
+	};
+
+	cmp_ok(
+		$service, 'eq', $fixtures->{SERVICE},
+		"<service> = $fixtures->{SERVICE}"	
 		);
-
-		cmp_ok(
-			$activity, 'eq', $raw->{Project_ID},
-			"<activity> = Project_ID = $activity"
-		);
-
-		cmp_ok(
-			$party, 'eq', $raw->{Project_Creator_Staff_Student_ID},
-			"<party> = Project_Creator_Staff_Student_ID = $party"
-		);
-
-		cmp_ok(
-			$description, 'eq', $fixtures->{DESCRIPTION},
-			"<description> content as expected"
-		) || do {
-			my $diff = diff \$fixtures->{DESCRIPTION}, \$description;
-			print "DIFF: \n$diff\n";
-		};
-
-		cmp_ok(
-			$service, 'eq', $fixtures->{SERVICE},
-			"<service> = $fixtures->{SERVICE}"
-		);
-
-	} else {
-		diag("XML parse error: $@");
-	}
-
-	
+} else {
+	diag("XML parse error: $@");
 }
 
-
-
-
+	

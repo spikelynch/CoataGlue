@@ -6,7 +6,6 @@
 #
 # mandatory fields:
 #   converter - a CoataGlue::Converter class
-#   redboxdir - the directory in which to write XML for ReDBox
 #   templates - the directory containing XML templates
 #
 # All the other fields depend on the converter class 
@@ -14,7 +13,6 @@
 [MIF]
 converter:    CoataGlue::Converter::FolderCSV
 ids:          CoataGlue::ID::NaiveSequence
-redboxdir:    /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 templates:	  MIF
 basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$

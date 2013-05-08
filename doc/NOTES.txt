@@ -54,6 +54,10 @@ Fedora Questions
   - Publication: return the cover page
 
 
+The Fedora ID is stored in the redbox record as a URL.
+
+
+
 
 Bare Minimum metadata
 ---------------------

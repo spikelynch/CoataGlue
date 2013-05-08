@@ -73,15 +73,15 @@ my $xml = $ds->xml();
 
 ok($xml, "Generated some XML");
 
-my ( $title, $activity, $party, $description, $service ) = ( '', '', '', '', '', '' );
+my ( $title, $projectname, $creator, $description, $service ) = ( '', '', '', '', '', '' );
 
 my $twig = XML::Twig->new(
 	twig_handlers => {
-		title => 		sub { $title = $_->text },
-		activity => 	sub { $activity = $_->text },
-		party =>		sub { $party = $_->text },
+		title => 		sub { $title       = $_->text },
+		projectname =>  sub { $projectname = $_->text },
+		creator =>		sub { $creator     = $_->text },
 		description => 	sub { $description = $_->text },
-		service => 		sub { $service = $_->text }
+		service => 		sub { $service     = $_->text }
 	}
 ); 
 
@@ -99,13 +99,13 @@ cmp_ok(
 );
 
 cmp_ok(
-	$activity, 'eq', $raw->{Project_ID},
-	"<activity> = Project_ID = $activity"
+	$projectname, 'eq', $raw->{Project_Name},
+	"<projectname> = Project_ID = $projectname"
 );
 
 cmp_ok(
-	$party, 'eq', $raw->{Project_Creator_Staff_Student_ID},
-	"<party> = Project_Creator_Staff_Student_ID = $party"
+	$creator, 'eq', $raw->{Project_Creator_Staff_Student_ID},
+	"<creator> = Project_Creator_Staff_Student_ID = $creator"
 );
 
 cmp_ok(
