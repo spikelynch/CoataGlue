@@ -82,7 +82,7 @@ if( ok($file, "Wrote XML to file: $file") ) {
 	); 
 
 	eval {
-		$twig->parse($xml)
+		$twig->parsefile($file)
 	};
 
 	ok(!$@, "XML parsed OK");
