@@ -1,5 +1,9 @@
 # configuration file for development environment
 
+# app config
+
+
+
 # the logger engine to use
 # console: log messages to STDOUT (your console where you started the
 #          application server)
