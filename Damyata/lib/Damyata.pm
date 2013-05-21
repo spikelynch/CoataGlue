@@ -58,7 +58,19 @@ use Apache::Solr;
 
 our $VERSION = '0.1';
 
-my $solr = Apache::Solr->new();
+my $solr_server = config->{solr}{server};
+my $solr_core = config->{solr}{core};
+
+if( !$solr_server || !$solr_core ) {
+	error("Need config/solr => { server, core }");
+	die;
+}
+
+my $solr = Apache::Solr->new(
+    server => $solr_server,
+    core => $solr_core,
+
+);
 
 my $solr_urifield = config->{solr_urifield};
 
@@ -81,6 +93,8 @@ if( ref($redbox_map) ne 'HASH' ) {
 	die;
 }
 
+my $fake_baseurl = config->{fake_baseurl};
+
 
 get '/' => sub {
     template 'index';
@@ -89,21 +103,29 @@ get '/' => sub {
 
 get '/:id' => sub {
 	
-	my $uri = request->uri();
+	my $uri = request->uri;
+	my $base = undef;
 	
+	if( $fake_baseurl ) {
+		$base = $fake_baseurl;		
+	} else {
+		$base = request->uri_base; 
+	}
+	
+	$uri = $base . $uri;
+
 	my $dataset = lookup(uri => $uri);
 	
 	if( !$dataset ) {
-		
-		template 'not_found';
-
+		template 'not_found' => { uri => $uri };
 	} else {
-		my $access = $dataset->{access};
+		debug({ dataset => $dataset });
 		
-		if( $access eq 'local' && !request_is_local() ) {
-			template 'denied';
+		
+		if( $dataset->{access} eq 'local' && !request_is_local() ) {
+			template 'forbidden' => { uri => $uri };
 		} else {
-			template 'dataset' => { dataset => $dataset }
+			template 'dataset' => $dataset
 		}
 	}
 };
@@ -120,7 +142,7 @@ sub lookup {
 	
 	my $solr_query = join(':', $solr_urifield, $esc_uri);
 
-	debug("Solr search: '$solr_query'");
+	debug("Solr query: '$solr_query'");
 
 	my $results = $solr->select(q => $solr_query);
 	
@@ -133,6 +155,8 @@ sub lookup {
 	
 	if( $n > 1 ) {
 		warn("More than one Solr index with URI '$uri'");
+	} else {
+		debug("Found a result for '$uri'");
 	}
 	
 	my $doc = $results->selected(0);
@@ -140,7 +164,7 @@ sub lookup {
 	my $dataset = {};
 	
 	for my $field ( keys %$redbox_map ) {
-		$dataset->{$field} = $doc->content($redbox_map->{$field});
+		$dataset->{$field} = $doc->content($redbox_map->{$field}) || '';
 	}
 	
 	return $dataset;

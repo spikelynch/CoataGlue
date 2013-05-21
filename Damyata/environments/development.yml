@@ -1,8 +1,5 @@
 # configuration file for development environment
 
-# app config
-
-
 
 # the logger engine to use
 # console: log messages to STDOUT (your console where you started the
@@ -10,7 +7,7 @@
 # file:    log message to a file in log/
 logger: "console"
 
-# the log level for this environement
+# the log level for this environment
 # core is the lowest, it shows Dancer's core log messages as well as yours
 # (debug, warning and error)
 log: "core"
@@ -29,3 +26,12 @@ show_errors: 1
 # DO NOT EVER USE THAT FEATURE IN PRODUCTION 
 # OR TINY KITTENS SHALL DIE WITH LOTS OF SUFFERING
 auto_reload: 0
+
+# fake_baseurl so that I can test Solr searching from my laptop.
+# warning: no trailing slash.
+
+fake_baseurl: http://research.uts.edu.au/datasets
+
+solr:
+  server: http://localhost:9000/solr
+  core:   fascinator
