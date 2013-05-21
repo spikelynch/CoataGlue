@@ -19,7 +19,7 @@ dataset D, there exists:
 
 =item A Fedora digital object with an ID like 'RDC.n'
 
-=item A dataset URL like 'http://research.uts.edu.au/data/RDC.n'
+=item A dataset URL like 'http://research.uts.edu.au/damyata/RDC.n'
 
 =item A ReDBox dataset with the URL as an identifier
 
@@ -54,73 +54,89 @@ find the datastreams.
 =cut
 
 use Dancer ':syntax';
+
 use Apache::Solr;
+use Catmandu::FedoraCommons;
 
 our $VERSION = '0.1';
 
-my $solr_server = config->{solr}{server};
-my $solr_core = config->{solr}{core};
-
-if( !$solr_server || !$solr_core ) {
-	error("Need config/solr => { server, core }");
-	die;
-}
-
-my $solr = Apache::Solr->new(
-    server => $solr_server,
-    core => $solr_core,
-
+our %REQUIRED_CONF = (
+	solr => [ qw(server core search) ],
+	fedora => [ qw(url user password) ],
+	redbox_map => [ qw(
+		title description access created
+		creator_title creator_familyname creator_givenname
+	) ]
 );
 
-my $solr_urifield = config->{solr_urifield};
 
-if( !$solr_urifield ) {
-	error("Config field missing: 'solr_urifield'");
+my $conf = load_config();
+
+
+my $solr = Apache::Solr->new(
+    server => $conf->{solr}{server},
+    core => $conf->{solr}{core}
+) || do {
+	error("Couldn't connect to ReDBox/Solr");
 	die;
-}
+};
 
-$solr_urifield =~ s/:/\\:/g;
-
-my $redbox_map = config->{redbox_map};
-
-if( !$redbox_map ) {
-	error("Config field missing: 'redbox_map'");
+my $fedora = Catmandu::FedoraCommons->new(
+	$conf->{fedora}{url},
+	$conf->{fedora}{user},
+	$conf->{fedora}{password}
+) || do {
+	error("Couldn't connect to Fedora Commons");
 	die;
-}
+};
 
-if( ref($redbox_map) ne 'HASH' ) {
-	error("Config 'redbox_map' must be a hash");
-	die;
-}
 
-my $fake_baseurl = config->{fake_baseurl};
 
+=head DANCER PATHS
+
+=over 4
+
+=item get /
+
+A placeholder index page
+
+=cut
 
 get '/' => sub {
     template 'index';
 };
 
+=item get /:id
+
+The landing page for a dataset
+
+=cut
+
 
 get '/:id' => sub {
 	
+	my $id = param('id');
+	debug("id = $id");
 	my $uri = request->uri;
 	my $base = undef;
 	
-	if( $fake_baseurl ) {
-		$base = $fake_baseurl;		
+	if( $conf->{fake_baseurl} ) {
+		$base = $conf->{fake_baseurl};		
 	} else {
 		$base = request->uri_base; 
 	}
 	
 	$uri = $base . $uri;
 
-	my $dataset = lookup(uri => $uri);
+	my $dataset = find_dataset(
+		solr_field => $conf->{solr}{search},
+		redbox_map => $conf->{redbox_map},
+		uri => $uri
+	);
 	
 	if( !$dataset ) {
 		template 'not_found' => { uri => $uri };
 	} else {
-		debug({ dataset => $dataset });
-		
 		
 		if( $dataset->{access} eq 'local' && !request_is_local() ) {
 			template 'forbidden' => { uri => $uri };
@@ -131,16 +147,113 @@ get '/:id' => sub {
 };
 
 
-sub lookup {
+=item get /:id/:ds
+
+Pass the contents of a datastream.
+
+=cut
+
+get '/:id/:ds' => sub {
+	
+	
+};
+
+=back
+
+=head METHODS
+
+=over 4
+
+=item load_config
+
+Loads and validates the app's config variables.  Calls error
+and dies if any are missing or invalid.
+
+=cut
+
+
+sub load_config {
+
+	my $conf = {};
+	
+	# build the config hash and die if any mandatory fields
+	# are missing
+	
+	my $missing = 0;
+	for my $section ( keys %REQUIRED_CONF ) {
+		my $req = $REQUIRED_CONF{$section};
+		$conf->{$section} = config->{$section};
+		if( ! $conf->{$section} ) {
+			error("Missing config section $section");
+			$missing = 1;
+		} else {
+			for my $value ( @$req ) {
+				if( ! $conf->{$section}{$value} ) {
+					error("Missing config value $section.$value");
+					$missing = 1;
+				}
+			}
+		}
+	}
+	die if $missing;
+	
+	$conf->{solr}{search} =~ s/:/\\:/g;
+	
+	# not a mandatory field so we have to fetch it explicitly
+	
+	$conf->{fake_baseurl} = config->{fake_baseurl};
+
+	return $conf;
+}
+
+=item find_dataset
+
+Looks up the dataset by its URI in Solr.  If it's found, also
+looks it up in Fedora to get the list of datastreams.
+
+The return value is a hash as follows:
+
+=over 4
+
+=item title
+=item description
+=item access
+=item created
+=item creator_title
+=item creator_familyname
+=item creator_givenname
+=item datastreams
+
+=back
+
+Mapping from the ReDBox/Solr index to these fieldnames is controlled
+by redbox_map in the config file.
+
+All of the values are scalars except for 'datastreams', which is an
+arrayref of hashes as follows:
+
+=over 4
+
+=item dsid
+=item url
+
+=back
+
+
+=cut
+
+sub find_dataset {
 	my %params = @_;
 	
 	my $uri = $params{uri} || return undef;
+	my $urifield = $params{solr_field};
+	my $redbox_map = $params{redbox_map};
 	
 	my $esc_uri = $uri;
 
 	$esc_uri =~ s/:/\\:/g;
 	
-	my $solr_query = join(':', $solr_urifield, $esc_uri);
+	my $solr_query = join(':', $urifield, $esc_uri);
 
 	debug("Solr query: '$solr_query'");
 
@@ -167,8 +280,59 @@ sub lookup {
 		$dataset->{$field} = $doc->content($redbox_map->{$field}) || '';
 	}
 	
+#	$dataset->{datastreams} = find_datastreams(
+#		fedora_id => $fedora_id
+#	);
+	
 	return $dataset;
 }
+
+
+=item find_datastreams 
+
+
+=cut
+
+
+sub find_datastreams {
+	my %params = @_;
+	
+	my $fedora_id = $params{fedora_id};
+	
+#	my $result = $fc->listDatastreams(pid => $ID);
+#
+#if( $result->is_ok ) {
+#	my $dss = $result->parse_content;
+#	print "List of datastreams\n";
+#	print Dumper( { ds => $dss } ) . "\n\n";
+#	for my $ds ( @{$dss->{datastream}} ) {
+#		my $dsid = $ds->{dsid};
+#		print "Datastream: $dsid\n";
+#		my $data = '';
+#		$fc->getDatastreamDissemination(
+#			pid => $ID,
+#			dsID => $dsid,
+#			callback => sub {
+#				my ( $d, $response, $protocol ) = @_;
+#				$data .= $d;
+#			}
+#		);
+#		print "Data:\n$data\n\n";
+#	}
+}
+	
+	
+	
+
+
+
+
+=item request_is_local
+
+Return true if this request is 'local'
+
+=cut
+
 
 
 sub request_is_local {

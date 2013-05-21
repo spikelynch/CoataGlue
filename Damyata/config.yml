@@ -43,6 +43,3 @@ redbox_map:
   creator_familyname: dc:creator.foaf:Person.1.foaf:familyName
   creator_givenname:  dc:creator.foaf:Person.1.foaf:givenName
 
-# solr_urifield is the Solr field in which to look up URIs
-
-solr_urifield: 	bibo:Website.1.dc:identifier
