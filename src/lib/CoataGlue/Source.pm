@@ -13,6 +13,7 @@ use POSIX qw(strftime);
 
 use CoataGlue::Converter;
 use CoataGlue::ID::NaiveSequence;
+use CoataGlue::Person;
 
 =head1 NAME
 
@@ -427,11 +428,47 @@ sub crosswalk {
 		$ds->{metadata} = $new;
 		$ds->{datecreated} = $ds->{metadata}{datecreated};
 		$self->{log}->debug("Date created = $ds->{datecreated}");
+		$self->{log}->debug("Creator = $ds->{creator}");
+		$ds->{metadata}{creator} = $self->staff_id_to_handle(
+			id => $ds->{metadata}{creator}
+		);
 	} else {
 		$ds->{views}{$view_name} = $new;
 	}
 	return $new;
 }
+
+=item staff_id_to_handle(id => $id)
+
+Convert a staff ID to an encrypted handle
+
+=cut
+
+
+sub staff_id_to_handle {
+ 	my ( $self, %params ) =  @_;
+ 	
+ 	my $id = $params{id};
+ 	
+	my $p = CoataGlue::Person->new(id => $id) || do {
+		$self->{log}->error("Couldn't create CoataGlue::Person");
+		die;
+	};
+
+	my $key = $self->conf('Redbox', 'cryptkey');
+
+	my $encrypt = $p->encrypt_id(id => $id, key => $key	);
+		
+	my $handle = $self->conf('Redbox', 'handleprefix') . $encrypt;
+	
+	$self->{log}->debug("Staff id $id => handle $handle");
+	
+	return $handle;
+}
+
+
+
+
 
 
 =item render_view(dataset => $ds, view => $view)
@@ -666,6 +703,9 @@ sub date_handler {
 	return $handler;
 	
 }
+
+
+	
 
 
 1;

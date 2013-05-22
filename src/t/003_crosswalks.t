@@ -83,9 +83,13 @@ if( ok($md, "Got metadata hash") ) {
 		"projectname = Project_Name = $md->{projectname}"
 	);
 
+	my $handle = $source->staff_id_to_handle(
+		id => $ds->{raw_metadata}{Project_Creator_Staff_Student_ID}
+	);
+
 	cmp_ok(
-		$md->{creator}, 'eq', $ds->{raw_metadata}{Project_Creator_Staff_Student_ID},
-		"creator = Project_Creator_Staff_Student_ID = $md->{creator}"
+		$md->{creator}, 'eq', $handle,
+		"creator = $handle = $md->{creator}"
 	);
 
 	cmp_ok(

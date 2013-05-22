@@ -103,9 +103,13 @@ cmp_ok(
 	"<projectname> = Project_ID = $projectname"
 );
 
+my $handle = $source->staff_id_to_handle(
+	id => $raw->{Project_Creator_Staff_Student_ID}
+);
+
 cmp_ok(
-	$creator, 'eq', $raw->{Project_Creator_Staff_Student_ID},
-	"<creator> = Project_Creator_Staff_Student_ID = $creator"
+	$creator, 'eq', $handle,
+	"<creator> = handle = $creator"
 );
 
 cmp_ok(

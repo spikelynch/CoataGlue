@@ -22,7 +22,11 @@ date:			datecreated
 identifier:		id
 source:			service
 
+# cryptkey has to match that used to encrypt the staff IDs for Mint
+# integration, in mintIntConfig.xml
+
 [Redbox]
 directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 extension:		dc
-handleprefix:   http://hdl.handle.net/11057/
+handleprefix:   http://hdl.handle.net/11057/id
+cryptkey:       1E23F1709478F63D2083

@@ -99,10 +99,15 @@ if( ok($file, "Wrote XML to file: $file") ) {
 		"<projectname> = Project_ID = $projectname"
 	);
 
-	cmp_ok(
-		$creator, 'eq', $raw->{Project_Creator_Staff_Student_ID},
-		"<creator> = Project_Creator_Staff_Student_ID = $creator"
+	my $handle = $source->staff_id_to_handle(
+		id => $raw->{Project_Creator_Staff_Student_ID}
 	);
+
+	cmp_ok(
+		$creator, 'eq', $handle,
+		"<creator> = handle = $creator"
+	);
+
 
 	cmp_ok(
 		$description, 'eq', $fixtures->{DESCRIPTION},
