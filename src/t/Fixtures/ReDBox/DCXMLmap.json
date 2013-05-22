@@ -10,7 +10,8 @@
         "//header/location":      "bibo:Website.0.dc:identifier",
         "//header/repositoryURL": "bibo:Website.0.dc:identifier",
  
-        "//projectname": "swrc:ResearchProject.dc:title",
+        "//projectname": "swrc:ResearchProject.dc:title"
+    },
     "exceptions": {
         "output": "skos:note.0.dc:description",
         "fields": {

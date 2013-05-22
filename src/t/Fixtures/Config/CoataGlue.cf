@@ -3,7 +3,6 @@
 [General]
 timeformat: %FT%T%z
 
-
 [Store]
 store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 
@@ -26,3 +25,4 @@ source:			service
 [Redbox]
 directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 extension:		dc
+handleprefix:   http://hdl.handle.net/11057/

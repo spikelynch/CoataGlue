@@ -1,7 +1,5 @@
 package CoataGlue::Dataset;
 
-
-
 =head1 NAME
 
 CoataGlue::Dataset
@@ -92,8 +90,8 @@ Create a new dataset object. All parameters are compulsory:
 
 =item location - the data itself - can be a filepath or URL
 
-=item metadata - a hashref of the raw metadata as read by the converter  Non-alphanumeric characters in keys are
-      converted to underscores.
+=item metadata - a hashref of the raw metadata as read by the converter
+      Non-alphanumeric characters in keys are converted to underscores.
 
 =back
 
@@ -109,7 +107,7 @@ sub new {
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 
-	$self->{file} 	  = $params{file};
+	$self->{file}   = $params{file};
 	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
 	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};
@@ -126,7 +124,7 @@ sub new {
 	
 	$self->get_status;
 	
-	
+
 	if( $error ) {
 		return undef;
 	}

@@ -15,7 +15,7 @@ my %MANDATORY_CONFIG = (
 	Store => [ 'store' ],
 	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
-	Redbox => [ 'directory', 'extension' ]
+	Redbox => [ 'directory', 'extension', 'handleprefix' ]
 );
 
 
@@ -94,10 +94,12 @@ sub new {
 			converter => $convclass,
 			settings => \%settings
 		);
+		
 		if( !$settings{ids} ) {
 			$self->{log}->error("Data source $name has no ids (ID generator)");
 			next SOURCE;
 		}
+		
 		my $source = CoataGlue::Source->new(
 			coataglue => $self,
 			name => $name,
@@ -106,6 +108,7 @@ sub new {
 			ids => $settings{ids},
 			settings => \%settings
 		);
+		
 		if( $source ) {
 			$self->{sources}{$name} = $source;
 		} else {

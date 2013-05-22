@@ -137,8 +137,6 @@ to wait.
 
 =cut
 
-
-
 sub open {
 	my ( $self ) = @_;	
 	if( !-f $self->{storefile} ) {
@@ -263,7 +261,6 @@ sub scan {
 					dataset => $dataset,
 					status => 'new'
 				);
-				
 				push @datasets, $dataset;
 				$self->{log}->debug("New id for dataset $dataset->{file}: $id");
 			} else {
@@ -290,9 +287,6 @@ sub dataset {
 	my $file = $params{file};
 	
 	if( !$metadata || ! $file ) {
-		print "AHOY $self";
-		cluck("Phooey");
-		print Dumper({self => $self});
 		$self->{log}->error("New dataset needs metadata and file");
 		return undef;
 	}
