@@ -1,0 +1,546 @@
+Trying Apache::Solr
+result = http://localhost:9000/solr/fascinator/select?wt=xml&q=bibo%5C%3AWebsite.1.dc%5C%3Aidentifier%3Ahttp%5C%3A%2F%2Fresearch.uts.edu.au%2Fdatasets%2FRC.234
+Title: Shared Data
+Access: Share
+$VAR1 = {
+  doc => bless( {
+    ASD_fields_h => {
+      'dc:type.rdf:PlainLiteral' => [
+        {
+          content => 'dataset',
+          name => 'dc:type.rdf:PlainLiteral'
+        }
+      ],
+      repository_name => [
+        {
+          content => 'ReDBox',
+          name => 'repository_name'
+        }
+      ],
+      workflow_step_label => [
+        {
+          content => 'Investigation',
+          name => 'workflow_step_label'
+        }
+      ],
+      storage_id => [
+        {
+          content => 'bb827f4ad530e1ef5035e0b6d1b4d046',
+          name => 'storage_id'
+        }
+      ],
+      date => [
+        {
+          content => {
+            name => 'date_created',
+            _ => '2013-05-14T00:00:00Z'
+          },
+          name => 'date'
+        },
+        {
+          content => {
+            name => 'last_modified',
+            _ => '2013-05-14T00:46:32Z'
+          },
+          name => 'date'
+        }
+      ],
+      'bibo:Website.2.dc:identifier' => [
+        {
+          content => 'http://an.other.website.com',
+          name => 'bibo:Website.2.dc:identifier'
+        }
+      ],
+      dc_biblioGraphicCitation => [
+        {
+          content => 'useCuration',
+          name => 'dc_biblioGraphicCitation'
+        }
+      ],
+      workflow_id => [
+        {
+          content => 'dataset',
+          name => 'workflow_id'
+        }
+      ],
+      'dc:type.skos:prefLabel' => [
+        {
+          content => 'Dataset',
+          name => 'dc:type.skos:prefLabel'
+        }
+      ],
+      'redbox:formVersion' => [
+        {
+          content => '1.6.1-SNAPSHOT',
+          name => 'redbox:formVersion'
+        }
+      ],
+      'dc:identifier.dc:type.skos:prefLabel' => [
+        {
+          content => 'HANDLE System Identifier',
+          name => 'dc:identifier.dc:type.skos:prefLabel'
+        }
+      ],
+      'dc:license.skos:prefLabel' => [
+        {
+          content => 'CC BY-NC-ND: Attribution-Noncommercial-No Derivatives 3.0 AU',
+          name => 'dc:license.skos:prefLabel'
+        }
+      ],
+      harvest_rules => [
+        {
+          content => '4cd9d2a82bfe9cd569f3d2240ac112c6',
+          name => 'harvest_rules'
+        }
+      ],
+      'dc:created' => [
+        {
+          content => '2013-05-14',
+          name => 'dc:created'
+        }
+      ],
+      id => [
+        {
+          content => 'bb827f4ad530e1ef5035e0b6d1b4d046',
+          name => 'id'
+        }
+      ],
+      dc_license => [
+        {
+          content => 'CC BY-NC-ND: Attribution-Noncommercial-No Derivatives 3.0 AU',
+          name => 'dc_license'
+        }
+      ],
+      workflow_step => [
+        {
+          content => 'investigation',
+          name => 'workflow_step'
+        }
+      ],
+      'dc:accessRights.skos:prefLabel' => [
+        {
+          content => 'Share',
+          name => 'dc:accessRights.skos:prefLabel'
+        }
+      ],
+      'dc:creator.foaf:Person.1.foaf:givenName' => [
+        {
+          content => 'Michael',
+          name => 'dc:creator.foaf:Person.1.foaf:givenName'
+        }
+      ],
+      'dc:creator.foaf:Person.1.foaf:familyName' => [
+        {
+          content => 'Lynch',
+          name => 'dc:creator.foaf:Person.1.foaf:familyName'
+        }
+      ],
+      'reporting_dc:creator.foaf:Person' => [
+        {
+          content => 'Lynch, Michael',
+          name => 'reporting_dc:creator.foaf:Person'
+        }
+      ],
+      'dc:identifier.dc:type.rdf:PlainLiteral' => [
+        {
+          content => 'handle',
+          name => 'dc:identifier.dc:type.rdf:PlainLiteral'
+        }
+      ],
+      'dc:relation.vivo:Service.1.vivo:Relationship.rdf:PlainLiteral' => [
+        {
+          content => 'hasAssociationWith',
+          name => 'dc:relation.vivo:Service.1.vivo:Relationship.rdf:PlainLiteral'
+        }
+      ],
+      'skos:note.1.foaf:name' => [
+        {
+          content => 'admin',
+          name => 'skos:note.1.foaf:name'
+        }
+      ],
+      'dc:relation.vivo:Dataset.1.vivo:Relationship.rdf:PlainLiteral' => [
+        {
+          content => 'hasAssociationWith',
+          name => 'dc:relation.vivo:Dataset.1.vivo:Relationship.rdf:PlainLiteral'
+        }
+      ],
+      'reporting_bibo:Website.dc:identifier' => [
+        {
+          content => 'http://an.other.website.com',
+          name => 'reporting_bibo:Website.dc:identifier'
+        },
+        {
+          content => 'http://research.uts.edu.au/datasets/RC.234',
+          name => 'reporting_bibo:Website.dc:identifier'
+        }
+      ],
+      'xmlns:foaf' => [
+        {
+          content => 'http://xmlns.com/foaf/spec/',
+          name => 'xmlns:foaf'
+        }
+      ],
+      'dc:license.dc:identifier' => [
+        {
+          content => 'http://creativecommons.org/licenses/by-nc-nd/3.0/au',
+          name => 'dc:license.dc:identifier'
+        }
+      ],
+      'dc:relation.vivo:Dataset.1.vivo:Relationship.skos:prefLabel' => [
+        {
+          content => 'Has association with:',
+          name => 'dc:relation.vivo:Dataset.1.vivo:Relationship.skos:prefLabel'
+        }
+      ],
+      'reporting_skos:note.foaf:name' => [
+        {
+          content => 'admin',
+          name => 'reporting_skos:note.foaf:name'
+        }
+      ],
+      dc_format => [
+        {
+          content => 'application/x-fascinator-package',
+          name => 'dc_format'
+        }
+      ],
+      'redbox:submissionProcess.redbox:submitted' => [
+        {
+          content => 'null',
+          name => 'redbox:submissionProcess.redbox:submitted'
+        }
+      ],
+      'reporting_skos:note.dc:created' => [
+        {
+          content => '2013-05-14 10:46:32',
+          name => 'reporting_skos:note.dc:created'
+        }
+      ],
+      dc_identifier => [
+        {
+          content => 'handle',
+          name => 'dc_identifier'
+        },
+        {
+          content => 'HANDLE System Identifier',
+          name => 'dc_identifier'
+        },
+        {
+          content => 'internal',
+          name => 'dc_identifier'
+        }
+      ],
+      workflow_security => [
+        {
+          content => 'librarian',
+          name => 'workflow_security'
+        },
+        {
+          content => 'admin',
+          name => 'workflow_security'
+        },
+        {
+          content => 'reviewer',
+          name => 'workflow_security'
+        },
+        {
+          content => 'admin',
+          name => 'workflow_security'
+        },
+        {
+          content => 'admin',
+          name => 'workflow_security'
+        },
+        {
+          content => 'admin',
+          name => 'workflow_security'
+        }
+      ],
+      'dc:description' => [
+        {
+          content => 'This is a data record for sharing',
+          name => 'dc:description'
+        }
+      ],
+      'dc:accessRights.dc:RightsStatement.skos:prefLabel' => [
+        {
+          content => 'All rights reserved',
+          name => 'dc:accessRights.dc:RightsStatement.skos:prefLabel'
+        }
+      ],
+      repository_type => [
+        {
+          content => 'Metadata Registry',
+          name => 'repository_type'
+        }
+      ],
+      oai_set => [
+        {
+          content => 'default',
+          name => 'oai_set'
+        }
+      ],
+      'dc:biblioGraphicCitation.dc:hasPart.dc:identifier.skos:note' => [
+        {
+          content => 'useCuration',
+          name => 'dc:biblioGraphicCitation.dc:hasPart.dc:identifier.skos:note'
+        }
+      ],
+      dc_relation => [
+        {
+          content => 'hasAssociationWith',
+          name => 'dc_relation'
+        },
+        {
+          content => 'Has association with:',
+          name => 'dc_relation'
+        },
+        {
+          content => 'on',
+          name => 'dc_relation'
+        },
+        {
+          content => 'hasAssociationWith',
+          name => 'dc_relation'
+        },
+        {
+          content => 'Has association with:',
+          name => 'dc_relation'
+        }
+      ],
+      'redbox:newForm' => [
+        {
+          content => 'false',
+          name => 'redbox:newForm'
+        }
+      ],
+      'dc:identifier.redbox:origin' => [
+        {
+          content => 'internal',
+          name => 'dc:identifier.redbox:origin'
+        }
+      ],
+      owner => [
+        {
+          content => 'admin',
+          name => 'owner'
+        }
+      ],
+      'dc:creator.foaf:Person.1.foaf:title' => [
+        {
+          content => 'Mr',
+          name => 'dc:creator.foaf:Person.1.foaf:title'
+        }
+      ],
+      'xmlns:anzsrc' => [
+        {
+          content => 'http://purl.org/anzsrc/',
+          name => 'xmlns:anzsrc'
+        }
+      ],
+      dc_title => [
+        {
+          content => 'Shared Data',
+          name => 'dc_title'
+        }
+      ],
+      dc_created => [
+        {
+          content => '2013-05-14',
+          name => 'dc_created'
+        }
+      ],
+      'reporting_dc:creator.foaf:Person.foaf:title' => [
+        {
+          content => 'Mr',
+          name => 'reporting_dc:creator.foaf:Person.foaf:title'
+        }
+      ],
+      'dc:title' => [
+        {
+          content => 'Shared Data',
+          name => 'dc:title'
+        }
+      ],
+      'dc:relation.vivo:Dataset.1.redbox:origin' => [
+        {
+          content => 'on',
+          name => 'dc:relation.vivo:Dataset.1.redbox:origin'
+        }
+      ],
+      dc_accessRights => [
+        {
+          content => 'Share',
+          name => 'dc_accessRights'
+        },
+        {
+          content => 'All rights reserved',
+          name => 'dc_accessRights'
+        }
+      ],
+      display_type => [
+        {
+          content => 'package-dataset',
+          name => 'display_type'
+        }
+      ],
+      'dc:relation.vivo:Service.1.vivo:Relationship.skos:prefLabel' => [
+        {
+          content => 'Has association with:',
+          name => 'dc:relation.vivo:Service.1.vivo:Relationship.skos:prefLabel'
+        }
+      ],
+      packageType => [
+        {
+          content => 'dataset',
+          name => 'packageType'
+        }
+      ],
+      security_filter => [
+        {
+          content => 'admin',
+          name => 'security_filter'
+        },
+        {
+          content => 'librarian',
+          name => 'security_filter'
+        },
+        {
+          content => 'reviewer',
+          name => 'security_filter'
+        }
+      ],
+      dc_type => [
+        {
+          content => 'dataset',
+          name => 'dc_type'
+        }
+      ],
+      viewId => [
+        {
+          content => 'default',
+          name => 'viewId'
+        }
+      ],
+      'bibo:Website.1.dc:identifier' => [
+        {
+          content => 'http://research.uts.edu.au/datasets/RC.234',
+          name => 'bibo:Website.1.dc:identifier'
+        }
+      ],
+      'skos:note.1.dc:created' => [
+        {
+          content => '2013-05-14 10:46:32',
+          name => 'skos:note.1.dc:created'
+        }
+      ],
+      harvest_config => [
+        {
+          content => '97d8fb197e191a2d56c18a5d734a2c4d',
+          name => 'harvest_config'
+        }
+      ],
+      dc_description => [
+        {
+          content => 'This is a data record for sharing',
+          name => 'dc_description'
+        },
+        {
+          content => 'This is a data record for sharing',
+          name => 'dc_description'
+        }
+      ],
+      'xmlns:dc' => [
+        {
+          content => 'http://dublincore.org/documents/2008/01/14/dcmi-terms/',
+          name => 'xmlns:dc'
+        }
+      ]
+    },
+    ASD_fields => [
+      $VAR1->{doc}{ASD_fields_h}{'dc:type.rdf:PlainLiteral'}[0],
+      $VAR1->{doc}{ASD_fields_h}{storage_id}[0],
+      $VAR1->{doc}{ASD_fields_h}{workflow_step_label}[0],
+      $VAR1->{doc}{ASD_fields_h}{repository_name}[0],
+      $VAR1->{doc}{ASD_fields_h}{date}[0],
+      $VAR1->{doc}{ASD_fields_h}{date}[1],
+      $VAR1->{doc}{ASD_fields_h}{'bibo:Website.2.dc:identifier'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_biblioGraphicCitation}[0],
+      $VAR1->{doc}{ASD_fields_h}{workflow_id}[0],
+      $VAR1->{doc}{ASD_fields_h}{'redbox:formVersion'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:type.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{harvest_rules}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:license.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:identifier.dc:type.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{id}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:created'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_license}[0],
+      $VAR1->{doc}{ASD_fields_h}{workflow_step}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:accessRights.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:creator.foaf:Person.1.foaf:givenName'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_dc:creator.foaf:Person'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:creator.foaf:Person.1.foaf:familyName'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:identifier.dc:type.rdf:PlainLiteral'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'skos:note.1.foaf:name'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:relation.vivo:Service.1.vivo:Relationship.rdf:PlainLiteral'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_bibo:Website.dc:identifier'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_bibo:Website.dc:identifier'}[1],
+      $VAR1->{doc}{ASD_fields_h}{'dc:relation.vivo:Dataset.1.vivo:Relationship.rdf:PlainLiteral'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'xmlns:foaf'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:license.dc:identifier'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_skos:note.foaf:name'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:relation.vivo:Dataset.1.vivo:Relationship.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_format}[0],
+      $VAR1->{doc}{ASD_fields_h}{'redbox:submissionProcess.redbox:submitted'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_skos:note.dc:created'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_identifier}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_identifier}[1],
+      $VAR1->{doc}{ASD_fields_h}{dc_identifier}[2],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[0],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[1],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[2],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[3],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[4],
+      $VAR1->{doc}{ASD_fields_h}{workflow_security}[5],
+      $VAR1->{doc}{ASD_fields_h}{'dc:accessRights.dc:RightsStatement.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:description'}[0],
+      $VAR1->{doc}{ASD_fields_h}{repository_type}[0],
+      $VAR1->{doc}{ASD_fields_h}{oai_set}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:biblioGraphicCitation.dc:hasPart.dc:identifier.skos:note'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_relation}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_relation}[1],
+      $VAR1->{doc}{ASD_fields_h}{dc_relation}[2],
+      $VAR1->{doc}{ASD_fields_h}{dc_relation}[3],
+      $VAR1->{doc}{ASD_fields_h}{dc_relation}[4],
+      $VAR1->{doc}{ASD_fields_h}{'redbox:newForm'}[0],
+      $VAR1->{doc}{ASD_fields_h}{owner}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:identifier.redbox:origin'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_title}[0],
+      $VAR1->{doc}{ASD_fields_h}{'xmlns:anzsrc'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:creator.foaf:Person.1.foaf:title'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'reporting_dc:creator.foaf:Person.foaf:title'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_created}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:relation.vivo:Dataset.1.redbox:origin'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'dc:title'}[0],
+      $VAR1->{doc}{ASD_fields_h}{display_type}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_accessRights}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_accessRights}[1],
+      $VAR1->{doc}{ASD_fields_h}{'dc:relation.vivo:Service.1.vivo:Relationship.skos:prefLabel'}[0],
+      $VAR1->{doc}{ASD_fields_h}{packageType}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_type}[0],
+      $VAR1->{doc}{ASD_fields_h}{security_filter}[0],
+      $VAR1->{doc}{ASD_fields_h}{security_filter}[1],
+      $VAR1->{doc}{ASD_fields_h}{security_filter}[2],
+      $VAR1->{doc}{ASD_fields_h}{viewId}[0],
+      $VAR1->{doc}{ASD_fields_h}{harvest_config}[0],
+      $VAR1->{doc}{ASD_fields_h}{'skos:note.1.dc:created'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'bibo:Website.1.dc:identifier'}[0],
+      $VAR1->{doc}{ASD_fields_h}{'xmlns:dc'}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_description}[0],
+      $VAR1->{doc}{ASD_fields_h}{dc_description}[1]
+    ],
+    ASD_boost => '1',
+    ASD_rank => 0
+  }, 'Apache::Solr::Document' )
+};
