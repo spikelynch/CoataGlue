@@ -36,7 +36,10 @@ sub new {
 		}
 	}
 	
-	die if $missing;
+	if( $missing ) {
+		$self->{log}->error("Can't continue");
+		return undef;
+	}
 	
 	$self->{globalcf} = $params{global};
 	$self->{sourcescf} = $params{sources};

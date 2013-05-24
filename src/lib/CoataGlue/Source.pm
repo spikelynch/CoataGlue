@@ -268,7 +268,7 @@ sub scan {
 				$self->{log}->error("New id for dataset $dataset->{file} failed");
 			}
 		} else {
-			$self->{log}->debug("Skipping $dataset->{id}: status = $status->{status}");
+			$self->{log}->debug("Skipping $dataset->{file}: status = $status->{status}");
 		}
 	}
 	return @datasets;

@@ -47,6 +47,9 @@ my $sources = CoataGlue->new(
 	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
+diag("\@INC =\n" . join("\n", @INC));
+
+
 ok($sources, "Initialised CoataGlue object");
 
 my @sources = $sources->sources;

@@ -41,6 +41,8 @@ sub new {
 	return $self;
 }
 
+
+
 sub encrypt_id {
 	my ( $self, %params ) = @_;
 	
@@ -67,6 +69,8 @@ sub encrypt_id {
 	$self->{log}->debug("Encrypted $id to $self->{encrypted_id}");
 	return $self->{encrypted_id};
 }	
+
+
 
 
 

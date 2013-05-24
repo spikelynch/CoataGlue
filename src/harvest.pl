@@ -28,6 +28,12 @@ If any of these is missing, the script won't run:
 
 =item COATAGLUE_LOG4J - location of the log4j.properties file
 
+=item COATAGLUE_CONFIG - main config file 
+
+=item COATAGLUE_SOURCES - sources config file
+
+=item COATAGLUE_TEMPLATES - templates directory
+
 =back
 
 =head2 Command-line switches
@@ -46,8 +52,20 @@ If any of these is missing, the script won't run:
 
 use strict;
 
-if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
+
+my $missing = 0;
+
+for my $ev ( qw(PERLLIB LOG4J CONFIG SOURCES TEMPLATES) ) {
+	my $full_ev = "COATAGLUE_$ev"; 
+	if( !$ENV{$full_ev} ) {
+		warn("Missing environment variable $full_ev\n");
+		$missing = 1;
+	}
+}
+
+if( $missing ) {
 	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
+	
 }
 
 use lib $ENV{COATAGLUE_PERLLIB};
@@ -82,7 +100,8 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 
 my $CoataGlue = CoataGlue->new(
-	conf => $ENV{COATAGLUE_CONFIG},
+	global => $ENV{COATAGLUE_CONFIG},
+	sources => $ENV{COATAGLUE_SOURCES},
 	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
@@ -91,65 +110,31 @@ if( !$CoataGlue ) {
 	die;
 }
 
+
 SOURCE: for my $source ( $CoataGlue->sources ) {
-	$source->lock;
-	eval {
-		run_harvest(source => $source);
-	};
-	if( $@ ) {
-		$log->error("$source->{name} harvest problem: $@");
-	}
-	$source->release;
-}
-
-
-
-sub run_harvest {
-	my %params = @_;
-	
-	my $source = $params{source};
-	my @datasets;
-	$log->info("Scanning data source $source->{name}");
-
-	eval {
-		@datasets = $source->scan;
-	};
-	
-	if( $@ ) {
-		$log->error("$source->{name} scan failed: $@")
-	}
-	$log->info("Found " . scalar(@datasets) . " datasets");
-	for my $dataset ( @datasets ) {
-		eval {
-
-
-
-#			if( $dataset->{metadata}{publish} ) {
-#				if( !$dataset->fc_publish() ) {
-#					$log->error("Fedora publish failed")
-#				}
-#				$dataset->{metadata}{publish} = undef;
-#			}
-#			if( $dataset->write_xml ) {
-#				$dataset->set_status_ingested;
-#			} else {
-#				$dataset->set_status_error()
-#				$log->error("Write ingest XML failed");
-#			}				
-		};
-		
-		my $xml = $dataset->xml(view => 'Dataset');
-		
-		print $xml;
-		
-		if( $@ ) {
-			$log->error("Write XML $source->{name}: $dataset->{id} failed");
-			$log->error("Error: $@");
-		} else {
-			$log->info("Wrote  XML for $source->{name}: $dataset->{id}");
+	$log->debug("Scanning source $source->{name}");
+	if( $source->open ) {
+		for my $dataset ( $source->scan ) {
+			$log->debug("Dataset: $dataset->{global_id}");
+			
+			if( $dataset->add_to_repository ) {
+				$log->info("Added $dataset->{global_id} to repository: $dataset->{repositoryid}");
+			} else {
+				$log->error("Couldn't add $dataset->{global_id} to repository");
+			}
+			
+			my $file = $dataset->write_redbox;
+			
+			if( $file ) {
+				$log->info("Wrote $dataset->{global_id} as ReDBox alert $file");
+				$dataset->set_status_ingested;
+			} else {
+				$log->error("Coudn't write $dataset->{global_id} to ReDBox");
+				$dataset->set_status_error;
+			}
 		}
+		$source->close;
 	}
-	
 }
-
+	
 

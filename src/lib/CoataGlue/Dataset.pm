@@ -208,7 +208,7 @@ sub set_status_ingested {
 
 =item set_status_error
 
-Sets this dataset's status to ingested
+Sets this dataset's status to error
 
 =cut
 
