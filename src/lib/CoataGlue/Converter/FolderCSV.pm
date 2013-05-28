@@ -88,7 +88,8 @@ sub scan {
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
-				file => $md->{file}
+				file => $md->{file},
+				datastreams => $md->{datastreams}
 			);	
 			if( $dataset ) {
 				push @datasets, $dataset;
@@ -98,6 +99,7 @@ sub scan {
 	closedir($dh);
 	return @datasets ;
 }
+
 
 sub get_metadata {
 	my ( $self, %params ) = @_;
@@ -113,9 +115,12 @@ sub get_metadata {
 	};
 	
 	my %metadata = ();
+	my @datastreams = ();
 	
 	while( my $item = readdir($dh) ) {
+		$self->{log}->debug("Scanning $path/$item");
 		if( $item =~ /$self->{metadatafile}/ ) {
+			$self->{log}->debug("Metadata file $path/$item");
 			my $file = "$path/$item";
 			if( -f $file ) {
 				if( my $md = $self->parse_metadata_file(file => "$path/$item") ) {
@@ -125,6 +130,9 @@ sub get_metadata {
 					$metadata{$file} = $md;
 				}
 			}
+		} elsif( $item !~ /^\./ ) {
+			$self->{log}->debug("Adding datastream $path/$item");
+			push @datastreams, "$path/$item";
 		}
 	}
 	
@@ -143,7 +151,8 @@ sub get_metadata {
 	
 	return {
 		file => $file,
-		metadata => $md
+		metadata => $md,
+		datastreams => \@datastreams
 	};
 
 }

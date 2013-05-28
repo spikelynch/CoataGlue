@@ -38,6 +38,7 @@ Variables:
 =item source         -> the datasource name
 =item datecreated    -> experiment date from the source
 =item dateconverted  -> date it was converted
+=item datastreams    -> an arrayref of payloads (files or URLs)
 
 =back
 
@@ -68,6 +69,7 @@ The standard metadata fields are as follows.
 use strict;
 
 use Log::Log4perl;
+use Carp qw(cluck);
 use Data::Dumper;
 use Template;
 use XML::Twig;
@@ -80,18 +82,19 @@ use Catmandu::Store::FedoraCommons;
 
 =item new(%params)
 
-Create a new dataset object. All parameters are compulsory:
+Create a new dataset object. All parameters apart from datastreams
+are compulsory.
 
 =over 4
 
-=item source - the CoataGlue::Source (a data capture source)
+=item source - the CoataGlue::Source
 
-=item id - a unique ID within this Source.  Any character apart from ':'
+=item file - the metadata file - has to be unique for this dataset
 
-=item location - the data itself - can be a filepath or URL
-
-=item metadata - a hashref of the raw metadata as read by the converter
+=item raw_metadata - a hashref of the raw metadata as read by the converter
       Non-alphanumeric characters in keys are converted to underscores.
+      
+=item datastreams - an arrayref of payloads (filenames or URLs)
 
 =back
 
@@ -111,6 +114,10 @@ sub new {
 	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
 	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};
+	
+	if( $params{datastreams} ) {
+		$self->{datastreams} = $params{datastreams};
+	}
 
 	my $error = undef;
 	for my $field ( @MANDATORY_PARAMS ) {
@@ -284,7 +291,7 @@ sub metadata {
 
 This returns the source, id, repository_id etc.  Metadata about
 metadata, which is why it's called 'header'
-
+chesapeake bay bridge
 =cut
 
 sub header {
@@ -412,39 +419,103 @@ sub add_to_repository {
 
 	my $repo = $self->{source}->repository;
 	
-	my $metadata = $self->metadata;
-
-	my $dc = $self->{source}->repository_crosswalk(
-		metadata => $metadata
-	);
-	
-	# Catmandu::Bag::add expects values to be arrayrefs, and
-	# complains if it gets an undef rather than an empty string
-	
-	for my $field ( keys %$dc ) {
-		if( $dc->{$field} ) {
-			$dc->{$field} = [ $dc->{$field} ];
-		} else {
-			$dc->{$field} = [ '' ];
-		}
-	}
-
-	my $rv;
-	
-	eval {
-		$rv = $repo->bag->add($dc);
-	};
-	
-	if( $@ ) {
-		$self->{log}->error("Couldn't add object to repository: $@");
+	if( !$repo ) {
+		$self->{log}->error("Couldn't get repository");
 		return 0;
 	}
 	
-	$self->{repositoryid} = $rv->{_id};
+	if( !$repo->add_object(dataset => $self) ) {
+		$self->{log}->error("Adding dataset failed");
+		return 0
+	} else {
+		return $self->{repositoryid};
+	}
 
-	return $self->{repositoryid};	
 }
 
+
+=item add_datastream(%params)
+
+Add a payload to the Fedora digital object.
+
+The content can be a filename, a URL or a scalar containing XML.
+
+Returns undef if it was unsuccessful.
+
+The datastreams from the converter aren't used for this as 
+the calling script may well do something with them (like copying
+them to a web server directory and translating them into URLs)
+before they are added as datastreams.
+
+Parameters:
+
+=over 4
+
+=item xml|file|url
+=item dsid
+=item label
+
+=back
+
+One of xml/file/url, and dsid, are compulsory. 
+
+=cut
+
+sub add_datastream {
+	my ( $self, %params ) = @_;
+	
+	if( !$params{dsid} ) {
+		$self->{log}->error("Need a dsid to add datastream");
+	}
+	
+	
+	
+	if( !$self->{repositoryid} ) {
+		$self->{log}->error("Can't add datastream - dataset has no repositoryid");
+	}
+
+	my $fc_params = {
+		dsID => $params{dsid},
+		pid => $self->{repositoryid},
+		label => $params{lable} || $params{dsid}
+	};
+
+	if( $params{file} ) {
+		if( -f $params{file} ) {
+			$fc_params->{file} = $params{file};
+			$self->{log}->debug("Loading datastream from file $params{file}");
+		} else {
+			$self->{log}->error("File $params{file} not found");
+			return undef;
+		}
+	} elsif( $params{url} ) {
+		$fc_params->{url} = $params{url};
+		$self->{log}->debug("Loading datastream from url $params{url}");
+	} elsif( $params{xml} ) {
+		$fc_params->{xml} = $params{xml};
+	} else {
+		$self->{log}->error("add_datastream needs file, url or xml");
+		return undef;
+	}
+	
+	my $repo = $self->{source}->repository;
+	
+	my $rv = undef;
+	
+	eval {
+		$repo->addDatastream(%$fc_params);		
+	};
+	
+	if( $@ ) {
+		$self->{log}->error("Couldn't add datastream to repository: $@");
+		return 0;
+	} else {
+		$self->{log}->info("Added datastream $params{dsid} to object $self->{repositoryid}");
+	}
+	
+	return 1;
+	
+}
 
 
 1;

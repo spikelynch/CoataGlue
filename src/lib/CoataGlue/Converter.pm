@@ -2,8 +2,64 @@ package CoataGlue::Converter;
 
 use strict;
 
+=head1 NAME
+
+CoataGlue::Converter
+
+=head1 DESCRIPTION
+
+Base class for Converters, which scan files or directories (or
+any other type of digital record) and return CoataGlue::Datasets.
+
+
+=head1 SYNOPSIS
+
+    for my $dataset ( $converter->scan ) {
+    	...
+    }
+    
+The converters are not called directly, but by calling ->scan on 
+a CoataGlue::Source instance.
+
+=head1 PLUGINS
+
+The main CoataGlue object creates a single CoataGlue::Converter.
+This then uses Module::Pluggable to read in all thhe subclasses.
+
+=head1 INTERFACE
+
+Each subclass should provide the following methods
+
+=over 4
+
+=item init(%params)
+
+Initialise the converter. The params will be different for each
+Converter subclass. Params are found in the DataSources.cf file.
+
+Note that one Converter subclass can be used in many sources.
+
+=item scan
+
+For this source instance, scan the directory (or whatever), convert
+whatever's there into CoataGlue datasets, and return an array of
+them.  The converter does not worry about whether the datasets
+have been seen before - this is handled by the CoataGlue::Source
+instance.
+
+
+
+=back
+    
+
+=cut
+
 use Module::Pluggable search_path => [ 'CoataGlue::Converter' ], require => 1;
+use Log::Log4perl;use Config::Std;
 use Log::Log4perl;
+use Data::Dumper;
+use Catmandu::Store::FedoraCommons;
+
 use Carp qw(cluck);
 use Data::Dumper;
 use POSIX qw(strftime);
@@ -42,6 +98,8 @@ sub scan {
 	$self->{log}->error("All CoataGlue::Converter subclasses need a scan method (" . ref($self) . ")");
 	die;
 }
+
+
 
 
 sub register_plugins {

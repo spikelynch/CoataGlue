@@ -33,6 +33,8 @@ use CoataGlue::Test qw(setup_tests);
 
 my $LOGGER = "CoataGlue.tests.006";
 
+my $DATASET_RE = 'P1_E1';
+
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
 }
@@ -69,14 +71,28 @@ ok(@datasets, "Got at least one dataset");
 
 my $ds = shift @datasets;
 
-ok($ds->add_to_repository, "Added dataset to Fedora");
+my ( $ds ) = grep { $_->{file} =~ /$DATASET_RE/ } @datasets;
 
-ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
+if( ok($ds, "Found dataset matching /$DATASET_RE/") ) {
 
-my $file = $ds->write_redbox;
+	ok($ds->add_to_repository, "Added dataset to Fedora");
 
-if( ok($file, "Wrote XML: $file") ) {
-	diag("TODO");
+	ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
+
+	my $dsid = 1;
+	for my $stream ( @{$ds->{datastreams}} ) {
+		ok($ds->add_datastream(
+			file => $stream,
+			dsid => $dsid,
+			label => "Datastream $dsid"
+		), "Added dataset $dsid");
+		$dsid++;
+	}
+
+	my $file = $ds->write_redbox;
+
+	if( ok($file, "Wrote XML: $file") ) {
+		diag("TODO");
+	}
+
 }
-
-

@@ -5,7 +5,7 @@ use strict;
 use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
-use Catmandu::Store::FedoraCommons;
+use CoataGlue::Repository;
 
 
 my @MANDATORY_PARAMS = qw(global sources templates);
@@ -13,7 +13,7 @@ my @MANDATORY_PARAMS = qw(global sources templates);
 my %MANDATORY_CONFIG = (
 	General => [ 'timeformat' ],
 	Store => [ 'store' ],
-	Repository => [ 'class', 'baseurl', 'username', 'password', 'model' ],
+	Repository => [ 'baseurl', 'username', 'password' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
 	Redbox => [ 'directory', 'extension', 'handleprefix' ]
 );
@@ -160,17 +160,12 @@ sub repository {
 	
 	if( !$self->{repository} ) {
 		my $conf = $self->{conf}{global}{Repository};
-		my $class = $conf->{class} || do {
-			$self->{log}->fatal("No repository class");
-			die;
-		};
-		$self->{repository} = $class->new(
+		$self->{repository} = CoataGlue::Repository->new(
 			baseurl => $conf->{baseurl},
 			username => $conf->{username},
-			password => $conf->{password},
-			model => $conf->{model}
+			password => $conf->{password}
 		) || do {
-			$self->{log}->fatal("Can't connect to $class repository:" . Dumper(
+			$self->{log}->fatal("Can't connect to repository:" . Dumper(
 				{ conf  => $conf }
 			));
 			die;

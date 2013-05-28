@@ -286,6 +286,7 @@ sub dataset {
 	
 	my $metadata = $params{metadata};
 	my $file = $params{file};
+	my $datastreams = $params{datastreams};
 	
 	if( !$metadata || ! $file ) {
 		$self->{log}->error("New dataset needs metadata and file");
@@ -295,7 +296,8 @@ sub dataset {
 	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
 		file => $file,
-		raw_metadata => $metadata
+		raw_metadata => $metadata,
+		datastreams => $datastreams
 	)|| do {
 		$self->{log}->error("Error creating dataset");
 		return undef;	
