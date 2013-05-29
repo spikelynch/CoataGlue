@@ -73,8 +73,12 @@ use Carp qw(cluck);
 use Data::Dumper;
 use Template;
 use XML::Twig;
+use XML::RegExp;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
+
+our $MAX_DSID_LENGTH = 64;
+our $MAX_DSID_SUFFIX = 1000000;
 
 =head1 METHODS
 
@@ -94,7 +98,18 @@ are compulsory.
 =item raw_metadata - a hashref of the raw metadata as read by the converter
       Non-alphanumeric characters in keys are converted to underscores.
       
-=item datastreams - an arrayref of payloads (filenames or URLs)
+=item datastreams - an arrayref of payloads hashrefs which should have the following:
+
+=over 4
+
+=item file or xml or url
+
+=item id - a unique string (first character must be [A-Za-z]) 
+
+=item mimetype - optional
+
+=back
+
 
 =back
 
@@ -454,6 +469,7 @@ Parameters:
 =item xml|file|url
 =item dsid
 =item label
+=item mimetype
 
 =back
 
@@ -463,59 +479,122 @@ One of xml/file/url, and dsid, are compulsory.
 
 sub add_datastream {
 	my ( $self, %params ) = @_;
+
+	my $repo = $self->{source}->repository;
 	
+	if( !$repo ) {
+		$self->{log}->error("Couldn't get repository");
+		return undef;
+	}
+		
 	if( !$params{dsid} ) {
 		$self->{log}->error("Need a dsid to add datastream");
-	}
-	
-	
-	
-	if( !$self->{repositoryid} ) {
-		$self->{log}->error("Can't add datastream - dataset has no repositoryid");
-	}
-
-	my $fc_params = {
-		dsID => $params{dsid},
-		pid => $self->{repositoryid},
-		label => $params{lable} || $params{dsid}
-	};
-
-	if( $params{file} ) {
-		if( -f $params{file} ) {
-			$fc_params->{file} = $params{file};
-			$self->{log}->debug("Loading datastream from file $params{file}");
-		} else {
-			$self->{log}->error("File $params{file} not found");
-			return undef;
-		}
-	} elsif( $params{url} ) {
-		$fc_params->{url} = $params{url};
-		$self->{log}->debug("Loading datastream from url $params{url}");
-	} elsif( $params{xml} ) {
-		$fc_params->{xml} = $params{xml};
-	} else {
-		$self->{log}->error("add_datastream needs file, url or xml");
 		return undef;
 	}
 	
-	my $repo = $self->{source}->repository;
-	
-	my $rv = undef;
-	
-	eval {
-		$repo->addDatastream(%$fc_params);		
-	};
-	
-	if( $@ ) {
-		$self->{log}->error("Couldn't add datastream to repository: $@");
-		return 0;
-	} else {
-		$self->{log}->info("Added datastream $params{dsid} to object $self->{repositoryid}");
+	if( !$self->{repositoryid} ) {
+		$self->{log}->error("Can't add datastream - dataset has no repositoryid");
+		return undef;
 	}
 	
-	return 1;
+	if( $params{dsid} !~ /^$XML::RegExp::NCName$/ ) {
+		$self->{log}->error("dsID '$params{dsid}' is invalid - must be an XML NCName (no colons, first char [A-Za-z])");
+		return undef;
+	}
 	
+	$self->{log}->debug("Adding datastream $params{dsid} to object $self->{repositoryid}");	
+	my %p = (
+		pid => $self->{repositoryid},
+		dsid => $params{dsid}
+	);
+	
+	if( $params{file} ) {
+		$p{file} = $params{file}
+	} elsif( $params{url} ) {
+		$p{url} = $params{url}
+	} elsif( $params{xml} ) {
+		$p{xml} = $params{xml};
+	} else {
+		$self->{log}->error("add_datastream needs a file, url or xml");
+		return undef;
+	}
+	
+	if( $params{mimetype} ) {
+		$p{mimetype} = $params{mimetype};
+	}
+	
+	if( $params{label} ) {
+		$p{dsLabel} = $params{label};
+	}
+	
+	$self->{log}->debug(Dumper({params => \%p}));
+	
+	return $repo->add_datastream(%p);
+
 }
+
+
+=item fix_datastream_ids($datastream)
+
+Goes through the $self->{datastreams} hash and ensures that all
+of the IDs are compliant with Fedora's requirements (XML NCnames
+no more than 64 chars)
+
+Will throw an error if it can't generate unique IDs, otherwise
+returns a hash of the datastreams by the new ids (with the original
+ID stored in old_id)
+
+=cut
+
+sub fix_datastream_ids {
+	my ( $self ) = @_;
+	
+	my $newids = {};
+	
+	for my $id ( sort keys %{$self->{datastreams}} ) {
+		
+		my $oid = $id;
+		# first replace forbidden characters with '_'
+		
+		#$id =~ s/[ :$&\/+,;?]/_/g;
+		$id =~ s/[^A-Za-z0-9_.]/_/g;
+		
+		# make sure first character is alphabetical
+		if( $id !~ /^[A-Za-z]/ ) {
+			$id = 'D' . $id;
+		}
+
+		if( $id !~ /^$XML::RegExp::NCName$/ ) {
+			$self->{log}->error("Couldn't make NCName from $oid");
+			return undef;
+		}
+		
+		# truncate to 64 chars...
+		if( length($id) > $MAX_DSID_LENGTH ) {
+			$id = substr($id, 0, $MAX_DSID_LENGTH);
+		}
+		my $id1 = $id;
+		my $inc = 1;
+		
+		# ...and if it's not unique, just keep appending integers
+		# to it and truncating until we get to a ridiculously high
+		# number.
+		
+		while( $newids->{$id} && $inc < $MAX_DSID_SUFFIX ) {
+			$id = substr($id1, 0, $MAX_DSID_LENGTH - length($inc)) . $inc;
+			$inc++;
+		}
+		if( $newids->{$id} ) {
+			$self->{log}->error("Couldn't generate unique dataset ID");
+			return undef;
+		}
+		$newids->{$id} = $self->{datastreams}{$oid};
+		$newids->{$id}{id} = $id;
+		$newids->{$id}{old_id} = $oid;
+	}
+	return $newids;
+}
+
 
 
 1;

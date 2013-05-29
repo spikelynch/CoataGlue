@@ -12,6 +12,11 @@ Register the object with FC via Catmandu
 
 TODO: date handling 
 
+Gotchas
+-------
+
+
+
 
 
 Fedora Questions

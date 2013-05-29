@@ -132,6 +132,71 @@ sub add_object {
 
 
 
+sub add_datastream {
+	my ( $self, %params ) = @_;
+
+
+	my $fc_params = {
+		dsID => $params{dsid},
+		pid => $params{pid}
+	};
+	
+	if( $params{mimetype} ) {
+		$fc_params->{mimeType} = $params{mimetype};
+	}
+
+	if( $params{file} ) {
+		if( -f $params{file} ) {
+			$fc_params->{file} = $params{file};
+			$self->{log}->debug("Loading datastream from file $params{file}");
+		} else {
+			$self->{log}->error("File $params{file} not found");
+			return undef;
+		}
+	} elsif( $params{url} ) {
+		$fc_params->{url} = $params{url};
+		$self->{log}->debug("Loading datastream from url $params{url}");
+	} elsif( $params{xml} ) {
+		$fc_params->{xml} = $params{xml};
+	} else {
+		$self->{log}->error("add_datastream needs file, url or xml");
+		return undef;
+	}
+	
+	my $repo = $self->repository;
+	
+	return undef unless $repo;
+	
+	my $rv = undef;
+	
+	$self->{log}->debug(Dumper({fc_params => $fc_params}));
+	
+	my $result = $repo->addDatastream(%$fc_params);		
+
+	if( $result->is_ok ) {
+		my $content = $result->parse_content;
+		$self->{log}->debug("Results: $content");
+	} else {
+		$self->{log}->error("Error adding datastream: " . $result->error);
+	}
+
+#	if( $@ ) {
+#		$self->{log}->error("Couldn't add datastream to repository: $@");
+#		return 0;
+#	} else {
+#		$self->{log}->info("Added datastream $params{dsid} to object $self->{repositoryid}");
+#	}
+	
+
+
+
+
+
+
+}
+
+
+
 sub store {
 	my ( $self ) = @_;
 	
@@ -158,9 +223,9 @@ sub repository {
 	
 	if( !$self->{repository} ) {
 		$self->{repository} = Catmandu::FedoraCommons->new(
-			baseurl => $self->{baseurl},
-			username => $self->{username},
-			password => $self->{password},
+			$self->{baseurl},
+			$self->{username},
+			$self->{password}
 		) || do {
 			$self->{log}->fatal("Can't create Catmandu::FedoraCommons instance");
 			die;

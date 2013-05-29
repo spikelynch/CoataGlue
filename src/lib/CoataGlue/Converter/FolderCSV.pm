@@ -6,6 +6,7 @@ use parent 'CoataGlue::Converter';
 
 use Data::Dumper;
 use Text::CSV;
+use File::MimeInfo;
 
 =head1 NAME
 
@@ -101,6 +102,8 @@ sub scan {
 }
 
 
+
+
 sub get_metadata {
 	my ( $self, %params ) = @_;
 	
@@ -115,7 +118,7 @@ sub get_metadata {
 	};
 	
 	my %metadata = ();
-	my @datastreams = ();
+	my %datastreams = ();
 	
 	while( my $item = readdir($dh) ) {
 		$self->{log}->debug("Scanning $path/$item");
@@ -132,7 +135,12 @@ sub get_metadata {
 			}
 		} elsif( $item !~ /^\./ ) {
 			$self->{log}->debug("Adding datastream $path/$item");
-			push @datastreams, "$path/$item";
+			my $mimetype = mimetype($item);
+			$datastreams{$item} => {
+				id => $item,
+				file => "$path/$item",
+				mimetype => $mimetype
+			};
 		}
 	}
 	
@@ -152,7 +160,7 @@ sub get_metadata {
 	return {
 		file => $file,
 		metadata => $md,
-		datastreams => \@datastreams
+		datastreams => \%datastreams
 	};
 
 }

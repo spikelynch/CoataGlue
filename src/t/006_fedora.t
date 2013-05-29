@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 7;
+use Test::More tests => 11;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -79,14 +79,15 @@ if( ok($ds, "Found dataset matching /$DATASET_RE/") ) {
 
 	ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
 
-	my $dsid = 1;
-	for my $stream ( @{$ds->{datastreams}} ) {
+	# TODO: check that it breaks if we try a dataset with a bad id
+	
+	
+	for my $datastream ( @{$ds->{datastreams}} ) {
 		ok($ds->add_datastream(
-			file => $stream,
-			dsid => $dsid,
-			label => "Datastream $dsid"
-		), "Added dataset $dsid");
-		$dsid++;
+			file => $datastream->{file},
+			dsid => $datastream->{id},
+			label => $datastream->{id}
+		), "Added dataset $datastream->{id}: $datastream->{file}");
 	}
 
 	my $file = $ds->write_redbox;
