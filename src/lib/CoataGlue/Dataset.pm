@@ -130,6 +130,7 @@ sub new {
 	$self->{source}   = $params{source};
 	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};
 	
+	
 	if( $params{datastreams} ) {
 		$self->{datastreams} = $params{datastreams};
 	}
@@ -150,7 +151,10 @@ sub new {
 	if( $error ) {
 		return undef;
 	}
-	
+	if( $self->{datastreams} ) {
+		$self->{log}->debug("Dataset $self $self->{file} has datastreams"); 
+		$self->{log}->debug(Dumper({datastreams => $params{datastreams}}));
+	}
 	return $self;
 }
 
@@ -467,7 +471,7 @@ Parameters:
 =over 4
 
 =item xml|file|url
-=item dsid
+=item id
 =item label
 =item mimetype
 
@@ -487,8 +491,8 @@ sub add_datastream {
 		return undef;
 	}
 		
-	if( !$params{dsid} ) {
-		$self->{log}->error("Need a dsid to add datastream");
+	if( !$params{id} ) {
+		$self->{log}->error("Need a datastream id");
 		return undef;
 	}
 	
@@ -497,15 +501,15 @@ sub add_datastream {
 		return undef;
 	}
 	
-	if( $params{dsid} !~ /^$XML::RegExp::NCName$/ ) {
-		$self->{log}->error("dsID '$params{dsid}' is invalid - must be an XML NCName (no colons, first char [A-Za-z])");
+	if( $params{id} !~ /^$XML::RegExp::NCName$/ ) {
+		$self->{log}->error("dsID '$params{id}' is invalid - must be an XML NCName (no colons, first char [A-Za-z])");
 		return undef;
 	}
 	
 	$self->{log}->debug("Adding datastream $params{dsid} to object $self->{repositoryid}");	
 	my %p = (
 		pid => $self->{repositoryid},
-		dsid => $params{dsid}
+		dsid => $params{id}
 	);
 	
 	if( $params{file} ) {
@@ -527,10 +531,8 @@ sub add_datastream {
 		$p{dsLabel} = $params{label};
 	}
 	
-	$self->{log}->debug(Dumper({params => \%p}));
 	
 	return $repo->add_datastream(%p);
-
 }
 
 

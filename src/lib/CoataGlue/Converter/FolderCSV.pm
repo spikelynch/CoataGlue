@@ -84,7 +84,7 @@ sub scan {
 		my $path = "$basedir/$item";
 		next ITEM unless -d $path;
 		
-		my $md = $self->get_metadata(path => $path);
+		my $md = $self->get_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
@@ -108,7 +108,7 @@ sub get_metadata {
 	my ( $self, %params ) = @_;
 	
 	my $path = $params{path};
-	
+	my $shortpath = $params{shortpath};
 	# scan through the dataset folder for something that
 	# matches the file pattern
 	
@@ -118,12 +118,12 @@ sub get_metadata {
 	};
 	
 	my %metadata = ();
-	my %datastreams = ();
+	my $datastreams = {};
 	
 	while( my $item = readdir($dh) ) {
-		$self->{log}->debug("Scanning $path/$item");
+		$self->{log}->debug("Scanning $shortpath/$item");
 		if( $item =~ /$self->{metadatafile}/ ) {
-			$self->{log}->debug("Metadata file $path/$item");
+			$self->{log}->debug("Metadata file $shortpath/$item");
 			my $file = "$path/$item";
 			if( -f $file ) {
 				if( my $md = $self->parse_metadata_file(file => "$path/$item") ) {
@@ -134,9 +134,9 @@ sub get_metadata {
 				}
 			}
 		} elsif( $item !~ /^\./ ) {
-			$self->{log}->debug("Adding datastream $path/$item");
+			$self->{log}->debug("Adding datastream $shortpath/$item");
 			my $mimetype = mimetype($item);
-			$datastreams{$item} => {
+			$datastreams->{$item} = {
 				id => $item,
 				file => "$path/$item",
 				mimetype => $mimetype
@@ -146,7 +146,7 @@ sub get_metadata {
 	
 	
 	if( ! keys %metadata ) {
-		$self->{log}->error("Error: no file matches $path/$self->{metadatafile}");
+		$self->{log}->error("Error: no file matches $shortpath/$self->{metadatafile}");
 		return undef;
 	}
 
@@ -157,10 +157,12 @@ sub get_metadata {
 		$self->{log}->warn("Warning: $path has more than one metadata file - using $file");
 	}
 	
+	$self->{log}->debug(Dumper({datastreams => $datastreams}));
+	
 	return {
 		file => $file,
 		metadata => $md,
-		datastreams => \%datastreams
+		datastreams => $datastreams
 	};
 
 }

@@ -169,15 +169,15 @@ sub add_datastream {
 	
 	my $rv = undef;
 	
-	$self->{log}->debug(Dumper({fc_params => $fc_params}));
-	
 	my $result = $repo->addDatastream(%$fc_params);		
 
 	if( $result->is_ok ) {
 		my $content = $result->parse_content;
-		$self->{log}->debug("Results: $content");
+		$self->{log}->debug("Datastream added");
+		return 1;
 	} else {
 		$self->{log}->error("Error adding datastream: " . $result->error);
+		return 0;
 	}
 
 #	if( $@ ) {
