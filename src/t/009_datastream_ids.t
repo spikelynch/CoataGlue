@@ -19,8 +19,10 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 
 use lib $ENV{COATAGLUE_PERLLIB};
 
+use strict;
 
-use Test::More tests => 11;
+
+use Test::More;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -43,6 +45,11 @@ my %BAD_IDS = (
 	'this name is full of spaces and is also quite long. The algorithm needs to truncate it and replace the spaces with underscores' => 'this_name_is_full_of_spaces_and_is_also_quite_long._The_algorith'
 );
 
+my $BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
+my $NMANY = 6000;
+
+
+plan tests => $NMANY + 12;
 
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
@@ -106,17 +113,14 @@ if( ok($fixed, "Got hash of datastreams with clean IDs") ) {
 # This makes an absurd number of datastreams with keys that
 # will not be unique when truncated to 64 characters.
 
-my $BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
 my $manystreams = {};
 
-my $NMANY = 1234;
 
 for my $i ( 1..$NMANY ) {
 	my $id = sprintf("$BASE%0000d", $i);
 	$manystreams->{$id} = {
 		id => $id,
-		file => $id,
+		file => "File$i",
 	}
 }
 
@@ -126,7 +130,9 @@ my $dataset2 = $source->dataset(
 	datastreams => $manystreams
 );
 
-if( ok($manyfixed = $dataset2->fix_datastream_ids, "Got fixed keys") ) {
+my $manyfixed = $dataset2->fix_datastream_ids;
+
+if( ok($manyfixed, "Got fixed keys") ) {
 
 	my @keys = keys %$manyfixed;
 	my $n = scalar(@keys);
@@ -135,8 +141,11 @@ if( ok($manyfixed = $dataset2->fix_datastream_ids, "Got fixed keys") ) {
 	
 	for my $new_id ( sort keys %$manyfixed ) {
 		my $old_id = $manyfixed->{$new_id}{old_id};
-		$log->debug("$old_id => $new_id");
+		my $new_file = $manyfixed->{$new_id}{file};
+		my $old_file = $manystreams->{$old_id}{file};
 		
+		
+		cmp_ok($new_file, 'eq', $old_file, "Match for $new_id");
 	}
 
 }
