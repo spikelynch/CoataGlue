@@ -79,15 +79,21 @@ if( ok($ds, "Found dataset matching /$DATASET_RE/") ) {
 
 	ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
 
-	# TODO: check that it breaks if we try a dataset with a bad id
+	ok($ds->{datastreams} && keys %{$ds->{datastreams}}, 
+		"Dataset has datastreams");
+
+	my $datastreams = $ds->fix_datastream_ids;
 	
+	if( ok($datastreams &&  keys %{$ds->{datastreams}},
+		"Got standardised-ID datastreams") ) {
 	
-	for my $datastream ( @{$ds->{datastreams}} ) {
-		ok($ds->add_datastream(
-			file => $datastream->{file},
-			dsid => $datastream->{id},
-			label => $datastream->{id}
-		), "Added dataset $datastream->{id}: $datastream->{file}");
+		for my $id ( %$datastreams ) {
+			my $datastream = $datastreams->{$id};
+			ok(
+				$ds->add_datastream(%$datastream),
+				"Added dataset $datastream->{id}: $datastream->{file}"
+			);
+		}
 	}
 
 	my $file = $ds->write_redbox;
