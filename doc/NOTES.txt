@@ -10,13 +10,18 @@ Metadata Interchange XML
 HTML dataset description (a la Peter Sefton's idea of machine and human readable docs)
 Register the object with FC via Catmandu
 
-TODO: date handling 
 
-Gotchas
--------
+Next step:
 
+a "publish" script which does the following:
 
+* copy the payload datastreams to web hosted locations
+* add them (as URLs) to Fedora.
+* get Damyata to serve the URLS from the filesystem
 
+This may be the point at which I merge CoataGlue and Damyata.
+
+CoataGlue => Dayadhvam?
 
 
 Fedora Questions

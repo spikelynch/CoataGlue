@@ -138,7 +138,7 @@ sub get_metadata {
 			my $mimetype = mimetype($item);
 			$datastreams->{$item} = {
 				id => $item,
-				file => "$path/$item",
+				original => "$path/$item",
 				mimetype => $mimetype
 			};
 		}

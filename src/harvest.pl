@@ -118,7 +118,7 @@ SOURCE: for my $source ( $CoataGlue->sources ) {
 			$log->debug("Dataset: $dataset->{global_id}");
 			
 			if( $dataset->add_to_repository ) {
-				$log->info("Added $dataset->{global_id} to repository: $dataset->{repositoryid}");
+				$log->info("Added $dataset->{global_id} to repository: $dataset->{repository_id}");
 			} else {
 				$log->error("Couldn't add $dataset->{global_id} to repository");
 			}

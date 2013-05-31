@@ -63,6 +63,8 @@ The standard metadata fields are as follows.
 
 =back
 
+FIXME: datastream handling in this class is pretty crap.
+
 
 =cut
 
@@ -71,11 +73,14 @@ use strict;
 use Log::Log4perl;
 use Carp qw(cluck);
 use Data::Dumper;
-use Template;
+use File::Path qw(make_path);
+use File::Copy;
 use XML::Twig;
 use XML::RegExp;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
+
+use CoataGlue::Datastream;
 
 our $MAX_DSID_LENGTH = 64;
 our $MAX_DSID_SUFFIX = 1000000;
@@ -132,7 +137,10 @@ sub new {
 	
 	
 	if( $params{datastreams} ) {
-		$self->{datastreams} = $params{datastreams};
+		$self->create_datastreams(raw => $params{datastreams}) || do {
+			$self->{log}->error("Error creating datastreams");
+			return undef;
+		}
 	}
 
 	my $error = undef;
@@ -151,10 +159,7 @@ sub new {
 	if( $error ) {
 		return undef;
 	}
-	if( $self->{datastreams} ) {
-		$self->{log}->debug("Dataset $self $self->{file} has datastreams"); 
-		$self->{log}->debug(Dumper({datastreams => $params{datastreams}}));
-	}
+
 	return $self;
 }
 
@@ -330,12 +335,12 @@ sub header {
 sub repositoryURL {
 	my ( $self ) = @_;
 	
-	my $base = $self->{source}->conf('Repository', 'publishurl');
+	my $base = $self->conf('Repository', 'publishurl');
 	
 	if( $base !~ /\/$/ ) {
-		return join('/', $base, $self->{repositoryid});
+		return join('/', $base, $self->{repository_id});
 	} else {
-		return join('', $base, $self->{repositoryid});
+		return join('', $base, $self->{repository_id});
 	}
 }
 
@@ -408,6 +413,124 @@ sub write_redbox {
 }
 
 
+
+=item publish(to => [$audience])
+
+Copies this dataset to the requested 'audience'.  An audience 
+is a directory in the base web publishing director with one
+set of authentication rules (ie UTS only, AAF, public etc):
+
+    /web/uts/$pid/$dsid 
+    
+A dataset can only be in one of these folders, so if the 
+publication status changes, it's deleted from the current
+one after it's been successfully added to the new one.
+
+This method also updates the datastreams in the Fedora object
+so that they point to the new URLs.
+
+=cut
+
+sub publish {
+	my ( $self, %params ) = @_;
+	
+	if( !$self->{repository_id} ) {
+		$self->{log}->error("Can't publish dataset $self->{global_id}")
+	}
+	
+	my $publish_to = $params{to} || do {
+		$self->{log}->error("Publish needs a 'to' param");
+		return undef;
+	};
+	
+	if( !keys %{$self->{datastreams}} ) {
+		$self->{log}->error("Dataset $self->{global_id} has no datastreams");
+		return undef;
+	}
+	
+	my $old_section = undef;
+	
+	if( $self->{publish} ) {
+		$old_section = $self->conf('Publish', $self->{publish});
+	}
+	
+	my $base = $self->conf('Publish', 'directory');
+	
+	my $section = $self->conf('Publish', $publish_to);
+	
+	if( !$section ) {
+		$self->{log}->error("Couldn't find location $section");
+		return undef;
+	}
+	
+	my $id = $self->{repository_id};
+	
+	my $dir = join('/', $base, $section, $id);
+	
+	eval {
+		make_path($dir);
+	};
+	
+	if( $@ ) {
+		$self->{log}->error("Couldn't make path $dir: $@");
+		return undef;
+	}
+	
+	my $error = 0;
+	
+	for my $dsid ( keys %{$self->{datastreams}} ) {
+		my $ds = $self->{datastreams}{$dsid};
+		my $dest = "$dir/$dsid";
+		copy($ds->{file}, $dest) || do {
+			$self->{log}->error("Couldn't copy $ds->{file} to $dest: $!");
+			$error = 1;
+		}
+	}
+	if ( $error ) {
+		$self->{log}->warn("Incomplete copy of $self->{global_id} to $dir");
+		if( $old_section ) {
+			$self->{log}->warn("Copy of datastreams may still be in $old_section");
+		}
+		return undef;
+	}
+	
+	if( $old_section ) {
+		my $old_dir = join('/', $base, $old_section, $id);
+		if( -d $old_dir ) {
+			eval {
+				remove_tree($old_dir);
+			};
+			if( $@ ) {
+				$self->{log}->error("Removing $old_dir failed: $@");
+			}
+		}
+	}
+	
+	
+	
+	my $base_url = $self->conf('Repository', 'publishurl');
+	$base_url = join('/', $base_url, $section, $id);
+	
+	for my $dsid ( keys %{$self->{datastreams}} ) {
+		$self->set_datastream(
+			id => $dsid,
+			url => "$base_url/$dsid",
+			mimetype => $self->{datastreams}{mimetype} 
+		) || do {
+			$self->{log}->error("Couldn't update datastream $dsid");
+		}
+	}
+	return 1;
+}
+
+
+
+
+
+
+
+
+
 =item xml_filename()
 
 Returns the full path of the xml file built from the source's
@@ -418,8 +541,8 @@ ReDBox directory and the dataset's global ID.
 sub xml_filename {
 	my ( $self ) = @_;
 	
-	my $ext = $self->{source}->conf('Redbox', 'extension');
-	my $dir = $self->{source}->conf('Redbox', 'directory');
+	my $ext = $self->conf('Redbox', 'extension');
+	my $dir = $self->conf('Redbox', 'directory');
 	
 	my $filename = join('/', $dir, $self->global_id . '.' . $ext);
 	return $filename;
@@ -447,100 +570,20 @@ sub add_to_repository {
 		$self->{log}->error("Adding dataset failed");
 		return 0
 	} else {
-		return $self->{repositoryid};
+		return $self->{repository_id};
 	}
 
 }
 
 
-=item add_datastream(%params)
-
-Add a payload to the Fedora digital object.
-
-The content can be a filename, a URL or a scalar containing XML.
-
-Returns undef if it was unsuccessful.
-
-The datastreams from the converter aren't used for this as 
-the calling script may well do something with them (like copying
-them to a web server directory and translating them into URLs)
-before they are added as datastreams.
-
-Parameters:
-
-=over 4
-
-=item xml|file|url
-=item id
-=item label
-=item mimetype
-
-=back
-
-One of xml/file/url, and dsid, are compulsory. 
-
-=cut
-
-sub add_datastream {
-	my ( $self, %params ) = @_;
-
-	my $repo = $self->{source}->repository;
-	
-	if( !$repo ) {
-		$self->{log}->error("Couldn't get repository");
-		return undef;
-	}
-		
-	if( !$params{id} ) {
-		$self->{log}->error("Need a datastream id");
-		return undef;
-	}
-	
-	if( !$self->{repositoryid} ) {
-		$self->{log}->error("Can't add datastream - dataset has no repositoryid");
-		return undef;
-	}
-	
-	if( $params{id} !~ /^$XML::RegExp::NCName$/ ) {
-		$self->{log}->error("dsID '$params{id}' is invalid - must be an XML NCName (no colons, first char [A-Za-z])");
-		return undef;
-	}
-	
-	$self->{log}->debug("Adding datastream $params{dsid} to object $self->{repositoryid}");	
-	my %p = (
-		pid => $self->{repositoryid},
-		dsid => $params{id}
-	);
-	
-	if( $params{file} ) {
-		$p{file} = $params{file}
-	} elsif( $params{url} ) {
-		$p{url} = $params{url}
-	} elsif( $params{xml} ) {
-		$p{xml} = $params{xml};
-	} else {
-		$self->{log}->error("add_datastream needs a file, url or xml");
-		return undef;
-	}
-	
-	if( $params{mimetype} ) {
-		$p{mimetype} = $params{mimetype};
-	}
-	
-	if( $params{label} ) {
-		$p{dsLabel} = $params{label};
-	}
-	
-	
-	return $repo->add_datastream(%p);
-}
 
 
-=item fix_datastream_ids($datastream)
+=item create_datastreams(raw => $hashref)
 
 Goes through the $self->{datastreams} hash and ensures that all
 of the IDs are compliant with Fedora's requirements (XML NCnames
-no more than 64 chars)
+no more than 64 chars), then creates CoataGlue::Datastream objects
+for them.
 
 Will throw an error if it can't generate unique IDs, otherwise
 returns a hash of the datastreams by the new ids (with the original
@@ -548,12 +591,14 @@ ID stored in old_id)
 
 =cut
 
-sub fix_datastream_ids {
-	my ( $self ) = @_;
+sub create_datastreams {
+	my ( $self, %params ) = @_;
 	
-	my $newids = {};
+	my $raw = $params{raw} || return undef;
 	
-	for my $id ( sort keys %{$self->{datastreams}} ) {
+	$self->{datastreams} = {};
+	
+	for my $id ( sort keys %$raw ) {
 		
 		my $oid = $id;
 		# first replace forbidden characters with '_'
@@ -582,20 +627,46 @@ sub fix_datastream_ids {
 		# to it and truncating until we get to a ridiculously high
 		# number.
 		
-		while( $newids->{$id} && $inc < $MAX_DSID_SUFFIX ) {
+		while( $self->{datastreams}{$id} && $inc < $MAX_DSID_SUFFIX ) {
 			$id = substr($id1, 0, $MAX_DSID_LENGTH - length($inc)) . $inc;
 			$inc++;
 		}
-		if( $newids->{$id} ) {
+		if( $self->{datastreams}{$id} ) {
 			$self->{log}->error("Couldn't generate unique dataset ID");
 			return undef;
 		}
-		$newids->{$id} = $self->{datastreams}{$oid};
-		$newids->{$id}{id} = $id;
-		$newids->{$id}{old_id} = $oid;
+		
+		$self->{log}->debug("Creating datastream " . Dumper($raw->{$id}));
+		
+		$self->{datastreams}{$id} = CoataGlue::Datastream->new(
+			dataset => 	$self,
+			id => 		$id,
+			oid => 		$oid,
+			original => $raw->{$oid}{original},
+			mimetype => $raw->{$oid}{mimetype},
+			label => 	$raw->{$oid}{label}
+		) || do {
+			$self->{log}->error("Create datastream failed");
+			return undef;
+		};
 	}
-	return $newids;
+	return $self->{datastreams};
 }
+
+
+
+=item conf
+
+Get config values from the Coataglue object
+
+=cut
+
+sub conf {
+	my ( $self, $section, $field ) = @_;
+	
+	return $self->{source}{coataglue}->conf($section, $field);
+}
+
 
 
 

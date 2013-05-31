@@ -13,6 +13,11 @@ password:	hce39alp
 model:		Catmandu::Store::FedoraCommons::DC
 publishurl: http://localhost:8080/repository/
 
+[Publish]
+directory:  /home/mike/workspace/RDC Data Capture/src/t/Test/Damyata
+local:      local
+public:     public
+
 [RepositoryCrosswalk]
 title:			title
 description:	description

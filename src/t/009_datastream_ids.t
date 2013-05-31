@@ -6,7 +6,7 @@
 
 =head1 DESCRIPTION
 
-Tests the CoataGlue::Dataset's fix_datastream_ids method's ability to
+Tests the CoataGlue::Dataset's datastreams method's ability to
 correct messy datastream ids that aren't allowed by Fedora, yet still
 keep them unique.
 
@@ -99,7 +99,7 @@ my $dataset = $source->dataset(
 	datastreams => $datastreams
 );
 
-my $fixed = $dataset->fix_datastream_ids;
+my $fixed = $dataset->datastreams;
 
 if( ok($fixed, "Got hash of datastreams with clean IDs") ) {
 	for my $new_id ( keys %$fixed ) {
@@ -130,7 +130,7 @@ my $dataset2 = $source->dataset(
 	datastreams => $manystreams
 );
 
-my $manyfixed = $dataset2->fix_datastream_ids;
+my $manyfixed = $dataset2->datastreams;
 
 if( ok($manyfixed, "Got fixed keys") ) {
 

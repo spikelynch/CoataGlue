@@ -9,6 +9,7 @@ use Storable qw(lock_store lock_retrieve);
 use Data::Dumper;
 use Config::Std;
 use XML::Writer;
+use Template;
 use POSIX qw(strftime);
 
 use CoataGlue::Converter;

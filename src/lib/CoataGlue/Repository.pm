@@ -31,19 +31,19 @@ May one day be used by Damyata to look things up.
     
     my $id = $repo->add_object(dataset => $dataset);
 
-	$repo->add_datastream(
+	$repo->set_datastream(
 		id => $id,
 		dsid => $dsid,
 		file => $datafile
 	);
 
-	$repo->add_datastream(
+	$repo->set_datastream(
 		id => $id,
 		dsid => $dsid,
 		url => $dataurl
 	);
 
-	$repo->add_datastream(
+	$repo->set_datastream(
 		id => $id,
 		dsid => $dsid,
 		xml => $dataxml
@@ -123,16 +123,22 @@ sub add_object {
 		return 0;
 	}
 	
-	$dataset->{repositoryid} = $rv->{_id};
+	$dataset->{repository_id} = $rv->{_id};
 
-	return $dataset->{repositoryid};	
+	return $dataset->{repository_id};	
 	
 	
 }
 
 
+=item set_datastream(%params)
 
-sub add_datastream {
+Add or rewrite a datastream on a Fedora object. Parameters:
+
+=cut
+
+
+sub set_datastream {
 	my ( $self, %params ) = @_;
 
 
@@ -159,7 +165,7 @@ sub add_datastream {
 	} elsif( $params{xml} ) {
 		$fc_params->{xml} = $params{xml};
 	} else {
-		$self->{log}->error("add_datastream needs file, url or xml");
+		$self->{log}->error("set_datastream needs file, url or xml");
 		return undef;
 	}
 	
@@ -179,19 +185,6 @@ sub add_datastream {
 		$self->{log}->error("Error adding datastream: " . $result->error);
 		return 0;
 	}
-
-#	if( $@ ) {
-#		$self->{log}->error("Couldn't add datastream to repository: $@");
-#		return 0;
-#	} else {
-#		$self->{log}->info("Added datastream $params{dsid} to object $self->{repositoryid}");
-#	}
-	
-
-
-
-
-
 
 }
 

@@ -79,17 +79,16 @@ if( ok($ds, "Found dataset matching /$DATASET_RE/: $ds $ds->{file}") ) {
 
 	ok($ds->add_to_repository, "Added dataset to Fedora");
 
-	ok($ds->{repositoryid}, "Dataset has repostoryid: $ds->{repositoryid}");
+	ok($ds->{repository_id}, "Dataset has repostoryid: $ds->{repository_id}");
 	
-	my $datastreams = $ds->fix_datastream_ids;
+	my $datastreams = $ds->{datastreams};
 	
-	if( ok($datastreams &&  keys %{$ds->{datastreams}},
-		"Got standardised-ID datastreams") ) {
+	if( ok($datastreams, "Got datastreams") ) {
 	
 		for my $id ( keys %$datastreams ) {
 			my $datastream = $datastreams->{$id};
 			ok(
-				$ds->add_datastream(%$datastream),
+				$datastream->write(),
 				"Added dataset $datastream->{id}: $datastream->{file}"
 			);
 		}
