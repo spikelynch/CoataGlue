@@ -2,11 +2,12 @@
 
 =head1 NAME
 
-006_fedora.t
+010_publish.t
 
 =head1 DESCRIPTION
 
-Tests adding a record to Fedora.
+Adds a record to Fedora, then publishes it to first the local
+and then the public Damyata directories
 
 =cut
 
@@ -31,7 +32,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests is_fedora_up);
 
-my $LOGGER = "CoataGlue.tests.006";
+my $LOGGER = "CoataGlue.tests.010";
 
 my $DATASET_RE = 'P1_E1';
 
@@ -59,6 +60,7 @@ ok($repo, "Connected to Fedora Commons");
 
 is_fedora_up(log => $log, repository => $repo);
 
+
 my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
@@ -73,26 +75,17 @@ ok(@datasets, "Got at least one dataset");
 
 my ( $ds ) = grep { $_->{file} =~ /$DATASET_RE/ } @datasets;
 
-if( ok($ds, "Found dataset matching /$DATASET_RE/: $ds $ds->{file}") ) {
+die unless ok($ds, "Found dataset matching /$DATASET_RE/: $ds $ds->{file}");
 
-	ok($ds->{datastreams} && keys %{$ds->{datastreams}}, 
-		"Dataset has datastreams");
 
-	ok($ds->add_to_repository, "Added dataset to Fedora");
 
-	ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}");
+ok($ds->{datastreams} && keys %{$ds->{datastreams}}, "Dataset has datastreams");
+
+
+ok($ds->add_to_repository, "Added dataset to Fedora");
+
+ok($ds->{repository_id}, "Dataset has repostoryid: $ds->{repository_id}");
 	
-	my $datastreams = $ds->{datastreams};
-	
-	if( ok($datastreams, "Got datastreams") ) {
-	
-		for my $id ( keys %$datastreams ) {
-			my $datastream = $datastreams->{$id};
-			ok(
-				$datastream->write(),
-				"Added dataset $datastream->{id}: $datastream->{file}"
-			);
-		}
-	}
+my $datastreams = $ds->datastreams;
 
-}
+ok($ds->publish(to => 'local'), "Published dataset to local");
