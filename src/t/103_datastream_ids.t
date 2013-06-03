@@ -33,7 +33,7 @@ use CoataGlue::Source;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = "CoataGlue.tests.009";
+my $LOGGER = "CoataGlue.tests.103_datastream_ids";
 
 my $DATASET_RE = 'P1_E1';
 

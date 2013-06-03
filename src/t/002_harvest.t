@@ -33,7 +33,7 @@ use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
 
-my $LOGGER = "CoataGlue.tests.002";
+my $LOGGER = "CoataGlue.tests.002_harvest";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");

@@ -32,7 +32,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests is_fedora_up);
 
-my $LOGGER = "CoataGlue.tests.010";
+my $LOGGER = "CoataGlue.tests.007_publish";
 
 my $DATASET_RE = 'P1_E1';
 

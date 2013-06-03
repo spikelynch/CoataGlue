@@ -31,7 +31,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests is_fedora_up);
 
-my $LOGGER = "CoataGlue.tests.006";
+my $LOGGER = "CoataGlue.tests.006_fedora";
 
 my $DATASET_RE = 'P1_E1';
 

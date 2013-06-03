@@ -39,7 +39,7 @@ my %STAFF_IDS = (
 
 
 
-my $LOGGER = "CoataGlue.tests.008";
+my $LOGGER = "CoataGlue.tests.102_encrypt_staff_ids";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
