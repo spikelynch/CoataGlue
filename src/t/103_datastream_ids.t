@@ -46,10 +46,10 @@ my %BAD_IDS = (
 );
 
 my $BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
-my $NMANY = 6000;
+my $NMANY = 1500;
 
 
-plan tests => $NMANY + 12;
+plan tests => $NMANY * 2 + 7;
 
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
@@ -89,7 +89,7 @@ my $datastreams = {};
 for my $bad_id ( keys %BAD_IDS ) {
 	$datastreams->{$bad_id} = {
 		id => $bad_id,
-		file => $bad_id
+		original => $bad_id
 	}
 }
 
@@ -120,7 +120,7 @@ for my $i ( 1..$NMANY ) {
 	my $id = sprintf("$BASE%0000d", $i);
 	$manystreams->{$id} = {
 		id => $id,
-		file => "File$i",
+		original => "File$i",
 	}
 }
 
@@ -140,11 +140,11 @@ if( ok($manyfixed, "Got fixed keys") ) {
 	cmp_ok($n, '==', $NMANY, "Got back $NMANY keys");
 	
 	for my $new_id ( sort keys %$manyfixed ) {
-		my $old_id = $manyfixed->{$new_id}{old_id};
-		my $new_file = $manyfixed->{$new_id}{file};
-		my $old_file = $manystreams->{$old_id}{file};
+		my $old_id = $manyfixed->{$new_id}{oid};
+		my $new_file = $manyfixed->{$new_id}{original};
+		my $old_file = $manystreams->{$old_id}{original};
 		
-		
+		ok($new_file && $old_file, "Got new and old IDs");
 		cmp_ok($new_file, 'eq', $old_file, "Match for $new_id");
 	}
 

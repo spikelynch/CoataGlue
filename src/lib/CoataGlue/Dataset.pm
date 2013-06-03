@@ -636,8 +636,6 @@ sub create_datastreams {
 			return undef;
 		}
 		
-		$self->{log}->debug("Creating datastream " . Dumper($raw->{$id}));
-		
 		$self->{datastreams}{$id} = CoataGlue::Datastream->new(
 			dataset => 	$self,
 			id => 		$id,
@@ -651,6 +649,21 @@ sub create_datastreams {
 		};
 	}
 	return $self->{datastreams};
+}
+
+
+=item datastreams
+
+Returns a hash of datastreams by id - the ids are not the original
+ids but the cleaned-up, Fedora-safe ones.
+
+=cut
+
+sub datastreams {
+	my ( $self ) = @_;
+	
+	return $self->{datastreams};
+	
 }
 
 
