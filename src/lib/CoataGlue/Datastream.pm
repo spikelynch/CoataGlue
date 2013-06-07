@@ -137,22 +137,39 @@ sub write {
 	);
 	
 	if( $params{file} ) {
-		$p{file} = $self->{file} = $params{file}
+		delete $self->{url};
+		delete $self->{xml};
+		$self->{file} = $params{file}
 	} elsif( $params{url} ) {
-		$p{url} = $self->{url} = $params{url}
+		delete $self->{file};
+		delete $self->{xml};
+		$self->{url} = $params{url}
 	} elsif( $params{xml} ) {
-		$p{xml} = $self->{xml} = $params{xml};
-	} else {
-		$p{file} = $self->{original};
+		delete $self->{file};
+		delete $self->{url};
+		$self->{xml} = $params{xml};
 	}
 	
+	
 	if( $params{mimetype} ) {
-		$p{mimetype} = $self->{mimetype} = $params{mimetype};
+		$self->{mimetype} = $params{mimetype};
 	}
 	
 	if( $params{label} ) {
-		$p{dsLabel} = $self->{label} = $params{label};
+		$self->{label} = $params{label};
 	}
+	
+	if( $self->{file} ) {
+		$p{file} = $self->{file};
+	} elsif( $self->{url} ) {
+		$p{url} = $self->{url};
+	} elsif( $self->{xml} ) {
+		$p{xml} = $self->{xml};
+	} else {
+		$self->{log}->warn("Datastream has no file, url or xml");
+		$p{file} = $self->{original};
+	}
+
 
 	return $repo->set_datastream(%p);
 }

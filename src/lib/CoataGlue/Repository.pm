@@ -150,6 +150,10 @@ sub set_datastream {
 	if( $params{mimetype} ) {
 		$fc_params->{mimeType} = $params{mimetype};
 	}
+	
+	if( $params{label}) {
+		$fc_params->{dsLabel} = $params{label};
+	}
 
 	if( $params{file} ) {
 		if( -f $params{file} ) {
@@ -174,6 +178,8 @@ sub set_datastream {
 	return undef unless $repo;
 	
 	my $rv = undef;
+	
+	$self->{log}->debug("Adding datastream: " . Dumper({fc_params => $fc_params}));
 	
 	my $result = $repo->addDatastream(%$fc_params);		
 

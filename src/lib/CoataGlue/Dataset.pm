@@ -481,7 +481,7 @@ sub publish {
 	for my $dsid ( keys %{$self->{datastreams}} ) {
 		my $ds = $self->{datastreams}{$dsid};
 		my $dest = "$dir/$dsid";
-		copy($ds->{file}, $dest) || do {
+		copy($ds->{original}, $dest) || do {
 			$self->{log}->error("Couldn't copy $ds->{file} to $dest: $!");
 			$error = 1;
 		}
@@ -512,10 +512,8 @@ sub publish {
 	$base_url = join('/', $base_url, $section, $id);
 	
 	for my $dsid ( keys %{$self->{datastreams}} ) {
-		$self->set_datastream(
-			id => $dsid,
-			url => "$base_url/$dsid",
-			mimetype => $self->{datastreams}{mimetype} 
+		$self->{datastreams}{$dsid}->write(
+			url => "$base_url/$dsid"
 		) || do {
 			$self->{log}->error("Couldn't update datastream $dsid");
 		}
