@@ -21,7 +21,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -57,7 +57,11 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
+
+if( !ok($source, "Got the MIF CSV source") ) {
+	die("Can't continue");
+}
 
 ok($source->open, "Opened source $source->{name}") || die;
 

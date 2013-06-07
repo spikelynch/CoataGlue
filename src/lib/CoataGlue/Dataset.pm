@@ -63,9 +63,6 @@ The standard metadata fields are as follows.
 
 =back
 
-FIXME: datastream handling in this class is pretty crap.
-
-
 =cut
 
 use strict;
@@ -75,7 +72,6 @@ use Carp qw(cluck);
 use Data::Dumper;
 use File::Path qw(make_path);
 use File::Copy;
-use XML::Twig;
 use XML::RegExp;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;

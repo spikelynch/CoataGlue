@@ -14,8 +14,13 @@
 converter:    CoataGlue::Converter::FolderCSV
 ids:          CoataGlue::ID::NaiveSequence
 templates:	  MIF
-basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture
+basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
 
-
+[Labshare]
+converter:    CoataGlue::Converter::XML
+ids:          CoataGlue::ID::NaiveSequence
+templates:    Labshare
+basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture/MIF
+metadatafile: ^.*\.xml$

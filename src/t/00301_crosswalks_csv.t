@@ -2,11 +2,12 @@
 
 =head1 NAME
 
-003_crosswalks.t
+00301_crosswalks_csv.t
 
 =head1 DESCRIPTION
 
-Test the crosswalk from raw to cooked metadata
+Test the crosswalk from raw to cooked metadata for a FolderCSV
+datasource
 
 =cut
 
@@ -19,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -31,7 +32,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = "CoataGlue.tests.003_crosswalks";
+my $LOGGER = "CoataGlue.tests.00301_crosswalks_csv";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
@@ -56,7 +57,12 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
+
+if( !ok($source, "Got the MIF CSV source") ) {
+	die("Can't continue");
+}
+
 
 ok($source->open, "Opened source $source->{name}") || die;
 
