@@ -32,7 +32,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = "CoataGlue.tests.00301_crosswalks_csv";
+my $LOGGER = "CoataGlue.tests.00301_converter_FolderCSV";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
