@@ -51,8 +51,8 @@ sub setup_tests {
 	
 	
 	return {
-		SOURCES => [ 'MIF' ],
-		DATASETS => { MIF => 3 },
+		SOURCES => [ 'MIF', 'Labshare' ],
+		DATASETS => { MIF => 3, Labshare => 2 },
 		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION),
 		SERVICE => $SAMPLE_SERVICE
 	};

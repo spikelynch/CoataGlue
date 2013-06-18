@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-00301_crosswalks_csv.t
+00301_converter_FolderCSV.t
 
 =head1 DESCRIPTION
 

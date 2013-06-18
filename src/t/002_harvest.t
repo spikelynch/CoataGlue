@@ -57,7 +57,7 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
 
 my $count_ds = $fixtures->{DATASETS}{$source->{name}};
 
@@ -66,6 +66,8 @@ my $count_ds = $fixtures->{DATASETS}{$source->{name}};
 my @datasets = $source->scan;
 
 ok(!@datasets, "Scan doesn't work until source has been opened.");
+
+
 
 ok($source->open, "Opened source");
 

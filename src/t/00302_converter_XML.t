@@ -2,12 +2,11 @@
 
 =head1 NAME
 
-00301_crosswalks_csv.t
+00301_converter_XML.t
 
 =head1 DESCRIPTION
 
-Test the crosswalk from raw to cooked metadata for a FolderCSV
-datasource
+Test the crosswalk from raw to cooked metadata for an XML datasource
 
 =cut
 
@@ -32,7 +31,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
-my $LOGGER = "CoataGlue.tests.00301_converter_FolderCSV";
+my $LOGGER = "CoataGlue.tests.00302_converter_XML";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");

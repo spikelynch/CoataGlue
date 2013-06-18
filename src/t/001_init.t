@@ -20,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Data::Dumper;
 
 use CoataGlue;
@@ -60,12 +60,17 @@ cmp_ok(
 	"Got correct number of sources"
 );
 
-cmp_ok(
-	$sources[0]->{name},
-	'eq',
-	$fixtures->{SOURCES}[0],
-	"Source name matches: $fixtures->{SOURCES}[0]"
-);
+my @got_names = sort map { $_->{name} } @sources;
+my @expect_names = sort @{$fixtures->{SOURCES}};
+
+for my $got ( @got_names ) {
+	my $expect = shift @expect_names;
+	cmp_ok(
+		$got, 'eq', $expect,
+		"Got source name $expect"
+	);
+}
+
 
 
 
