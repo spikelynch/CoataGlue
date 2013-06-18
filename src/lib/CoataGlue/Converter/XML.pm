@@ -6,6 +6,7 @@ use parent 'CoataGlue::Converter';
 
 use Data::Dumper;
 use XML::Twig;
+use File::MimeInfo;
 
 =head1 NAME
 
@@ -25,7 +26,7 @@ sub init {
 	$self->{twig} = XML::Twig->new();	
 	
 	my $missing = 0;
-	for my $field ( qw(basedir metadatafile) ) {
+	for my $field ( qw(basedir metadatafile datastreams) ) {
 		if( !$params{$field} ) {
 			$missing = 1;
 			$self->{log}->error("$self->{name} missing config $field");
@@ -59,15 +60,26 @@ sub scan {
 		return undef;
 	};
 	
+	$self->{log}->debug("Scanning $basedir");
+	
 	my @datasets = ();
 	
 	ITEM: for my $item ( readdir($dh) ) {
 		next ITEM if $item =~ /^\./;
+		
+		$self->{log}->debug("Scanning $item");
 		next ITEM unless $item =~ /$self->{metadatafile}/;
 		my $path = "$basedir/$item";
 		next ITEM unless -f $path;
 		
+		
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
+		
+		$self->{log}->debug(Dumper({
+			path => $path,
+			md => $md		
+		}));
+		
 		
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
@@ -118,8 +130,38 @@ sub parse_metadata {
 			$md->{$tag} = $elt->text;
 		}
 	}
+
+	my $datastreams = {};
 	
-	return $md;
+	if( !$md->{$self->{datastreams}} ) {
+		$self->{log}->error("No datastreams found in <$self->{datastreams}>");
+	} else {
+		my $ds = $md->{$self->{datastreams}};
+		if( !ref($ds) ) {
+			$ds = [ $ds ];
+		}
+		for my $file ( @$ds ) {
+			$self->{log}->debug("Adding datastream $file");
+			if( -f $file ) {
+				my $mimetype = mimetype($file);
+				$datastreams->{$file} = {
+					id => $file,
+					original => $file,
+					mimetype => $mimetype
+				};
+			} else {
+				$self->{log}->error("Datastream $file not found");
+			}
+		}
+	}
+
+
+	
+	return {
+		file => $path,
+		metadata => $md,
+		datastreams => $datastreams
+	};
 }
 
 1;

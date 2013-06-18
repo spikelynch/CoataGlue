@@ -246,12 +246,16 @@ which haven't been ingested on a previous pass
 sub scan {
 	my ( $self ) = @_;
 	
+	$self->{log}->info("Scanning source $self->{name}");
+	
 	my @datasets = ();
 	
 	if( !$self->{locked} ) {
 		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
 		return ();
 	}
+	
+	$self->{log}->debug("Scanning with converter $self->{converter}");
 	
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);

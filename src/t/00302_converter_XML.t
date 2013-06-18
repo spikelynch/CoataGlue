@@ -56,9 +56,9 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
+my ( $source ) = grep { $_->{name} eq 'Labshare' } @sources;
 
-if( !ok($source, "Got the MIF CSV source") ) {
+if( !ok($source, "Got the Labshare XML source") ) {
 	die("Can't continue");
 }
 
@@ -67,7 +67,7 @@ ok($source->open, "Opened source $source->{name}") || die;
 
 my @datasets = $source->scan;
 
-ok(@datasets, "Got at least one dataset");
+ok(@datasets, "Got at least one dataset") || die;
 
 $source->close;
 

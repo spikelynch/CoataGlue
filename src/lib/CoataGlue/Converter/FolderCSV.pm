@@ -157,8 +157,6 @@ sub get_metadata {
 		$self->{log}->warn("Warning: $path has more than one metadata file - using $file");
 	}
 	
-	$self->{log}->debug(Dumper({datastreams => $datastreams}));
-	
 	return {
 		file => $file,
 		metadata => $md,

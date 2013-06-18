@@ -22,5 +22,6 @@ metadatafile: ^.*\.csv$
 converter:    CoataGlue::Converter::XML
 ids:          CoataGlue::ID::NaiveSequence
 templates:    Labshare
-basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture/MIF
+basedir:      /home/mike/workspace/RDC Data Capture/src/t/Test/Capture/Labshare
 metadatafile: ^.*\.xml$
+datastreams:  location

@@ -1,0 +1,17 @@
+# Crosswalk config file for Labshare metadata
+
+# In CoataGlue::Converter::XML, datastreams is taken to be one or
+# more payload files.
+
+[metadata]
+title: 			title
+projectnumber: 	activity
+group:          group
+creator: 		creator
+supervisor:     supervisor
+datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
+description:	description
+service:		service
+access:         access
+share:          share
+datastreams:    location
