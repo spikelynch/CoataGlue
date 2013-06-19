@@ -42,7 +42,9 @@ Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $fixtures = setup_tests(log => $log);
+my $f = setup_tests(log => $log);
+
+my $fixtures = $f->{MIF};
 
 my $CoataGlue = CoataGlue->new(
 	global => $ENV{COATAGLUE_CONFIG},
@@ -98,17 +100,19 @@ if( ok($md, "Got metadata hash") ) {
 		"creator = $handle = $md->{creator}"
 	);
 
+	$md->{description} =~ s/\s*$//g;
+
 	cmp_ok(
-		$md->{description}, 'eq', $fixtures->{DESCRIPTION},
+		$md->{description}, 'eq', $fixtures->{description},
 		"<description> content as expected"
 	) || do {
-		my $diff = diff \$fixtures->{DESCRIPTION}, \$md->{description};
+		my $diff = diff \$fixtures->{description}, \$md->{description};
 		print "DIFF: \n$diff\n";
 	};
 
 	cmp_ok(
-		$md->{service}, 'eq', $fixtures->{SERVICE},
-		"service = $fixtures->{SERVICE}"
+		$md->{service}, 'eq', $fixtures->{service},
+		"service = $fixtures->{service}"
 	);
 	
 	

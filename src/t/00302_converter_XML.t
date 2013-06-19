@@ -41,7 +41,9 @@ Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $fixtures = setup_tests(log => $log);
+my $f = setup_tests(log => $log);
+
+my $fixtures = $f->{Labshare};
 
 my $CoataGlue = CoataGlue->new(
 	global => $ENV{COATAGLUE_CONFIG},
@@ -73,23 +75,22 @@ $source->close;
 
 my $ds = shift @datasets;
 
-
 my $md = $ds->metadata();
 
 if( ok($md, "Got metadata hash") ) {
 	
 	cmp_ok(
-		$md->{title}, 'eq', $ds->{raw_metadata}{Experiment_Name},
-		"title = Experiment_Name = $md->{title}"
+		$md->{title}, 'eq', $ds->{raw_metadata}{title},
+		"title = $md->{title}"
 	);
 
 	cmp_ok(
-		$md->{projectname}, 'eq', $ds->{raw_metadata}{Project_Name},
-		"projectname = Project_Name = $md->{projectname}"
+		$md->{projectnumber}, 'eq', $ds->{raw_metadata}{activity},
+		"projectnumber = activity = $md->{projectnumber}"
 	);
 
 	my $handle = $source->staff_id_to_handle(
-		id => $ds->{raw_metadata}{Project_Creator_Staff_Student_ID}
+		id => $ds->{raw_metadata}{creator}
 	);
 
 	cmp_ok(
@@ -97,19 +98,20 @@ if( ok($md, "Got metadata hash") ) {
 		"creator = $handle = $md->{creator}"
 	);
 
+	$md->{description} =~ s/\s*$//g;
+
 	cmp_ok(
-		$md->{description}, 'eq', $fixtures->{DESCRIPTION},
+		$md->{description}, 'eq', $fixtures->{description},
 		"<description> content as expected"
 	) || do {
-		my $diff = diff \$fixtures->{DESCRIPTION}, \$md->{description};
+		my $diff = diff \$fixtures->{description}, \$md->{description};
 		print "DIFF: \n$diff\n";
 	};
 
 	cmp_ok(
-		$md->{service}, 'eq', $fixtures->{SERVICE},
-		"service = $fixtures->{SERVICE}"
+		$md->{service}, 'eq', $fixtures->{service},
+		"service = $fixtures->{service}"
 	);
-	
 	
 }
 

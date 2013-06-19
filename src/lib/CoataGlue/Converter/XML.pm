@@ -135,16 +135,21 @@ sub parse_metadata {
 			$ds = [ $ds ];
 		}
 		for my $file ( @$ds ) {
-			$self->{log}->debug("Adding datastream $file");
-			if( -f $file ) {
-				my $mimetype = mimetype($file);
-				$datastreams->{$file} = {
-					id => $file,
-					original => $file,
-					mimetype => $mimetype
-				};
+			if( $file =~ /^file:\/\/(.*)$/ ) {
+				$file = $1;
+				$self->{log}->debug("Adding datastream $file");
+				if( -f $file ) {
+					my $mimetype = mimetype($file);
+					$datastreams->{$file} = {
+						id => $file,
+						original => $file,
+						mimetype => $mimetype
+					};
+				} else {
+					$self->{log}->error("Datastream $file not found");
+				}
 			} else {
-				$self->{log}->error("Datastream $file not found");
+				$self->{log}->warn("XML converter can only handle local files");
 			}
 		}
 	}

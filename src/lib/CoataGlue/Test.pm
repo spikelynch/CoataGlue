@@ -13,8 +13,7 @@ use Data::Dumper;
 use strict;
 
 
-my $SAMPLE_DESCRIPTION = "$ENV{COATAGLUE_TESTDIR}/Extras/description.txt";
-my $SAMPLE_SERVICE = 'MIF.service.1';
+my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Extras";
 my $EXISTING_PID = 'RDC:1';
 
 
@@ -50,12 +49,23 @@ sub setup_tests {
 	my @results = dircopy($fixtures, $test) || die("Copy failed $!");
 	
 	
-	return {
-		SOURCES => [ 'MIF', 'Labshare' ],
-		DATASETS => { MIF => 3, Labshare => 2 },
-		DESCRIPTION => loadfile(file => $SAMPLE_DESCRIPTION),
-		SERVICE => $SAMPLE_SERVICE
+	my $fhash = {
+		MIF => {  datasets => 3	},
+		Labshare => { datasets => 2 }
 	};
+	
+	for my $source ( keys %$fhash ) {
+		$fhash->{$source}{description} = loadfile(
+			file => "$FIXTURES_DIR/$source.description.txt"
+		);
+		$fhash->{$source}{service} = loadfile(
+			file => "$FIXTURES_DIR/$source.service.txt"
+		);
+		chomp $fhash->{$source}{description};
+		chomp $fhash->{$source}{service};
+	}
+	
+	return $fhash
 }
 
 sub loadfile {
