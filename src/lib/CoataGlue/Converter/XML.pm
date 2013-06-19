@@ -75,12 +75,6 @@ sub scan {
 		
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
-		$self->{log}->debug(Dumper({
-			path => $path,
-			md => $md		
-		}));
-		
-		
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
