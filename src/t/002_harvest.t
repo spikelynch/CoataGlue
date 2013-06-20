@@ -23,7 +23,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 16;
+use Test::More tests => 2 + 2 * 14;
 use Data::Dumper;
 
 use CoataGlue;
@@ -57,61 +57,80 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
+for my $source ( @sources ) {
+	my $f = $fixtures->{$source->{name}};
+	
+	my $count_ds = scalar keys %$f;
 
-my $count_ds = $fixtures->{MIF}{datasets};
+	# scanning without locking the source should return 0 datasets
 
-# scanning without locking the source should return 0 datasets
+	my @datasets = $source->scan;
 
-my @datasets = $source->scan;
+	ok(!@datasets, "Scan doesn't work until source has been opened.");
 
-ok(!@datasets, "Scan doesn't work until source has been opened.");
+	ok($source->open, "Opened source");
 
-ok($source->open, "Opened source");
+	@datasets = $source->scan;
 
-@datasets = $source->scan;
+	cmp_ok(scalar(@datasets), '==', $count_ds,
+		"Got $count_ds datasets") || die(
+		"Dataset harvest failed, can't continue"
+	);
 
+	my $ds = shift @datasets;
+	
+	my $status = $ds->get_status;
+		
+	cmp_ok(
+		$status->{status}, 'eq', 'new',
+		"Status of dataset is 'new'"
+	);
 
-my $ds = $datasets[0];
+	$ds->set_status_ingested;
 
-cmp_ok(scalar(@datasets), '==', $count_ds, "Got $count_ds datasets") || die(
-	"Dataset harvest failed, can't continue"
-);
+	my $status = $ds->get_status;
+	
+	cmp_ok(
+		$status->{status}, 'eq', 'ingested',
+		"Status of dataset is now 'ingested'"
+	);
+	
+	my $id = $ds->{id};
 
+	like($id, qr/\d+/, "Dataset id is numeric");
 
-my $status = $ds->get_status;
-cmp_ok($status->{status}, 'eq', 'new', "Status of dataset is 'new'");
+	ok($source->close, "Source closed");
 
-$ds->set_status_ingested;
+	ok($source->open, "Source re-opened");
 
-my $status = $ds->get_status;
-cmp_ok($status->{status}, 'eq', 'ingested', "Status of dataset is now 'ingested'");
+	@datasets = $source->scan;
 
-cmp_ok($ds->{id}, '==', 1, "Dataset has ID == 1");
+	my $new_count_ds = $count_ds - 1;
 
-ok($source->close, "Source closed");
+	cmp_ok(
+		scalar(@datasets), '==', $new_count_ds,
+		"Got $new_count_ds datasets"
+	);
 
-ok($source->open, "Source re-opened");
+	$ds = shift @datasets;
 
-@datasets = $source->scan;
+	my $status = $ds->get_status;
+	cmp_ok(
+		$status->{status}, 'eq', 'new',
+		"Status of dataset is 'new'"
+	);
 
-my $new_count_ds = $count_ds - 1;
+	$ds->set_status_ingested;
 
-cmp_ok(scalar(@datasets), '==', $new_count_ds, "Got $new_count_ds datasets");
+	my $status = $ds->get_status;
+	cmp_ok(
+		$status->{status}, 'eq', 'ingested',
+		"Status of dataset is now 'ingested'"
+	);
 
-$ds = $datasets[0];
+	cmp_ok($ds->{id}, '>', $id, "Dataset has ID > $id");
 
-my $status = $ds->get_status;
-cmp_ok($status->{status}, 'eq', 'new', "Status of dataset is 'new'");
+	ok($ds->{dateconverted}, "Has a value for dateconverted '$ds->{dateconverted}'");
 
-$ds->set_status_ingested;
-
-my $status = $ds->get_status;
-cmp_ok($status->{status}, 'eq', 'ingested', "Status of dataset is now 'ingested'");
-
-cmp_ok($ds->{id}, '>', 1, "Dataset has ID > 1");
-
-ok($ds->{dateconverted}, "Has a value for dateconverted '$ds->{dateconverted}'");
-
-ok($source->close, "Source closed");
-
+	ok($source->close, "Source closed");
+}
