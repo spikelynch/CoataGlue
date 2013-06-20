@@ -6,6 +6,7 @@ use parent Exporter;
 
 our @EXPORT_OK = qw(setup_tests teardown is_fedora_up);
 
+use Log::Log4perl;
 use Test::More;
 use File::Path qw(remove_tree);
 use File::Copy::Recursive qw(dircopy);

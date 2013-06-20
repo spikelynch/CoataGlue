@@ -59,7 +59,7 @@ ok(@sources, "Got sources");
 
 my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
 
-my $count_ds = $fixtures->{DATASETS}{$source->{name}};
+my $count_ds = $fixtures->{MIF}{datasets};
 
 # scanning without locking the source should return 0 datasets
 
@@ -67,15 +67,17 @@ my @datasets = $source->scan;
 
 ok(!@datasets, "Scan doesn't work until source has been opened.");
 
-
-
 ok($source->open, "Opened source");
 
 @datasets = $source->scan;
 
-cmp_ok(scalar(@datasets), '==', $count_ds, "Got $count_ds datasets");
 
 my $ds = $datasets[0];
+
+cmp_ok(scalar(@datasets), '==', $count_ds, "Got $count_ds datasets") || die(
+	"Dataset harvest failed, can't continue"
+);
+
 
 my $status = $ds->get_status;
 cmp_ok($status->{status}, 'eq', 'new', "Status of dataset is 'new'");
