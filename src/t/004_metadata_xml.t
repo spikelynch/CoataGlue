@@ -21,7 +21,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 12;
+use Test::More tests => 36;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -74,8 +74,9 @@ for my $source ( @sources ) {
 	my $md_map = $source->{template_cf}{metadata};
 
 	for my $ds ( @datasets  ) {
-
-        my $xml = $ds->xml();
+		my $file = $ds->short_file;
+        my $xml = $ds->xml;
+        my $md = $ds->metadata;
 
         ok($xml, "Generated some XML");
 
@@ -96,42 +97,34 @@ for my $source ( @sources ) {
         };
         
         if( ok(!$@, "XML parsed OK") ) {
-            my $raw = $ds->{raw_metadata};
-            
             cmp_ok(
-                $title, 'eq', $raw->{$md_map->{title}},
-                "<title> = $md_map->{title} = $title"
+                $title, 'eq', $md->{title},
+                "<title> = $md->{title}"
                 );
             
             cmp_ok(
-                $projectname, 'eq', $raw->{$md_map->{projectname}},
-                "<projectname> = $md_map->{projectname} = $projectname"
+                $projectname, 'eq', $md->{projectname},
+                "<projectname> = $md->{projectname}"
+                );
+    
+    
+            cmp_ok(
+                $creator, 'eq', $md->{creator},
+                "<creator> = $creator"
                 );
             
-            my $handle = $source->staff_id_to_handle(
-                id => $raw->{$md_map->{creator}}
-            );
+            $description =~ s/\s*$//g;
+            $fixtures->{$sname}{$file} =~ s/\s*$//g;
             
             cmp_ok(
-                $creator, 'eq', $handle,
-                "<creator> = handle = $creator"
-                );
-            
-            $description =~ s/\s*^//g;
-            $fixtures->{$sname}{description} =~ s/\s*^//g;
-            
-            cmp_ok(
-                $description, 'eq', $fixtures->{$sname}{description},
+                $description, 'eq', $fixtures->{$sname}{$file},
                 "<description> content as expected"
                 ) || do {
-                    my $diff = diff \$fixtures->{$sname}{description}, \$description;
+                    my $diff = diff \$fixtures->{$sname}{$file}, \$description;
                     print "DIFF: \n$diff\n";
             };
             
-            cmp_ok(
-                $service, 'eq', $fixtures->{$sname}{service},
-                "<service> = $fixtures->{$sname}{service}"
-                );
+           
         }
 	}
 }
