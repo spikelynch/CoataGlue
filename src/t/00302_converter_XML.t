@@ -100,6 +100,7 @@ if( ok($md, "Got metadata hash") ) {
 
 	$md->{description} =~ s/\s*$//g;
 
+
 	cmp_ok(
 		$md->{description}, 'eq', $fixtures->{description},
 		"<description> content as expected"
