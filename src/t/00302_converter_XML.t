@@ -19,7 +19,8 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 12;
+
+use Test::More tests => 5 + 2 * 7;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -41,9 +42,7 @@ Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $f = setup_tests(log => $log);
-
-my $fixtures = $f->{Labshare};
+my $fixtures = setup_tests(log => $log);
 
 my $CoataGlue = CoataGlue->new(
 	global => $ENV{COATAGLUE_CONFIG},
@@ -69,55 +68,59 @@ ok($source->open, "Opened source $source->{name}") || die;
 
 my @datasets = $source->scan;
 
-ok(@datasets, "Got at least one dataset") || die;
+my $n = scalar @datasets;
+my $nf = scalar keys %{$fixtures->{Labshare}};
+
+cmp_ok($n, '==', $nf, "Got $nf datasets") || die;
 
 $source->close;
 
-my $ds = shift @datasets;
+for my $ds ( @datasets ) {
+	my $file = $ds->short_file;
+	my $md = $ds->metadata;
 
-my $md = $ds->metadata();
+	if( ok($md, "Got metadata for $file") ) {
 
-if( ok($md, "Got metadata hash") ) {
-	
-	cmp_ok(
-		$md->{title}, 'eq', $ds->{raw_metadata}{title},
-		"title = $md->{title}"
-	);
+		cmp_ok(
+			$md->{title}, 'eq', $ds->{raw_metadata}{title},
+			"title = $md->{title}"
+		);
 
-	cmp_ok(
-		$md->{projectnumber}, 'eq', $ds->{raw_metadata}{activity},
-		"projectnumber = activity = $md->{projectnumber}"
-	);
+		cmp_ok(
+			$md->{projectnumber}, 'eq', $ds->{raw_metadata}{activity},
+			"projectnumber = activity = $md->{projectnumber}"
+		);
 
-	my $handle = $source->staff_id_to_handle(
-		id => $ds->{raw_metadata}{creator}
-	);
-
-	cmp_ok(
-		$md->{creator}, 'eq', $handle,
-		"creator = $handle = $md->{creator}"
-	);
-
-	$md->{description} =~ s/\s*$//g;
+		cmp_ok(
+			$md->{service}, 'eq', $md->{service},
+			"service = $md->{service}"
+		);
 
 
-	cmp_ok(
-		$md->{description}, 'eq', $fixtures->{description},
-		"<description> content as expected"
-	) || do {
-		my $diff = diff \$fixtures->{description}, \$md->{description};
-		print "DIFF: \n$diff\n";
-	};
+		my $handle = $source->staff_id_to_handle(
+			id => $ds->{raw_metadata}{creator}
+		);
 
-	cmp_ok(
-		$md->{service}, 'eq', $fixtures->{service},
-		"service = $fixtures->{service}"
-	);
-	
+		cmp_ok(
+			$md->{creator}, 'eq', $handle,
+			"creator handle: $md->{creator}"
+		);
+
+		$md->{description} =~ s/\s*$//g;
+
+
+		cmp_ok(
+			$md->{description}, 'eq', $fixtures->{Labshare}{$file},
+			"<description> content as expected"
+		) || do {
+			my $diff = diff \$fixtures->{description}, \$md->{description};
+			print "DIFF: \n$diff\n";
+		};
+
+	}
+	ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
 }
 
-ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
-	
 
 
 
