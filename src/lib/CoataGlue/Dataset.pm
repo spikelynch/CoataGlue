@@ -191,6 +191,19 @@ sub global_id {
 }
 
 
+=item short_file()
+
+Returns the filename relative to the capture directory
+
+=cut
+
+sub short_file {
+	my ( $self ) = @_;
+	
+	my @parts = reverse split(/\//, $self->{file});
+	return $parts[0];
+}
+
 
 
 =item get_status()

@@ -44,6 +44,9 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $f = setup_tests(log => $log);
 
+print Dumper({fixtures => $f});
+die;
+
 my $fixtures = $f->{MIF};
 
 my $CoataGlue = CoataGlue->new(

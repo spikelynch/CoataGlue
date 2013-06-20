@@ -14,7 +14,7 @@ use Data::Dumper;
 use strict;
 
 
-my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Extras";
+my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Capture";
 my $EXISTING_PID = 'RDC:1';
 
 
@@ -48,28 +48,42 @@ sub setup_tests {
 	$log && $log->info("Fixtures: copy $fixtures/* => $test");
 	
 	my @results = dircopy($fixtures, $test) || die("Copy failed $!");
-	
-	
-	my $fhash = {
-		MIF => {  datasets => 3	},
-		Labshare => { datasets => 2 }
+		
+	my $fhash = {};
+	my $dh;
+
+	opendir(my $dh, $FIXTURES_DIR) || do {
+		die("Couldn't scan $FIXTURES_DIR");
 	};
-	
-	for my $source ( keys %$fhash ) {
-		$fhash->{$source}{description} = loadfile(
-			file => "$FIXTURES_DIR/$source.description.txt"
-		);
-		$fhash->{$source}{service} = loadfile(
-			file => "$FIXTURES_DIR/$source.service.txt"
-		);
-		chomp $fhash->{$source}{description};
-		chomp $fhash->{$source}{service};
+		
+	SOURCE: for my $item ( readdir($dh) ) {
+		next SOURCE if $item =~ /^\./;
+		my $path = "$FIXTURES_DIR/$item/Test";
+		if( !-d $path ) {
+			$log && $log->warn("No fixture path $path for $item");
+			next SOURCE;
+		}
+		$fhash->{$item} = {};
+		if( opendir(my $sdh, $path)) {
+			DATASET: while( my $ds = readdir($sdh) ) {
+				next DATASET if $ds =~ /^\./;
+				my $dspath = "$path/$ds";
+				$log && $log->debug("path $path / $ds");
+				$fhash->{$item}{$ds} = load_file(
+					file => "$dspath/description.txt"
+				);
+				$fhash->{$item}{$ds} =~ s/\s+$//g;
+			}
+		} else {
+			$log && $log->warn("Couldn't open $path")
+		}
 	}
-	
+
+
 	return $fhash
 }
 
-sub loadfile {
+sub load_file {
 	my ( %params ) = @_;
 	
 	my $file = $params{file};
