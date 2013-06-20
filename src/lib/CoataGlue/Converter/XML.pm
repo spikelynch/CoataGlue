@@ -154,7 +154,7 @@ sub parse_metadata {
 		}
 	}
 
-
+	$md->{dateconverted} = $self->timestamp;
 	
 	return {
 		file => $path,

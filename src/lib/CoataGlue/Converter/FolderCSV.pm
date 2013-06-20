@@ -146,7 +146,7 @@ sub get_metadata {
 	
 	
 	if( ! keys %metadata ) {
-		$self->{log}->error("Error: no file matches $shortpath/$self->{metadatafile}");
+		$self->{log}->warn("Dir $shortpath has no metadata file: skipping");
 		return undef;
 	}
 
