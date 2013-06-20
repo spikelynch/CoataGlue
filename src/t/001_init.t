@@ -56,12 +56,12 @@ ok(@sources, "Got sources");
 cmp_ok(
 	scalar(@sources),
 	'==',
-	scalar(@{$fixtures->{SOURCES}}),
+	scalar(keys %$fixtures),
 	"Got correct number of sources"
 );
 
 my @got_names = sort map { $_->{name} } @sources;
-my @expect_names = sort @{$fixtures->{SOURCES}};
+my @expect_names = sort keys %$fixtures;
 
 for my $got ( @got_names ) {
 	my $expect = shift @expect_names;
