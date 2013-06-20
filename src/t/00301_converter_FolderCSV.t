@@ -20,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 12;
+use Test::More tests => 5 + 3 * 7;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -42,12 +42,7 @@ Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $f = setup_tests(log => $log);
-
-print Dumper({fixtures => $f});
-die;
-
-my $fixtures = $f->{MIF};
+my $fixtures = setup_tests(log => $log);
 
 my $CoataGlue = CoataGlue->new(
 	global => $ENV{COATAGLUE_CONFIG},
@@ -73,55 +68,65 @@ ok($source->open, "Opened source $source->{name}") || die;
 
 my @datasets = $source->scan;
 
-ok(@datasets, "Got at least one dataset");
+my $n = scalar(@datasets);
+
+my $nf = scalar keys %{$fixtures->{MIF}};
+
+ok($n, "Got $nf datasets");
 
 $source->close;
 
-my $ds = shift @datasets;
+for my $ds ( @datasets ) {
 
+	my $file = $ds->short_file;
+	my $md = $ds->metadata;
 
-my $md = $ds->metadata();
-
-if( ok($md, "Got metadata hash") ) {
+	if( ok($md, "Got metadata for $file") ) {
 	
-	cmp_ok(
-		$md->{title}, 'eq', $ds->{raw_metadata}{Experiment_Name},
-		"title = Experiment_Name = $md->{title}"
-	);
+		cmp_ok(
+			$md->{title}, 'eq', $ds->{raw_metadata}{Experiment_Name},
+			"title = Experiment_Name = $md->{title}"
+		);
 
-	cmp_ok(
-		$md->{projectname}, 'eq', $ds->{raw_metadata}{Project_Name},
-		"projectname = Project_Name = $md->{projectname}"
-	);
+		cmp_ok(
+			$md->{projectname}, 'eq', $ds->{raw_metadata}{Project_Name},
+			"projectname = Project_Name = $md->{projectname}"
+		);
 
-	my $handle = $source->staff_id_to_handle(
-		id => $ds->{raw_metadata}{Project_Creator_Staff_Student_ID}
-	);
+		my $handle = $source->staff_id_to_handle(
+			id => $ds->{raw_metadata}{Project_Creator_Staff_Student_ID}
+		);
 
-	cmp_ok(
-		$md->{creator}, 'eq', $handle,
-		"creator = $handle = $md->{creator}"
-	);
+		cmp_ok(
+			$md->{creator}, 'eq', $handle,
+			"creator = $md->{creator}"
+		);
+		
+		my $service = 'MIF.service.2';
+		if( $ds->{raw_metadata}{Instrument_Name} eq "UTS Demo Microscope" ) {
+			$service = 'MIF.service.1';
+		}
 
-	$md->{description} =~ s/\s*$//g;
-
-	cmp_ok(
-		$md->{description}, 'eq', $fixtures->{description},
-		"<description> content as expected"
-	) || do {
-		my $diff = diff \$fixtures->{description}, \$md->{description};
-		print "DIFF: \n$diff\n";
-	};
-
-	cmp_ok(
-		$md->{service}, 'eq', $fixtures->{service},
-		"service = $fixtures->{service}"
-	);
+		cmp_ok(
+			$md->{service}, 'eq', $service,
+			"service = $service"
+		);
 	
-	
+
+		$md->{description} =~ s/\s*$//g;
+
+		cmp_ok(
+			$md->{description}, 'eq', $fixtures->{MIF}{$file},
+			"<description> content as expected"
+		) || do {
+			my $diff = diff \$fixtures->{$file}, \$md->{description};
+			print "DIFF: \n$diff\n";
+		};
+
+	}
+	ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
 }
 
-ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
 	
 
 
