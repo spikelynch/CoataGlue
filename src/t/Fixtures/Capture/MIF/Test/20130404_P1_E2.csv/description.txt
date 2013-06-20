@@ -1,0 +1,9 @@
+Cell Type/Tissue: <span id="celltype">cell</span><br />
+Experiment Type: <span id="experimenttype">Fixed</span><br />
+Slides: <span id="slides">Yes</span><br />
+Dishes: <span id="dishes">Yes</span><br />
+Multiwell Chambers: <span id="multiwell">Yes</span><br />
+Other Equipment: <span id="">other</span><br />
+Fluorescent Proteins: <span id="fluorescentproteins">YFP; CFP; RFP</span><br />
+Has Specific Dyes: <span id="hasspecificdyes">No</span><br />
+Immunofluorescence: <span id="immunofluorescence">Goat anti-Rabbit IgG AF488; Goat anti-Mouse IgG AF405</span><br />
