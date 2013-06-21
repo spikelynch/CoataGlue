@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 15;
+use Test::More tests => 32;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -32,8 +32,6 @@ use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests is_fedora_up);
 
 my $LOGGER = "CoataGlue.tests.006_fedora";
-
-my $DATASET_RE = 'P1_E1';
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
@@ -63,28 +61,22 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+for my $source ( @sources ) {
+ 	my $sname = $source->{name};
+	ok($source->open, "Opened source '$sname'");
 
-ok($source->open, "Opened source '$source->{name}'");
+	my @datasets = $source->scan;
 
-my @datasets = $source->scan;
+	ok(@datasets, "Got at least one dataset");
 
-ok(@datasets, "Got at least one dataset");
+	DATASET: for my $ds ( @datasets ) {
+		my $datastreams = $ds->{datastreams};
+		ok($datastreams && keys %$datastreams, 
+			"Dataset has datastreams") || next DATASET;
 
-my ( $ds ) = grep { $_->{file} =~ /$DATASET_RE/ } @datasets;
+		ok($ds->add_to_repository, "Added dataset to Fedora");
 
-if( ok($ds, "Found dataset matching /$DATASET_RE/: $ds $ds->{file}") ) {
-
-	ok($ds->{datastreams} && keys %{$ds->{datastreams}}, 
-		"Dataset has datastreams");
-
-	ok($ds->add_to_repository, "Added dataset to Fedora");
-
-	ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}");
-	
-	my $datastreams = $ds->{datastreams};
-	
-	if( ok($datastreams, "Got datastreams") ) {
+		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}");
 	
 		for my $id ( keys %$datastreams ) {
 			my $datastream = $datastreams->{$id};
