@@ -702,6 +702,8 @@ sub date_handler {
  				);
 		} else {
 			$self->{log}->error("Invalid date '$value'");
+			$self->{log}->debug(Dumper(
+			{ value => $value, re => $re, val =>  $val }));
 			return undef;
 		}
 	};

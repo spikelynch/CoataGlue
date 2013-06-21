@@ -67,7 +67,9 @@ my @sources = $sources->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+diag("TODO: make this test check more than one source");
+
+my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
 
 my $handler = $source->{template_handlers}{metadata}{datecreated};
 
