@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 11;
+use Test::More tests => 36;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -55,74 +55,73 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
-
-ok($source->open, "Opened source '$source->{name}'");
-
-my @datasets = $source->scan;
-
-ok(@datasets, "Got at least one dataset");
-
-my $ds = shift @datasets;
-
-my $file = $ds->write_redbox;
-
-if( ok($file, "Wrote XML to file: $file") ) {
+for my $source ( @sources ) {
+	my $sname = $source->{name};
 	
-	my ( $title, $projectname, $creator, $description, $service ) = ( '', '', '', '', '', '' );
+	ok($source->open, "Opened source '$sname'");
 
-	my $twig = XML::Twig->new(
-		twig_handlers => {
-			title => 		sub { $title       = $_->text },
-			projectname =>  sub { $projectname = $_->text },
-			creator =>		sub { $creator     = $_->text },
-			description => 	sub { $description = $_->text },
-			service => 		sub { $service     = $_->text }
+	my @datasets = $source->scan;
+
+	ok(@datasets, "Got at least one dataset");
+
+	for my $ds ( @datasets ) {
+
+		my $file = $ds->write_redbox;
+
+		if( ok($file, "Wrote XML to file: $file") ) {	
+			my (
+				$title, $projectname,
+				$creator, $description, $service
+			) = ( '', '', '', '', '', '' );
+
+			my $twig = XML::Twig->new(
+				twig_handlers => {
+					title => 		sub { $title       = $_->text },
+					projectname =>  sub { $projectname = $_->text },
+					creator =>		sub { $creator     = $_->text },
+					description => 	sub { $description = $_->text },
+					service => 		sub { $service     = $_->text }
+				}
+			); 
+
+			eval {
+				$twig->parsefile($file)
+			};
+
+			if( ok(!$@, "XML parsed OK") ) {
+
+				my $md = $ds->metadata;
+				my $mdfile = $ds->short_file;
+				cmp_ok(
+					$title, 'eq', $md->{title},
+					"<title> = $title"
+				);
+
+				cmp_ok(
+					$projectname, 'eq', $md->{projectname},
+					"<projectname> = $projectname"
+				);
+
+				cmp_ok(
+					$creator, 'eq', $md->{creator},
+					"<creator> = $creator"
+				);
+
+				$description =~ s/\s*$//g;
+    			$fixtures->{$sname}{$mdfile} =~ s/\s*$//g;
+
+				cmp_ok(
+					$description, 'eq', $fixtures->{$sname}{$mdfile},
+					"<description> content as expected"
+				) || do {
+					my $diff = diff \$fixtures->{$sname}{$mdfile}, \$description;
+					print "DIFF: \n$diff\n";
+				};
+
+			} else {
+				diag("XML parse error: $@");
+			}
 		}
-	); 
-
-	eval {
-		$twig->parsefile($file)
-	};
-
-	ok(!$@, "XML parsed OK");
-
-	my $raw = $ds->{raw_metadata};
-
-	cmp_ok(
-		$title, 'eq', $raw->{Experiment_Name},
-		"<title> = Experiment_Name = $title"
-	);
-
-	cmp_ok(
-		$projectname, 'eq', $raw->{Project_Name},
-		"<projectname> = Project_ID = $projectname"
-	);
-
-	my $handle = $source->staff_id_to_handle(
-		id => $raw->{Project_Creator_Staff_Student_ID}
-	);
-
-	cmp_ok(
-		$creator, 'eq', $handle,
-		"<creator> = handle = $creator"
-	);
-
-
-	cmp_ok(
-		$description, 'eq', $fixtures->{DESCRIPTION},
-		"<description> content as expected"
-	) || do {
-		my $diff = diff \$fixtures->{DESCRIPTION}, \$description;
-		print "DIFF: \n$diff\n";
-	};
-
-	cmp_ok(
-		$service, 'eq', $fixtures->{SERVICE},
-		"<service> = $fixtures->{SERVICE}"	
-		);
-} else {
-	diag("XML parse error: $@");
+	}
 }
-
 	
