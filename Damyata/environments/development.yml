@@ -32,6 +32,9 @@ auto_reload: 0
 
 fake_baseurl: http://research.uts.edu.au/datasets
 
+filestore:
+  basedir: data
+
 solr:
   server: http://localhost:9000/solr
   core:   fascinator

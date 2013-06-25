@@ -56,6 +56,8 @@ find the datastreams.
 use Dancer ':syntax';
 
 use Apache::Solr;
+use Data::Dumper;
+use File::MimeInfo;
 use Catmandu::FedoraCommons;
 
 our $VERSION = '0.1';
@@ -66,7 +68,8 @@ our %REQUIRED_CONF = (
 	redbox_map => [ qw(
 		title description access created
 		creator_title creator_familyname creator_givenname
-	) ]
+	) ],
+	filestore => [ qw(basedir) ]
 );
 
 
@@ -81,6 +84,7 @@ my $solr = Apache::Solr->new(
 	die;
 };
 
+
 my $fedora = Catmandu::FedoraCommons->new(
 	$conf->{fedora}{url},
 	$conf->{fedora}{user},
@@ -90,6 +94,7 @@ my $fedora = Catmandu::FedoraCommons->new(
 	die;
 };
 
+debug({ "Fedora credentials:" => $conf->{fedora} } );
 
 
 =head DANCER PATHS
@@ -116,7 +121,7 @@ The landing page for a dataset
 get '/:id' => sub {
 	
 	my $id = param('id');
-	debug("id = $id");
+
 	my $uri = request->uri;
 	my $base = undef;
 	
@@ -124,13 +129,14 @@ get '/:id' => sub {
 		$base = $conf->{fake_baseurl};		
 	} else {
 		$base = request->uri_base; 
-	}
+	} g
 	
 	$uri = $base . $uri;
 
 	my $dataset = find_dataset(
 		solr_field => $conf->{solr}{search},
 		redbox_map => $conf->{redbox_map},
+		fedora_id => $id,
 		uri => $uri
 	);
 	
@@ -147,16 +153,86 @@ get '/:id' => sub {
 };
 
 
-=item get /:id/:ds
+=item get /fs/:audience/:id/:ds
 
-Pass the contents of a datastream.
+Serves a datastream which is located in the filesystem, NOT Fedora.
+
+Note: for production, if we use this, needs security based on the
+:section parameter.
 
 =cut
 
-get '/:id/:ds' => sub {
+get '/fs/:section/:id/:ds' => sub {
 	
+	my $section = param('section');
+	my $id = param('id');
+	my $ds = param('ds');
+	
+	my ( $file, $ext ) = split(/\./, $ds);
+	
+	my $mimetype = mimetype($ds);
+	
+	my $path = join(
+		'/', $conf->{filestore}{basedir}, $section, $id, $file
+	);
+	 
+	
+	send_file(
+		$path,
+		content_type => $mimetype,
+		filename => $ds
+	);
 	
 };
+
+
+=item get /fedora/:id/:ds
+
+Serves a datastream which is stored in Fedora Commons, rather
+than the filesystem.
+
+
+=cut
+
+
+get '/fedora/:id/:ds' => sub {
+	
+	my $id = param('id');
+	my $dsid = param('ds');
+	
+	my $data = '';
+	
+	my $datastreams = find_datastreams(fedora_id => $id);
+
+	my @ds = grep { $_->{dsid} eq $dsid } @$datastreams;
+	
+	if( !@ds ) {
+		template 'not_found';
+	} else {
+		my $mimetype = $ds[0]->{mimeType};
+		debug("mimetype $dsid = $mimetype");
+		content_type $mimetype;
+		
+		my $data = '';
+		$fedora->getDatastreamDissemination(
+			pid => $id,
+			dsID => $dsid,
+			callback => sub {
+				my ( $d, $response, $protocol ) = @_;
+				$data .= $d;
+			}
+		);
+		my @mimeparts = split('/', $mimetype);
+		my $filename = join('.', $id, $dsid, $mimeparts[1]);
+		return send_file(
+			\$data,
+			content_type => $mimetype,
+			filename => $filename
+		);
+	}
+	
+};
+
 
 =back
 
@@ -211,6 +287,17 @@ sub load_config {
 Looks up the dataset by its URI in Solr.  If it's found, also
 looks it up in Fedora to get the list of datastreams.
 
+Parameters:
+
+=over 4
+
+=item uri
+=item fedora_id 
+=item solr_field
+=item redbox_map
+
+=back
+
 The return value is a hash as follows:
 
 =over 4
@@ -235,6 +322,8 @@ arrayref of hashes as follows:
 =over 4
 
 =item dsid
+=item label
+=item mimeType
 =item url
 
 =back
@@ -246,6 +335,7 @@ sub find_dataset {
 	my %params = @_;
 	
 	my $uri = $params{uri} || return undef;
+	my $fedora_id = $params{fedora_id} || return undef;
 	my $urifield = $params{solr_field};
 	my $redbox_map = $params{redbox_map};
 	
@@ -280,9 +370,15 @@ sub find_dataset {
 		$dataset->{$field} = $doc->content($redbox_map->{$field}) || '';
 	}
 	
-#	$dataset->{datastreams} = find_datastreams(
-#		fedora_id => $fedora_id
-#	);
+	$dataset->{datastreams} = find_datastreams(
+		fedora_id => $fedora_id
+	);
+	
+	# build a url for each datastream
+	
+	for my $ds ( @{$dataset->{datastreams}} ) {
+		$ds->{url} = uri_for(join('/', $fedora_id, $ds->{dsid}));
+	}
 	
 	return $dataset;
 }
@@ -290,6 +386,9 @@ sub find_dataset {
 
 =item find_datastreams 
 
+Looks the dataset up in Fedora and returns a list of datastreams.
+The list is an arrayref of hashrefs: keys are dsid, mimeType and
+label
 
 =cut
 
@@ -297,34 +396,22 @@ sub find_dataset {
 sub find_datastreams {
 	my %params = @_;
 	
+	
 	my $fedora_id = $params{fedora_id};
+	my $datastreams = {};
 	
-#	my $result = $fc->listDatastreams(pid => $ID);
-#
-#if( $result->is_ok ) {
-#	my $dss = $result->parse_content;
-#	print "List of datastreams\n";
-#	print Dumper( { ds => $dss } ) . "\n\n";
-#	for my $ds ( @{$dss->{datastream}} ) {
-#		my $dsid = $ds->{dsid};
-#		print "Datastream: $dsid\n";
-#		my $data = '';
-#		$fc->getDatastreamDissemination(
-#			pid => $ID,
-#			dsID => $dsid,
-#			callback => sub {
-#				my ( $d, $response, $protocol ) = @_;
-#				$data .= $d;
-#			}
-#		);
-#		print "Data:\n$data\n\n";
-#	}
+	my $result = $fedora->listDatastreams(pid => $fedora_id);
+
+	if( $result->is_ok ) {
+		my $dss = $result->parse_content;
+		
+		return $dss->{datastream};
+		
+	} else {
+		debug("Error looking up datastreams in FC: " . $result->error);
+		return []
+	}
 }
-	
-	
-	
-
-
 
 
 =item request_is_local
