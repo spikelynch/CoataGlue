@@ -65,26 +65,25 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-my $source = $sources[0];
+for my $source ( @sources ) {
 
-ok($source->open, "Opened source '$source->{name}'");
+	ok($source->open, "Opened source '$source->{name}'");
 
-my @datasets = $source->scan;
+	my @datasets = $source->scan;
 
-ok(@datasets, "Got at least one dataset");
+	ok(@datasets, "Got at least one dataset");
 
-my ( $ds ) = grep { $_->{file} =~ /$DATASET_RE/ } @datasets;
-
-die unless ok($ds, "Found dataset matching /$DATASET_RE/: $ds $ds->{file}");
-
-
-
-ok($ds->{datastreams} && keys %{$ds->{datastreams}}, "Dataset has datastreams");
-
-ok($ds->add_to_repository, "Added dataset to Fedora");
-
-ok($ds->{repository_id}, "Dataset has repostoryid: $ds->{repository_id}");
+	for my $ds ( @datasets ) {
 	
-my $datastreams = $ds->datastreams;
+		if( ok($ds->{datastreams} && keys %{$ds->{datastreams}}, "Dataset has datastreams") ) {
 
-ok($ds->publish(to => 'local'), "Published dataset to local");
+			ok($ds->add_to_repository, "Added dataset to Fedora");
+
+			ok($ds->{repository_id}, "Dataset has repostoryid: $ds->{repository_id}");
+	
+			my $datastreams = $ds->datastreams;
+
+			ok($ds->publish(to => 'local'), "Published dataset to local");
+		}
+	}
+}
