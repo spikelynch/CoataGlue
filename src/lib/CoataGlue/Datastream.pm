@@ -39,8 +39,6 @@ use Data::Dumper;
 use File::Path qw(make_path);
 use File::Copy;
 
-our $MAX_DSID_LENGTH = 64;
-our $MAX_DSID_SUFFIX = 1000000;
 
 =head1 METHODS
 
@@ -66,7 +64,7 @@ Create a new datastream object.
 
 =cut
 
-our @MANDATORY_PARAMS = qw(dataset original id);
+our @MANDATORY_PARAMS = qw(dataset original id mimetype);
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -76,22 +74,26 @@ sub new {
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 
-	$self->{dataset}   	= $params{dataset};
-	$self->{original} 	= $params{original};
-	$self->{id}   		= $params{id};
-	$self->{oid}		= $params{oid};
+	$self->{log}->debug("New datastream $params{id} mime = $params{mimetype}");
 
 	my $error = undef;
 	for my $field ( @MANDATORY_PARAMS ) {
-		if( !$self->{$field} ) {
+		if( !$params{$field} ) {
 			$self->{log}->error("Missing field $field in $class");
 			$error = 1;
 		}
 	}
-	
+		
 	if( $error ) {
 		return undef;
 	}
+
+	$self->{dataset}   	= $params{dataset};
+	$self->{original} 	= $params{original};
+	$self->{mimetype}   = $params{mimetype};
+	$self->{id}   		= $params{id};
+	$self->{oid}		= $params{oid};
+
 	
 	return $self;
 }
@@ -133,7 +135,8 @@ sub write {
 
 	my %p = (
 		pid => $pid,
-		dsid => $self->{id}
+		dsid => $self->{id},
+		mimetype => $self->{mimetype}
 	);
 	
 	if( $params{file} ) {
@@ -149,15 +152,13 @@ sub write {
 		delete $self->{url};
 		$self->{xml} = $params{xml};
 	}
-	
-	
-	if( $params{mimetype} ) {
-		$self->{mimetype} = $params{mimetype};
-	}
+
 	
 	if( $params{label} ) {
 		$self->{label} = $params{label};
 	}
+	
+	$p{label} = $self->{label};
 	
 	if( $self->{file} ) {
 		$p{file} = $self->{file};

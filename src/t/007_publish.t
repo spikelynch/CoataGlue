@@ -20,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 15;
+use Test::More tests => 29;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;

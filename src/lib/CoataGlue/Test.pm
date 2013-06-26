@@ -18,6 +18,9 @@ my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Capture";
 my $EXISTING_PID = 'RDC:1';
 
 
+my $COUNTS = {};
+
+
 sub setup_tests {
 	my %params = @_;
 	
@@ -51,6 +54,7 @@ sub setup_tests {
 		
 	my $fhash = {};
 	my $dh;
+		
 
 	opendir(my $dh, $FIXTURES_DIR) || do {
 		die("Couldn't scan $FIXTURES_DIR");

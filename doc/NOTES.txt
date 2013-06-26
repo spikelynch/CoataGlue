@@ -11,6 +11,12 @@ HTML dataset description (a la Peter Sefton's idea of machine and human readable
 Register the object with FC via Catmandu
 
 
+//// DECISION ////
+
+For now - storing datastreams in Fedora and serving them via
+Damyata
+
+
 Next step:
 
 a "publish" script which does the following:
@@ -22,6 +28,41 @@ a "publish" script which does the following:
 This may be the point at which I merge CoataGlue and Damyata.
 
 CoataGlue => Dayadhvam?
+
+
+
+
+* Problem - we can only add datastreams to Fedora as URLs if
+  they are live (or it throws an internal server error).
+  
+So: copy datastream file to the appropriate web hosting 
+directory under Damyata - which can then serve the URLs
+
+Then put the URLs in as datastreams, so that they appear
+when the landing page is up.
+
+So 
+
+* Landing page - based on Fedora and Solr data
+
+Each datastream URL on the landing page goes to -> 
+
+* A Damyata pcid/ds URL which gets the file from /local/ /public/
+  or whatever.
+  
+  so DM / local/$RCid/$dsid
+               / ...
+               \
+        / public/$RCid2/$dsid...
+        
+        
+  Anticipated problem with this is that we're going to get a very 
+  large drectory in /local /public etc
+
+Alternative:
+
+* pass the datastreams into Fedora as files, and then have Damyata
+  fetch the datastreams
 
 
 Fedora Questions

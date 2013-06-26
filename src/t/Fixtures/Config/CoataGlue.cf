@@ -11,12 +11,13 @@ baseurl:	http://localhost:8080/fedora
 username:	fedoraAdmin
 password:	hce39alp
 model:		Catmandu::Store::FedoraCommons::DC
-publishurl: http://localhost:8080/repository/
+publishurl: http://0.0.0.0:3000/data
 
 [Publish]
-directory:  /home/mike/workspace/RDC Data Capture/src/t/Test/Damyata
-local:      local
-public:     public
+datastreams: urls
+directory:   /home/mike/workspace/RDC Fedora/Damyata/public/data
+local:       local
+public:      public
 
 [RepositoryCrosswalk]
 title:			title

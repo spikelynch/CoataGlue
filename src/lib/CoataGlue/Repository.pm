@@ -149,6 +149,8 @@ sub set_datastream {
 	
 	if( $params{mimetype} ) {
 		$fc_params->{mimeType} = $params{mimetype};
+	} else {
+		$self->{log}->warn("Datastream $params{pid}/$params{dsid} being written with no mimetype");
 	}
 	
 	if( $params{label}) {
@@ -179,13 +181,10 @@ sub set_datastream {
 	
 	my $rv = undef;
 	
-	$self->{log}->debug("Adding datastream: " . Dumper({fc_params => $fc_params}));
-	
 	my $result = $repo->addDatastream(%$fc_params);		
 
 	if( $result->is_ok ) {
 		my $content = $result->parse_content;
-		$self->{log}->debug("Datastream added");
 		return 1;
 	} else {
 		$self->{log}->error("Error adding datastream: " . $result->error);

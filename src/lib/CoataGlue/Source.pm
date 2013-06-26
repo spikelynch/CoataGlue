@@ -298,6 +298,8 @@ sub dataset {
 		return undef;
 	}
 	
+	$self->{log}->debug(Dumper({ datastreams => $datastreams}));
+	
 	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
 		file => $file,

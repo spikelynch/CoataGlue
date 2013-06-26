@@ -25,7 +25,7 @@ Variables:
 
 =over 4
 
-=item file           -> the metadata file
+=item file           -> the metadata file$old_id
 =item location       -> dataset location
 =item raw_metadata   -> a hashref of the raw metadata from the
                         Converter
@@ -79,6 +79,7 @@ use Catmandu::Store::FedoraCommons;
 use CoataGlue::Datastream;
 
 our $MAX_DSID_LENGTH = 64;
+our $MAX_DSID_EXTENSION = 4;
 our $MAX_DSID_SUFFIX = 1000000;
 
 =head1 METHODS
@@ -423,13 +424,18 @@ sub write_redbox {
 
 
 
-=item publish(to => [$audience])
+=item publish_urls(to => [$audience])
+
+Version of the publish method where hosted datastreams are stored
+in a filesystem and pushed into Fedora as URLs.  For this to work,
+the datastreams need to be available on the web as served by 
+Damyata before they are pushed into Fedora.
 
 Copies this dataset to the requested 'audience'.  An audience 
 is a directory in the base web publishing director with one
 set of authentication rules (ie UTS only, AAF, public etc):
 
-    /web/uts/$pid/$dsid 
+    ...dancer app/public/data/$audience/$pid/$dsid.$ext
     
 A dataset can only be in one of these folders, so if the 
 publication status changes, it's deleted from the current
@@ -437,6 +443,9 @@ one after it's been successfully added to the new one.
 
 This method also updates the datastreams in the Fedora object
 so that they point to the new URLs.
+
+We need to add the extension $ext so that Damyata can set the 
+mime type when serving the file.
 
 =cut
 
@@ -596,6 +605,8 @@ Will throw an error if it can't generate unique IDs, otherwise
 returns a hash of the datastreams by the new ids (with the original
 ID stored in old_id)
 
+Modified so that it preserves file extensions.
+
 =cut
 
 sub create_datastreams {
@@ -606,57 +617,130 @@ sub create_datastreams {
 	$self->{datastreams} = {};
 	
 	for my $id ( sort keys %$raw ) {
-		
-		my $oid = $id;
-		# first replace forbidden characters with '_'
-		
-		#$id =~ s/[ :$&\/+,;?]/_/g;
-		$id =~ s/[^A-Za-z0-9_.]/_/g;
-		
-		# make sure first character is alphabetical
-		if( $id !~ /^[A-Za-z]/ ) {
-			$id = 'D' . $id;
-		}
-
-		if( $id !~ /^$XML::RegExp::NCName$/ ) {
-			$self->{log}->error("Couldn't make NCName from $oid");
+		if( !$self->add_datastream(id => $id, datastream => $raw->{$id} ) ) {
 			return undef;
 		}
-		
-		# truncate to 64 chars...
-		if( length($id) > $MAX_DSID_LENGTH ) {
-			$id = substr($id, 0, $MAX_DSID_LENGTH);
-		}
-		my $id1 = $id;
-		my $inc = 1;
-		
-		# ...and if it's not unique, just keep appending integers
-		# to it and truncating until we get to a ridiculously high
-		# number.
-		
-		while( $self->{datastreams}{$id} && $inc < $MAX_DSID_SUFFIX ) {
-			$id = substr($id1, 0, $MAX_DSID_LENGTH - length($inc)) . $inc;
-			$inc++;
-		}
-		if( $self->{datastreams}{$id} ) {
-			$self->{log}->error("Couldn't generate unique dataset ID");
-			return undef;
-		}
-		
-		$self->{datastreams}{$id} = CoataGlue::Datastream->new(
-			dataset => 	$self,
-			id => 		$id,
-			oid => 		$oid,
-			original => $raw->{$oid}{original},
-			mimetype => $raw->{$oid}{mimetype},
-			label => 	$raw->{$oid}{label}
-		) || do {
-			$self->{log}->error("Create datastream failed");
-			return undef;
-		};
 	}
 	return $self->{datastreams};
 }
+
+
+=item add_datastream(id => $id, datastream => $ds)
+
+Tries to add a datastream to the hash, fixing the id if required.
+Returns undef if it couldn't be truncated andd uniquified.
+
+=cut
+
+
+sub add_datastream {
+	my ( $self, %params ) = @_;
+
+	my $id = $params{id};
+	my $raw = $params{datastream};	
+
+	$self->{log}->debug("Adding datastream $id");
+	
+	my $oid = $id;
+
+	# remove and keep the extension, if it exists
+
+	my $ext = undef;
+	my $length = $MAX_DSID_LENGTH;
+	if( $id =~ /^(.*)\.([^.]*)$/ ) {
+		( $id, $ext ) = ( $1, $2 );
+		#$self->{log}->debug("Split extension $ext");
+		$length = $MAX_DSID_LENGTH - (length($ext) + 1);
+	} else {
+		$self->{log}->debug("Extension not found");
+	}
+		
+	# Replace forbidden characters with '_'
+		
+	$id =~ s/[^A-Za-z0-9_.]/_/g;
+		
+	# make sure first character is alphabetical
+	if( $id !~ /^[A-Za-z]/ ) {
+		$id = 'D' . $id;
+	}
+
+	if( $id !~ /^$XML::RegExp::NCName$/ ) {
+		$self->{log}->error("Couldn't make NCName from $oid");
+		return undef;
+	}
+		
+	# truncate to the maximum length (allows for extension)
+	if( length($id) > $length ) {
+		$id = substr($id, 0, $length);
+	}
+	my $id1 = $id;
+	my $inc = 1;
+		
+	# ...and if it's not unique, just keep appending integers
+	# to it and truncating until we get to a ridiculously high
+	# number.
+		
+	while( $self->has_dsid(id => $id, ext => $ext) && $inc < $MAX_DSID_SUFFIX ) {
+		$id = substr($id1, 0, $length - length($inc)) . $inc;
+		$inc++;
+	}
+		
+	if( $self->has_dsid(id => $id, ext => $ext) ) {
+		$self->{log}->error("Couldn't generate unique dataset ID");
+		return undef;
+	}
+	my $dsid = $self->dsid(id => $id, ext => $ext);
+	$self->{log}->debug("Adding datastream $dsid");
+	$self->{log}->debug("raw datastream:"  . Dumper($raw));
+	$self->{datastreams}{$dsid} = CoataGlue::Datastream->new(
+		dataset => 	$self,
+		id => 		$dsid,
+		oid => 		$oid,
+		original => $raw->{original},
+		mimetype => $raw->{mimetype},
+		label => 	$raw->{label}
+	) || do {
+		$self->{log}->error("Create datastream failed");
+		return undef;
+	};
+	return 1;
+}
+
+
+=item has_dsid(id => $id, ext => $ext)
+
+Reassemble the id with dsid and checks if it's already in 
+the datastreams hash.
+
+=cut
+
+sub has_dsid {
+	my ( $self, %params ) = @_;
+	
+	my $dsid = $self->dsid(%params);
+	
+	return exists $self->{datastreams}{$dsid};
+}
+
+
+=item dsid(id => $id, ext => $ext)
+
+Utility to reassemble an id and the file extension. Returns
+"$id.$ext" if $ext is defined, otherwise just returns $id
+
+=cut
+
+sub dsid {
+	my ( $self, %params ) = @_;
+	
+	my $dsid = $params{id};
+	if( $params{ext} ) {
+		 $dsid .= '.' . $params{ext};
+	}
+	#$self->{log}->debug("dsid: $params{id}/$params{ext} = $dsid");
+	return $dsid;
+}
+
 
 
 =item datastreams
