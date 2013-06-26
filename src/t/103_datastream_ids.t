@@ -93,7 +93,8 @@ my $datastreams = {};
 for my $bad_id ( keys %BAD_IDS ) {
 	$datastreams->{$bad_id} = {
 		id => $bad_id,
-		original => $bad_id
+		original => $bad_id,
+		mimetype => 'text/xml'
 	}
 }
 
@@ -130,6 +131,7 @@ for my $i ( 1..$NMANY ) {
 	$manystreams->{$id} = {
 		id => $id,
 		original => "File$i",
+		mimetype => 'text/xml'
 	}
 }
 
