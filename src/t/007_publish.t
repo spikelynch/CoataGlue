@@ -19,8 +19,8 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 
 use lib $ENV{COATAGLUE_PERLLIB};
 
-
-use Test::More tests => 29;
+use Test::More tests => 34;
+use Test::WWW::Mechanize;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -60,10 +60,13 @@ ok($repo, "Connected to Fedora Commons");
 
 is_fedora_up(log => $log, repository => $repo);
 
+my $mech = Test::WWW::Mechanize->new;
 
 my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
+
+my %datasets = {};
 
 for my $source ( @sources ) {
 
@@ -78,12 +81,14 @@ for my $source ( @sources ) {
 		if( ok($ds->{datastreams} && keys %{$ds->{datastreams}}, "Dataset has datastreams") ) {
 
 			ok($ds->add_to_repository, "Added dataset to Fedora");
-
 			ok($ds->{repository_id}, "Dataset has repostoryid: $ds->{repository_id}");
-	
-			my $datastreams = $ds->datastreams;
 
-			ok($ds->publish(to => 'local'), "Published dataset to local");
+			ok($ds->write_redbox, "Wrote metadata record for ReDBox");
+		
+			ok($ds->publish(to => 'local'), "Published dataset to local");			
+			
+#			push @ds_urls, $ds->url;
+			
 		}
 	}
 }

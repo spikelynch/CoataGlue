@@ -100,6 +100,62 @@ sub new {
 
 
 
+=item conf
+
+Get config values from the Coataglue object
+
+=cut
+
+sub conf {
+	my ( $self, $section, $field ) = @_;
+	
+	return $self->{dataset}{source}{coataglue}->conf($section, $field);
+}
+
+
+
+=item url()
+
+Returns this datastream's public URL.  Datastreams have to be in 
+a 'section' (public/local/etc) which they always inherit from their
+parent dataset
+
+=cut
+
+sub url {
+	my ( $self ) = @_;
+	
+	if( !$self->{dataset}{repository_id} ) {
+		$self->{log}->error("Can't build a URL - dataset has no repository_id");
+		return undef;
+	}
+	
+	if( !$self->{dataset}{publish} ) {
+		$self->{log}->error("Can't build a URL - dataset not published");
+		return undef;
+	}
+	 
+	 
+	my $base_url = $self->conf('Publish', 'datastreamurl');
+	
+	if( $base_url !~ /\/$/ ) {
+		$base_url .= '/';
+	}
+	
+	$self->{url} = $base_url .= join(
+		'/',
+		$self->{dataset}{publish},
+		$self->{dataset}{repository_id},
+		$self->{id}
+	);
+	
+	return $self->{url};
+	
+	
+}
+
+
+
 =item write(%params)
 
 Write the datastream to Fedora, updating any params that 

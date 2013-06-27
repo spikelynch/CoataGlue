@@ -39,6 +39,7 @@ Variables:
 =item datecreated    -> experiment date from the source
 =item dateconverted  -> date it was converted
 =item datastreams    -> an arrayref of payloads (files or URLs)
+=item published      -> which section the dataset has been published to 
 
 =back
 
@@ -160,6 +161,7 @@ sub new {
 	return $self;
 }
 
+
 =item global_id()
 
 Returns the dataset's global unique ID:
@@ -190,6 +192,8 @@ sub global_id {
 	
 	return $self->{global_id};
 }
+
+
 
 
 =item short_file()
@@ -325,7 +329,6 @@ sub metadata {
 
 This returns the source, id, repository_id etc.  Metadata about
 metadata, which is why it's called 'header'
-chesapeake bay bridge
 =cut
 
 sub header {
@@ -336,16 +339,23 @@ sub header {
 		source => $self->{source}{name},
 		file => $self->{file},
 		location => $self->{location},
-		repositoryURL => $self->repositoryURL,
+		repositoryURL => $self->url,
 		dateconverted => $self->{dateconverted}
 	};
 }
 
 
-sub repositoryURL {
+sub url {
 	my ( $self ) = @_;
 	
-	my $base = $self->conf('Repository', 'publishurl');
+	my $base = $self->conf('Publish', 'dataseturl');
+	
+	if( !$self->{repository_id} ) {
+		$self->{log}->warn(
+			"repositoryURL failed: no repository_id.  Need to add it to the repository first."
+		);
+		return undef;
+	}
 	
 	if( $base !~ /\/$/ ) {
 		return join('/', $base, $self->{repository_id});
@@ -390,6 +400,10 @@ as the filename.
 sub write_redbox {
 	my ( $self ) = @_;
 	
+	if( !$self->{repository_id} ) {
+		$self->{log}->warn("The dataset needs to be added to Fedora before writing XML to ReDBox.");;
+	}
+	
 	my $xml = $self->xml;
 	
 	if( !$xml ) {
@@ -399,7 +413,7 @@ sub write_redbox {
 	
 	my $global_id = $self->global_id;
 	if( !$global_id ) {
-		$self->{log}->error("Dataset $self->{file} has not got a global_id");
+		$self->{log}->error("Dataset $self->{file} doesn't have a global_id");
 		return undef;	
 	}
 	
@@ -453,7 +467,7 @@ sub publish {
 	my ( $self, %params ) = @_;
 	
 	if( !$self->{repository_id} ) {
-		$self->{log}->error("Can't publish dataset $self->{global_id}")
+		$self->{log}->error("Can't publish dataset $self->{global_id} - no repository ID")
 	}
 	
 	my $publish_to = $params{to} || do {
@@ -469,21 +483,16 @@ sub publish {
 	my $old_section = undef;
 	
 	if( $self->{publish} ) {
-		$old_section = $self->conf('Publish', $self->{publish});
+		$old_section = $self->{publish};
 	}
 	
 	my $base = $self->conf('Publish', 'directory');
 	
-	my $section = $self->conf('Publish', $publish_to);
-	
-	if( !$section ) {
-		$self->{log}->error("Couldn't find location $section");
-		return undef;
-	}
+	$self->{publish} = $publish_to;
 	
 	my $id = $self->{repository_id};
 	
-	my $dir = join('/', $base, $section, $id);
+	my $dir = join('/', $base, $self->{publish}, $id);
 	
 	eval {
 		make_path($dir);
@@ -525,17 +534,29 @@ sub publish {
 	}
 	
 	
-	
-	my $base_url = $self->conf('Repository', 'publishurl');
-	$base_url = join('/', $base_url, $section, $id);
-	
+#	my $base_url = $self->conf('Repository', 'publishurl');
+#	$base_url = join('/', $base_url, $section, $id);
+#	
+#	for my $dsid ( keys %{$self->{datastreams}} ) {
+#		$self->{datastreams}{$dsid}->write(
+#			section => $section
+#		)
+#		$self->{datastreams}{$dsid}->write(
+#			url => "$base_url/$dsid"
+#		) || do {
+#			$self->{log}->error("Couldn't update datastream $dsid");
+#		}
+#	}
+
 	for my $dsid ( keys %{$self->{datastreams}} ) {
-		$self->{datastreams}{$dsid}->write(
-			url => "$base_url/$dsid"
-		) || do {
-			$self->{log}->error("Couldn't update datastream $dsid");
+		my $ds = $self->{datastreams}{$dsid};
+		my $url = $ds->url;  # this inherits from the dataset's publish
+		$ds->write(url => $url) || do {
+			$self->{log}->error("Couldn't update datastream $dsid")
 		}
 	}
+
+
 	return 1;
 }
 

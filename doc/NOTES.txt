@@ -13,10 +13,6 @@ Register the object with FC via Catmandu
 
 //// DECISION ////
 
-For now - storing datastreams in Fedora and serving them via
-Damyata
-
-
 Next step:
 
 a "publish" script which does the following:
@@ -41,7 +37,7 @@ directory under Damyata - which can then serve the URLs
 Then put the URLs in as datastreams, so that they appear
 when the landing page is up.
 
-So 
+
 
 * Landing page - based on Fedora and Solr data
 

@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 32;
+use Test::More tests => 47;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -27,6 +27,7 @@ use Text::Diff;
 
 use CoataGlue;
 use CoataGlue::Source;
+
 use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests is_fedora_up);
@@ -78,13 +79,31 @@ for my $source ( @sources ) {
 
 		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}");
 	
+		my $url = $ds->url;
+		my $expect = $source->conf('Publish', 'dataseturl');
+		if( $expect !~ /\/$/ ) {
+			$expect .= '/';
+		}
+		$expect .= $ds->{repository_id};
+		cmp_ok($url, 'eq', $expect, "Dataset has URL $expect");
+	
+		ok($ds->write_redbox, "Wrote metadata record for ReDBox");
+		
+		ok($ds->publish(to => 'local'), "Published dataset to local");			
+	
 		for my $id ( keys %$datastreams ) {
 			my $datastream = $datastreams->{$id};
-			ok(
-				$datastream->write(),
-				"Added dataset $datastream->{id}: $datastream->{file}"
+			my $stream_url = $datastream->url;
+			my $expect_stream = join(
+				'/', $source->conf('Publish', 'datastreamurl'),
+				'local', $ds->{repository_id}, $datastream->{id}
 			);
+					
+			cmp_ok($stream_url, 'eq', $expect_stream, "Datastream has URL: $expect_stream");
 		}
+		
+		
+		
 	}
 
 }

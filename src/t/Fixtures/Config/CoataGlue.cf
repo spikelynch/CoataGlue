@@ -7,17 +7,17 @@ timeformat: %FT%T%z
 store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 
 [Repository]
-baseurl:	http://localhost:8080/fedora
-username:	fedoraAdmin
-password:	hce39alp
-model:		Catmandu::Store::FedoraCommons::DC
-publishurl: http://0.0.0.0:3000/data
+baseurl:		http://localhost:8080/fedora
+username:		fedoraAdmin
+password:		hce39alp
+model:			Catmandu::Store::FedoraCommons::DC
+
 
 [Publish]
-datastreams: urls
-directory:   /home/mike/workspace/RDC Fedora/Damyata/public/data
-local:       local
-public:      public
+datastreams: 	urls
+directory:   	/home/mike/workspace/RDC Fedora/Damyata/public/data
+datastreamurl: 	http://0.0.0.0:3000/fs
+dataseturl:    	http://0.0.0.0:3000/
 
 [RepositoryCrosswalk]
 title:			title
@@ -31,7 +31,8 @@ source:			service
 # integration, in mintIntConfig.xml
 
 [Redbox]
-directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
+#directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
+directory:      /opt/redbox/home/alerts
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       1E23F1709478F63D2083
