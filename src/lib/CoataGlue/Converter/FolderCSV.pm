@@ -86,10 +86,12 @@ sub scan {
 		
 		my $md = $self->get_metadata(path => $path, shortpath => $item);
 		
+		
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
 				file => $md->{file},
+				location => $md->{location},
 				datastreams => $md->{datastreams}
 			);	
 			if( $dataset ) {
@@ -127,9 +129,9 @@ sub get_metadata {
 			my $file = "$path/$item";
 			if( -f $file ) {
 				if( my $md = $self->parse_metadata_file(file => "$path/$item") ) {
-					if( !$md->{location} ) {
-						$md->{location} = $path;
-					}
+#					if( !$md->{location} ) {
+#						$md->{location} = $path;
+#					}
 					$metadata{$file} = $md;
 				}
 			}
@@ -159,6 +161,7 @@ sub get_metadata {
 	
 	return {
 		file => $file,
+		location => $path,
 		metadata => $md,
 		datastreams => $datastreams
 	};

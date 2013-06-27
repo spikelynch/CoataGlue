@@ -291,18 +291,18 @@ sub dataset {
 	
 	my $metadata = $params{metadata};
 	my $file = $params{file};
+	my $location = $params{location};
 	my $datastreams = $params{datastreams};
 	
-	if( !$metadata || ! $file ) {
-		$self->{log}->error("New dataset needs metadata and file");
+	if( !$metadata || ! $file || !$location ) {
+		$self->{log}->error("New dataset needs metadata, location and file");
 		return undef;
 	}
-	
-	$self->{log}->debug(Dumper({ datastreams => $datastreams}));
 	
 	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
 		file => $file,
+		location => $location,
 		raw_metadata => $metadata,
 		datastreams => $datastreams
 	)|| do {

@@ -78,6 +78,7 @@ sub scan {
 		if( $md ) {
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
+				location => $md->{location},
 				file => $md->{file},
 				datastreams => $md->{datastreams}
 			);	
@@ -158,6 +159,7 @@ sub parse_metadata {
 	
 	return {
 		file => $path,
+		location => $path,
 		metadata => $md,
 		datastreams => $datastreams
 	};

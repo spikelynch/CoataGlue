@@ -25,8 +25,8 @@ Variables:
 
 =over 4
 
-=item file           -> the metadata file$old_id
-=item location       -> dataset location
+=item file           -> the metadata file
+=item location       -> dataset location (a directory in a filesystem)
 =item raw_metadata   -> a hashref of the raw metadata from the
                         Converter
 =item metadata       -> the crosswalked metadata
@@ -118,7 +118,7 @@ are compulsory.
 
 =cut
 
-our @MANDATORY_PARAMS = qw(file raw_metadata source);
+our @MANDATORY_PARAMS = qw(file location raw_metadata source);
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -129,6 +129,7 @@ sub new {
 	$self->{log} = Log::Log4perl->get_logger($class);
 
 	$self->{file}   = $params{file};
+	$self->{location} = $params{location};
 	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
 	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};

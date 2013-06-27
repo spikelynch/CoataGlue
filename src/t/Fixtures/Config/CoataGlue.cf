@@ -31,8 +31,8 @@ source:			service
 # integration, in mintIntConfig.xml
 
 [Redbox]
-#directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
-directory:      /opt/redbox/home/alerts
+directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
+#directory:      /opt/redbox/home/alerts
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       1E23F1709478F63D2083
