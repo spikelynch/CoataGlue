@@ -30,7 +30,7 @@ auto_reload: 0
 # fake_baseurl so that I can test Solr searching from my laptop.
 # warning: no trailing slash.
 
-fake_baseurl: http://research.uts.edu.au/datasets
+# fake_baseurl: http://research.uts.edu.au/datasets
 
 filestore:
   basedir: data

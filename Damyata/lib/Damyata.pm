@@ -129,7 +129,7 @@ get '/:id' => sub {
 		$base = $conf->{fake_baseurl};		
 	} else {
 		$base = request->uri_base; 
-	} g
+	}
 	
 	$uri = $base . $uri;
 
@@ -164,18 +164,21 @@ Note: for production, if we use this, needs security based on the
 
 get '/fs/:section/:id/:ds' => sub {
 	
+	warning("In datastream section");
+	
 	my $section = param('section');
 	my $id = param('id');
 	my $ds = param('ds');
 	
-	my ( $file, $ext ) = split(/\./, $ds);
+#my ( $file, $ext ) = split(/\./, $ds);
 	
 	my $mimetype = mimetype($ds);
 	
 	my $path = join(
-		'/', $conf->{filestore}{basedir}, $section, $id, $file
+		'/', $conf->{filestore}{basedir}, $section, $id, $ds
 	);
-	 
+	
+	warning("***File path = $path");
 	
 	send_file(
 		$path,
