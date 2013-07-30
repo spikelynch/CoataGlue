@@ -341,6 +341,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
+		publish => $self->{publish},
 		dateconverted => $self->{dateconverted}
 	};
 }

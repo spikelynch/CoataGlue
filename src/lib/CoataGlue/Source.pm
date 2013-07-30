@@ -495,6 +495,8 @@ is created)
 
 Returns the resulting XML.
 
+FIXME change this to include expanded creator info.
+
 =cut
 
 sub render_view {
@@ -547,7 +549,7 @@ sub write_header_XML {
 	my $header = $dataset->header();
 
 	$writer->startTag('header');	
-	for my $field ( qw(source id file location repositoryURL dateconverted) ) {
+	for my $field ( qw(source id file location publish repositoryURL dateconverted) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
 		$writer->endTag();
