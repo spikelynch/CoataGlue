@@ -98,6 +98,8 @@ are compulsory.
 
 =item file - the metadata file - has to be unique for this dataset
 
+=item location - the directory of the dataset (usually contains file)
+
 =item raw_metadata - a hashref of the raw metadata as read by the converter
       Non-alphanumeric characters in keys are converted to underscores.
       
@@ -583,7 +585,12 @@ sub xml_filename {
 	my $ext = $self->conf('Redbox', 'extension');
 	my $dir = $self->conf('Redbox', 'directory');
 	
+    if( ref($dir) eq 'ARRAY' ) {
+        $self->{log}->debug("Dir is array: " . join(', ', @$dir));
+    }
+
 	my $filename = join('/', $dir, $self->global_id . '.' . $ext);
+    $self->{log}->debug("xml_filename = $filename");
 	return $filename;
 }
 

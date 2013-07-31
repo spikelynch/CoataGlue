@@ -101,6 +101,7 @@ for my $bad_id ( keys %BAD_IDS ) {
 my $dataset = $source->dataset(
 	metadata => {},
 	file => 'file.xml',
+    location => 'location',
 	datastreams => $datastreams
 );
 
@@ -138,6 +139,7 @@ for my $i ( 1..$NMANY ) {
 my $dataset2 = $source->dataset(
 	metadata => {},
 	file => 'file.xml',
+    location => 'location',
 	datastreams => $manystreams
 );
 
