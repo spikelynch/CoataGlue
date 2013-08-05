@@ -73,10 +73,13 @@ sub setup_tests {
 				next DATASET if $ds =~ /^\./;
 				my $dspath = "$path/$ds";
 				$log && $log->debug("path $path / $ds");
-				$fhash->{$item}{$ds} = load_file(
+				$fhash->{$item}{$ds}{description} = load_file(
 					file => "$dspath/description.txt"
 				);
-				$fhash->{$item}{$ds} =~ s/\s+$//g;
+				$fhash->{$item}{$ds}{description} =~ s/\s+$//g;
+                $fhash->{$item}{$ds}{datastreams} = load_datastreams(
+                    file => "$dspath/datastreams.csv"
+                );
 			}
 		} else {
 			$log && $log->warn("Couldn't open $path")
@@ -96,6 +99,32 @@ sub load_file {
 	my $contents = <FILE>;
 	close FILE;
 	return $contents;
+}
+
+sub load_datastreams {
+    my ( %params ) = @_;
+
+    my $streams = {};
+
+    my $file = $params{file};
+
+    open(FILE, "<$file") || do {
+        warn("No datastreams.csv in dataset fixtures");
+        return undef;
+    };
+
+    while ( my $l = <FILE> ) {
+        chomp $l;
+        my ( $id, $file, $mimetype ) = split(/,/, $l);
+        $streams->{$id} = {
+            file => $file, 
+            id => $id,
+            mimetype => $mimetype
+        };
+    }
+
+    close FILE;
+    return $streams;
 }
 
 sub teardown {

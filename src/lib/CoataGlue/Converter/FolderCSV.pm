@@ -7,6 +7,7 @@ use parent 'CoataGlue::Converter';
 use Data::Dumper;
 use Text::CSV;
 use File::MimeInfo;
+#use MIME::Types qw(by_suffix);
 
 =head1 NAME
 
@@ -137,7 +138,8 @@ sub get_metadata {
 			}
 		} elsif( $item !~ /^\./ ) {
 			$self->{log}->debug("Adding datastream $shortpath/$item");
-			my $mimetype = mimetype($item);
+		    my $mimetype = mimetype($item);
+            #my ( $mimetype, $encoding ) = by_suffix($item);
 			$datastreams->{$item} = {
 				id => $item,
 				original => "$path/$item",

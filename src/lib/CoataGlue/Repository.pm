@@ -113,13 +113,14 @@ sub add_object {
 
 	my $rv;
 	
+    $self->{log}->debug("About to add dataset to repository: " . Dumper({ dc => $dc}));
+
 	eval {
 		$rv = $store->bag->add($dc);
 	};
 	
 	if( $@ ) {
 		$self->{log}->error("Couldn't add object to repository: $@");
-		$self->{log}->debug(Dumper({dc => $dc}));
 		return 0;
 	}
 	

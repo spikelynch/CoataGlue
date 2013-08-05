@@ -20,7 +20,7 @@ use lib $ENV{COATAGLUE_PERLLIB};
 
 
 
-use Test::More tests => 5 + 2 * 7;
+use Test::More tests => 5 + 2 * 7 + ( 1 + 2 ) * 3;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -80,6 +80,7 @@ for my $ds ( @datasets ) {
 	my $md = $ds->metadata;
 
 	if( ok($md, "Got metadata for $file") ) {
+        my $f = $fixtures->{Labshare}{$file};
 
 		cmp_ok(
 			$md->{title}, 'eq', $ds->{raw_metadata}{title},
@@ -110,15 +111,27 @@ for my $ds ( @datasets ) {
 
 
 		cmp_ok(
-			$md->{description}, 'eq', $fixtures->{Labshare}{$file},
+			$md->{description}, 'eq', $f->{description},
 			"<description> content as expected"
 		) || do {
-			my $diff = diff \$fixtures->{description}, \$md->{description};
+			my $diff = diff \$f->{description}, \$md->{description};
 			print "DIFF: \n$diff\n";
 		};
 
+        my $datastreams = $ds->{datastreams};
+
+        for my $dsid ( keys %$datastreams ) {
+            my $ds = $datastreams->{$dsid};
+            my $fds = $f->{datastreams}{$dsid};
+            if( ok($fds, "Found datastream $dsid in fixtures") ) {
+                cmp_ok($ds->{original}, 'eq', $fds->{file}, "File = $fds->{file}");
+                cmp_ok($ds->{mimetype}, 'eq', $fds->{mimetype}, "MIME type = $fds->{mimetype}");
+            }
+        }
+
 	}
 	ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
+
 }
 
 
