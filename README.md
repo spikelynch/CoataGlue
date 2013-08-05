@@ -1,5 +1,5 @@
-CoataGlue - UTS Research Data Catalogue
-=======================================
+CoataGlue
+=========
 
 Glue code for the UTS Research Data Catalogue and data capture apps.
 This code was developed with funding from ANDS - the Australian
