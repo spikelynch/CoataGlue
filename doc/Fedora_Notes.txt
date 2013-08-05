@@ -1,0 +1,7 @@
+Misc notes on Fedora setup
+--------------------------
+
+Persistent ID prefix - fedora.fcfg file (not the new Spring config):
+
+Change pidNamespance from 'changeme' to 'RDC'
+

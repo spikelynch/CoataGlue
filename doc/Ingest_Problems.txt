@@ -1,0 +1,73 @@
+TODO for metadata ingest
+
+- Decide which field we are using to control publication and
+  make sure that it's being set 
+
+- Ensure that as many of the required fields as possible are being
+  crosswalked
+
+
+- LOOK UP the person record in Mint and use that to populate the metadata
+  record with name etc
+
+- Same thing for projects
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Getting ReDBox ingest andd curation to work how I think it should...
+
+- all of the metadata record is being passed through, but the
+  connections to Mint records for the researcher are not.
+
+
+Possible points of failure:
+
+* my local ReDBox communicating with the Mint.
+
+
+
+Reading through:
+
+http://www.redboxresearchdata.com.au/documentation/system-overview/curating-linked-data/curation-configuration
+
+dc:relation.vivo:Dataset.0.dc:identifier <- with 0, refers to the 'base field'. With 1, the first, with 2, the second.
+
+Relationship keys should always be base fields.
+
+Need to keep instances (1, 2, etc) distinct.
+
+Try this tomorrow: explicitly spell out all the fields to be copied from the Mint record in the harvest JSON?
+
+Fallback: have CoataGlue look up the user ID in the staff module (or a
+copy of it) and populate the XML metadata with surname, name, etc.
+
+------------
+
+Ingested Relationships
+
+http://www.redboxresearchdata.com.au/documentation/system-administration/administering-mint/ingested-relationships
+
+
+Am working through the Mint docs but should apply to RB - maybe.
+
+in global config:
+transformerDefaults { ingest-relations: { id: ingest-relations } }
+
+- this will only work in Mint, I think, because it assumes that the
+  other records are at the same level - what we need is a lookup into
+  the Mint from Redbox.
+
+- the Mint server is choking, so I'm putting this aside until Paul fixes it:
+  going to work on the import - to - Fedora side.

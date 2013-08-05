@@ -1,5 +1,7 @@
 Data Capture Ingest Adaptor script - notes.
 
+
+
 Input
 
 DC18A - CSV file, one row of headers, one row of data.

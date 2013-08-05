@@ -1,0 +1,43 @@
+Self-submission as data capture
+-------------------------------
+
+Researcher self-submit can work like data capture, with the order of ID
+assignment the other way around.
+
+Data capture works like this:
+
+     Metadata and payload appears in a data source.
+
+     Metadata is crosswalked to standard format
+
+     A fedora object is created
+
+     Datastreams are copied to the web server's filesystem and added to the
+     Fedora object
+
+     A standard XML file is written to ReDBox - this contains the dataset's
+     Damyata (landing page) URL, which contains the Fedora ID
+
+     ...ReDBox harvests it
+
+     Damyata serves up the landing page, checking ReDBox for publication
+     status (by looking up the Damyata URL)
+
+In the case of self-submit, the redbox record is created first.  It could
+work like this:
+
+     Researcher adds a record to ReDBox
+
+     Either right away, or later, they follow a link to the data upload app,
+     which contains the collection's ReDBox oid.
+
+     The upload app shows them the metadata from ReDBox (via solr lookup)
+     and allows them to upload file(s).
+
+     After upload, the app creates a fedora object and adds the payload 
+     as datastream(s).
+
+     The data now has a Damyata URL: write this back to the ReDBox record
+     as a linked URL
+
+     From this point onward the process is the same....

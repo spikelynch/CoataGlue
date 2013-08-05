@@ -1,0 +1,24 @@
+Dependencies for CoataGlue and Damyata
+
+---
+
+Perl modules
+
+Data::Dumper
+Getopt::Std
+Log::Log4perl
+Test::More
+File::Path
+File::Copy::Recursive
+Module::Pluggable
+Catmandu
+Catmandu::Store::FedoraCommons
+POSIX
+XML::Writer
+Crypt::Skip32
+XML::RegExp
+File::MimeInfo
+Text::CSV
+Text::Diff
+XML::Twig
+Test::WWW::Mechanize

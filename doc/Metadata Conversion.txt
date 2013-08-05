@@ -1,0 +1,17 @@
+Notes on how metadata conversion works.
+
+A two-stage process.
+
+The CoataGlue::Converter class takes a dataset (in whatever file format
+or folder combination) and returns a raw metadata hashref.
+
+The CoataGlue::Source then uses its templates to crosswalk the raw
+metadata (which will have weird headers, source-specific technical
+fields, etc) into a standard metadata hash.
+
+The standard metadata is what will get written into ReDBox and Fedora.
+
+The two processes (conversion and crosswalk) are separated out because
+hopefully we'll one day have lots of different DC sources using the
+same conversion class, but with different templates to generate
+a description from the technical metadata.
