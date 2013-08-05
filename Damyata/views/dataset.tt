@@ -1,0 +1,34 @@
+<!-- Template page for a single dataset -->
+
+<div id="page">
+
+<table>
+<tbody>
+
+<tr><td colspan="2"><h1 id="title"><% title %></h1></td></tr>
+
+<tr><td>Description</td><td id="description"><% description %></td></tr>
+
+<tr><td>Created</td><td id="date_created">2013-07-31T04:15:04Z<!--<% created %>--> </td></tr>
+
+<tr><td>Creator</td>
+<td id="creator">Dr Jane Researcher</td>
+<!-- <% creator_title %> <% creator_givenname %> <% creator_familyname %> -->
+</td>
+
+<tr><td>Datastreams</td>
+<td id="datastreams">
+
+<% IF datastreams.size > 0 %>
+  <% FOREACH ds IN datastreams %>
+    <div class="datastream">
+    <a href="<% ds.url %>"><% ds.dsid %> <% ds.label %></a></div>
+  <% END %>
+<% ELSE %>
+  (No datastreams found)
+<% END %>
+
+</td></tr>
+
+</tbody>
+</table>

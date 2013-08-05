@@ -1,0 +1,40 @@
+# This is the main configuration file of your Dancer app
+# env-related settings should go to environments/$env.yml
+# all the settings in this file will be loaded at Dancer's startup.
+
+# Your application's name
+appname: "Damyata"
+
+# The default layout to use for your application (located in
+# views/layouts/main.tt)
+layout: "main"
+
+# when the charset is set to UTF-8 Dancer will handle for you
+# all the magic of encoding and decoding. You should not care
+# about unicode within your app when this setting is set (recommended).
+charset: "UTF-8"
+
+# template engine
+# simple: default and very basic template engine
+# template_toolkit: TT
+
+# template: "simple"
+
+template: "template_toolkit"
+
+logger: "console"
+
+## app-specific config
+
+# redbox_map maps internal dataset hash keys (left) onto
+# the ReDBox fields we get from Solr (right)
+
+redbox_map:
+  title:              dc_title
+  description:        dc_description
+  access:             dc_accessrights
+  created:            dc_created
+  creator_title:      dc:creator.foaf:Person.1.foaf:title
+  creator_familyname: dc:creator.foaf:Person.1.foaf:familyName
+  creator_givenname:  dc:creator.foaf:Person.1.foaf:givenName
+
