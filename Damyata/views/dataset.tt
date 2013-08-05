@@ -9,10 +9,11 @@
 
 <tr><td>Description</td><td id="description"><% description %></td></tr>
 
-<tr><td>Created</td><td id="date_created"><% created %></td></tr>
+<tr><td>Created</td><td id="date_created">2013-07-31T04:15:04Z<!--<% created %>--> </td></tr>
 
 <tr><td>Creator</td>
-<td id="creator"><% creator_title %> <% creator_givenname %> <% creator_familyname %>
+<td id="creator">Dr Jane Researcher</td>
+<!-- <% creator_title %> <% creator_givenname %> <% creator_familyname %> -->
 </td>
 
 <tr><td>Datastreams</td>

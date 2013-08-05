@@ -378,9 +378,10 @@ sub find_dataset {
 	);
 	
 	# build a url for each datastream
+    # Pay No Attention to the Man behind the Curtain
 	
 	for my $ds ( @{$dataset->{datastreams}} ) {
-		$ds->{url} = uri_for(join('/', $fedora_id, $ds->{dsid}));
+		$ds->{url} = uri_for(join('/', 'fs', 'local', $fedora_id, $ds->{dsid}));
 	}
 	
 	return $dataset;
