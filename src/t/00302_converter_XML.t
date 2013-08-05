@@ -20,7 +20,7 @@ use lib $ENV{COATAGLUE_PERLLIB};
 
 
 
-use Test::More tests => 5 + 2 * 7 + ( 1 + 2 ) * 3;
+use Test::More tests => 5 + 2 * 8 + ( 1 + 2 ) * 3;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -78,9 +78,10 @@ $source->close;
 for my $ds ( @datasets ) {
 	my $file = $ds->short_file;
 	my $md = $ds->metadata;
+   
+    my $f = $fixtures->{Labshare}{$file};
 
 	if( ok($md, "Got metadata for $file") ) {
-        my $f = $fixtures->{Labshare}{$file};
 
 		cmp_ok(
 			$md->{title}, 'eq', $ds->{raw_metadata}{title},
@@ -117,8 +118,9 @@ for my $ds ( @datasets ) {
 			my $diff = diff \$f->{description}, \$md->{description};
 			print "DIFF: \n$diff\n";
 		};
+	}
 
-        my $datastreams = $ds->{datastreams};
+    if( ok(my $datastreams = $ds->{datastreams}, "Got datastreams") ) {
 
         for my $dsid ( keys %$datastreams ) {
             my $ds = $datastreams->{$dsid};
@@ -129,7 +131,8 @@ for my $ds ( @datasets ) {
             }
         }
 
-	}
+    }
+
 	ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
 
 }

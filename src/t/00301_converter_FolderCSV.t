@@ -20,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 5 + 3 * 7;
+use Test::More tests => 5 + 3 * 8 + ( 1 + 1 + 3 ) * 3;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -80,9 +80,10 @@ for my $ds ( @datasets ) {
 
 	my $file = $ds->short_file;
 	my $md = $ds->metadata;
+    my $f = $fixtures->{MIF}{$file};
 
 	if( ok($md, "Got metadata for $file") ) {
-	
+
 		cmp_ok(
 			$md->{title}, 'eq', $ds->{raw_metadata}{Experiment_Name},
 			"title = Experiment_Name = $md->{title}"
@@ -116,14 +117,31 @@ for my $ds ( @datasets ) {
 		$md->{description} =~ s/\s*$//g;
 
 		cmp_ok(
-			$md->{description}, 'eq', $fixtures->{MIF}{$file},
+			$md->{description}, 'eq', $f->{description},
 			"<description> content as expected"
 		) || do {
-			my $diff = diff \$fixtures->{$file}, \$md->{description};
+			my $diff = diff \$f->{description}, \$md->{description};
 			print "DIFF: \n$diff\n";
 		};
 
 	}
+
+
+    if( ok(my $datastreams = $ds->{datastreams}, "Got datastreams") ) {
+        
+        for my $dsid ( keys %$datastreams ) {
+            my $ds = $datastreams->{$dsid};
+            my $fds = $f->{datastreams}{$dsid};
+            if( ok($fds, "Found datastream $dsid in fixtures") ) {
+                cmp_ok($ds->{original}, 'eq', $fds->{file}, "File = $fds->{file}");
+                cmp_ok($ds->{mimetype}, 'eq', $fds->{mimetype}, "MIME type = $fds->{mimetype}");
+            }
+        }
+    }
+
+
+
+
 	ok($ds->{datecreated}, "Dataset has datecreated '$ds->{datecreated}'");
 }
 

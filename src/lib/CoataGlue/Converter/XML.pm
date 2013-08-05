@@ -138,7 +138,6 @@ sub parse_metadata {
 		for my $file ( @$ds ) {
 			if( $file =~ /^file:\/\/(.*)$/ ) {
 				$file = $1;
-				$self->{log}->debug("Adding datastream $file");
 				if( -f $file ) {
 					my $mimetype = mimetype($file);
 					$datastreams->{$file} = {
