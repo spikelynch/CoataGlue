@@ -6,7 +6,7 @@ use parent 'CoataGlue::Converter';
 
 use Data::Dumper;
 use XML::Twig;
-use File::MimeInfo;
+use MIME::Types qw(by_suffix);
 
 =head1 NAME
 
@@ -139,7 +139,7 @@ sub parse_metadata {
 			if( $file =~ /^file:\/\/(.*)$/ ) {
 				$file = $1;
 				if( -f $file ) {
-					my $mimetype = mimetype($file);
+                    my ( $mimetype, $encoding ) = by_suffix($file);
 					$datastreams->{$file} = {
 						id => $file,
 						original => $file,
