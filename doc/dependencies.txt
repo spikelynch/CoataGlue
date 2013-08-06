@@ -9,6 +9,7 @@ i = I installed these from yum
 * Catmandu::Store::FedoraCommons (part of Catmandu::FedoraCommons... I think)
 * Crypt::Skip32
 * Dancer
+* Apache::Solr
 
 a Data::Dumper
 a File::Copy::Recursive
