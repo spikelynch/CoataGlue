@@ -9,7 +9,7 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 [Repository]
 baseurl:		http://localhost:8080/fedora
 username:		fedoraAdmin
-password:		hce39alp
+password:	 	########	
 model:			Catmandu::Store::FedoraCommons::DC
 
 
@@ -35,4 +35,4 @@ directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 #directory:      /opt/redbox/home/alerts
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
-cryptkey:       1E23F1709478F63D2083
+cryptkey:       ############################# 
