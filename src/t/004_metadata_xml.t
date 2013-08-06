@@ -112,15 +112,18 @@ for my $source ( @sources ) {
                 $creator, 'eq', $md->{creator},
                 "<creator> = $creator"
                 );
+
+            my $fdesc = $fixtures->{$sname}{$file}{description};
             
             $description =~ s/\s*$//g;
-            $fixtures->{$sname}{$file} =~ s/\s*$//g;
+            $fdesc =~ s/\s*$//g;
+
             
             cmp_ok(
-                $description, 'eq', $fixtures->{$sname}{$file},
+                $description, 'eq', $fdesc,
                 "<description> content as expected"
                 ) || do {
-                    my $diff = diff \$fixtures->{$sname}{$file}, \$description;
+                    my $diff = diff \$fdesc, \$description;
                     print "DIFF: \n$diff\n";
             };
             
