@@ -50,6 +50,18 @@ instance.
 
 
 =back
+
+=head MIME TYPES
+
+Datastreams need to be assigned a MIME type so that Damyata knows how to
+serve them on the web.  In both Converter::FolderCSV and Converter::XML,
+the by_suffix function provided by MIME::Types is used to guess the 
+MIME type from the file suffix.
+
+It's easy to imagine a situation where the MIME type doesn't correspond
+to the file suffix.  If that happens, the Converter module can explicitly
+set the MIME type or read it from the data source, but that will need
+some coding work.
     
 
 =cut
