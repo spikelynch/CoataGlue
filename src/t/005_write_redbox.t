@@ -49,6 +49,7 @@ my $CoataGlue = CoataGlue->new(
 	templates => $ENV{COATAGLUE_TEMPLATES}
 );
 
+
 ok($CoataGlue, "Initialised CoataGlue object");
 
 my @sources = $CoataGlue->sources;
@@ -67,6 +68,7 @@ for my $source ( @sources ) {
 	for my $ds ( @datasets ) {
 
 		my $file = $ds->write_redbox;
+        
 
 		if( ok($file, "Wrote XML to file: $file") ) {	
 			my (
@@ -107,14 +109,18 @@ for my $source ( @sources ) {
 					"<creator> = $creator"
 				);
 
+                my $fixture_id = fix_id($ds);
+
+                my $fdesc = $fixtures->{$sname}{$fixture_id}{description};
+
 				$description =~ s/\s*$//g;
-    			$fixtures->{$sname}{$mdfile} =~ s/\s*$//g;
+    			$fdesc =~ s/\s*$//g;
 
 				cmp_ok(
-					$description, 'eq', $fixtures->{$sname}{$mdfile},
+					$description, 'eq', $fdesc,
 					"<description> content as expected"
 				) || do {
-					my $diff = diff \$fixtures->{$sname}{$mdfile}, \$description;
+					my $diff = diff \$fdesc, \$description;
 					print "DIFF: \n$diff\n";
 				};
 
@@ -125,3 +131,15 @@ for my $source ( @sources ) {
 	}
 }
 	
+
+sub fix_id {
+    my ( $ds ) = @_;
+
+    my $file = $ds->{file};
+
+    if( $file =~ m#/([^/]+)$# ) {
+        return $1;
+    } else {
+        die("Couldn't grep filename from $file");
+    }
+}

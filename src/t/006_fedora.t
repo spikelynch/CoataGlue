@@ -70,15 +70,16 @@ for my $source ( @sources ) {
 
 	ok(@datasets, "Got at least one dataset");
 
-	DATASET: for my $ds ( @datasets ) {
+ 	DATASET: for my $ds ( @datasets ) {
 		my $datastreams = $ds->{datastreams};
 		ok($datastreams && keys %$datastreams, 
 			"Dataset has datastreams") || next DATASET;
 
 		ok($ds->add_to_repository, "Added dataset to Fedora");
 
-		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}");
-	
+		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}") || do {
+            die("Check that Fedora is running.");
+        };
 		my $url = $ds->url;
 		my $expect = $source->conf('Publish', 'dataseturl');
 		if( $expect !~ /\/$/ ) {
