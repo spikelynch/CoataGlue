@@ -257,6 +257,8 @@ sub scan {
 	
 	$self->{log}->debug("Scanning with converter $self->{converter}");
 	
+    ## NOTE 7-8-2013 GET THIS TO LOOK UP PEOPLE
+
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
 		if( $status->{status} eq 'new') {
@@ -313,6 +315,42 @@ sub dataset {
 	return $dataset;
 }	
 
+
+
+=item person(id => $id)
+
+Creates a person record by looking up their ID in the Mint Solr index
+
+=cut
+
+sub person {
+    my ( $self, %params ) = @_;
+
+    my $id = $params{id} || do {
+        $self->{log}->error("No staff id - can't create person");
+        return undef;
+    };
+    
+    my $mint = $self->{coataglue}->mint || do {
+        $self->{log}->error("No connection to Mint");
+        return undef;
+    };
+
+    # 'lookup' is like 'new' except that it encrypts the id provided,
+    # looks it up in Solr, and populates the object's fields
+
+    my $person = CoataGlue::Person->lookup(
+        solr => $mint,
+        key => $self->conf('Redbox', 'cryptkey'),
+        id => $params{id}
+        ) || do {
+            $self->{log}->error("Mint lookup failed: for $params{id}");
+            return undef;
+        };
+
+    return $person;
+}
+    
 
 
 =item load_templates
@@ -474,6 +512,7 @@ sub staff_id_to_handle {
 	
 	return $handle;
 }
+
 
 
 

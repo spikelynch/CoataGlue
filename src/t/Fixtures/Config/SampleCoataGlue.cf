@@ -36,3 +36,7 @@ directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       ############################# 
+
+[Mint]
+solr:           http://mint.research.uts.edu.au/solr
+core:           fascinator

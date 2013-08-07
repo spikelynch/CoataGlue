@@ -1,10 +1,11 @@
 package CoataGlue;
-
 use strict;
 
 use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
+use Apache::Solr;
+
 use CoataGlue::Repository;
 
 
@@ -15,7 +16,8 @@ my %MANDATORY_CONFIG = (
 	Store => [ 'store' ],
 	Repository => [ 'baseurl', 'username', 'password' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
-	Redbox => [ 'directory', 'extension', 'handleprefix' ]
+	Redbox => [ 'directory', 'extension', 'handleprefix' ],
+    Mint => [ 'solr', 'core' ]
 );
 
 
@@ -195,7 +197,32 @@ sub repository_crosswalk {
 	return $dc;
 }
 
+=item mint
 
+Returns an Apache::Solr object for doing lookups in Mint for 
+researcher details
+
+=cut
+
+sub mint {
+    my ( $self ) = @_;
+
+    if( ! $self->{mint} ) {
+        my $mc = $self->{conf}{global}{Mint};
+
+        $self->{mint} = Apache::Solr->new(
+            server => $mc->{solr},
+            core => $mc->{core}
+            ) || do {
+                error("Couldn't connect to ReDBox/Solr");
+                die;
+            };
+    }
+
+    return $self->{mint};
+}
+
+    
 
 
 

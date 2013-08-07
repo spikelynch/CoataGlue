@@ -6,14 +6,22 @@ CoataGlue::Person
 
 =head1 SYNOPSIS
 
-Object for a UTS researcher. Holds the staff ID encryption code.
+Class representing researchers.  Has code to encrypt staff IDs to form
+safe handles, and a method to look up researchers by handle in Mint's solr
+index.
 
 =cut
 
 use strict;
 
 use Log::Log4perl;
+use Data::Dumper;
 use Crypt::Skip32;
+
+my %SOLR_FIELDS = (
+
+);
+
 
 =head1 METHODS
 
@@ -42,6 +50,73 @@ sub new {
 }
 
 
+=item lookup(solr => $solr, id => $id)
+
+Works like 'new' but looks up the details by encrypted staff id in Mint.
+
+=cut
+
+
+sub lookup {
+    my ( $class, %params ) = @_;
+
+    my $self = $class->new(%params);
+
+    my $solr = $params{solr} || do {
+        $self->{log}->error("${class}->lookup needs a solr parameter");
+        return undef;
+    };
+
+    my $key = $params{key};
+    my $prefix = $params{prefix};
+
+    $self->encrypt_id(key => $key);
+
+    $self->{log}->debug("Encrypted id = $self->{encrypted_id}");
+    
+    my $handle = $self->{encrypted_id};
+    my $query = join(':', 'dc_identifier', $handle);
+	my $results = $solr->select(q => $query);
+	
+	my $n = $results->nrSelected;
+	
+	if( !$n ) {
+		$self->{log}->warn("Staff handle $handle not found");
+		return undef;
+	}
+
+    $self->{log}->debug("Got $n results for $handle");
+	
+	if( $n > 1 ) {
+		$self->{log}->warn("More than one Solr index with handle $handle");
+	} else {
+		$self->{log}->debug("Found a result for $handle");
+	}
+	
+	my $doc = $results->selected(0);
+	
+	for my $field ( keys %SOLR_FIELDS ) {
+		$self->{$field} = $doc->content($SOLR_FIELDS{$field}) || '';
+	}
+	
+    return $self;
+}
+
+
+
+
+
+
+
+
+
+
+=item encrypt_id()
+
+Encrypt a staff ID to put in a handle
+
+=cut
+
 
 sub encrypt_id {
 	my ( $self, %params ) = @_;
@@ -56,7 +131,6 @@ sub encrypt_id {
 		die("Invalid cryptKey - must be 20-digit hex");
 	}
 
-
 	my $id = $self->{id};	
 	
 	my $keybytes = pack("H20", $key);
@@ -69,13 +143,6 @@ sub encrypt_id {
 	$self->{log}->debug("Encrypted $id to $self->{encrypted_id}");
 	return $self->{encrypted_id};
 }	
-
-
-
-
-
-
-
 
 
 
