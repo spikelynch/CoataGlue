@@ -138,10 +138,19 @@ sub conf {
 	my ( $self, $section, $field ) = @_;
 	
 	if( exists $self->{conf}{global}{$section} ) {
-		return $self->{conf}{global}{$section}{$field};
-	} else {
+        if( $field ) {
+            if ( exists $self->{conf}{global}{$section}{$field} ) {
+                return $self->{conf}{global}{$section}{$field};
+            } else {
+                $self->{log}->error("No config setting '$field' in section '$section'");
+            }
+        } else {
+            return $self->{conf}{global}{$section};
+        }
+    } else {
 		$self->{log}->error("No config section '$section'");
 	}
+    return undef;
 }
 
 

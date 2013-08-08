@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 3;
+use Test::More tests => 9;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -32,9 +32,11 @@ use CoataGlue::Test qw(setup_tests);
 
 my %RESEARCHER = (
     id => '040221',
-    surname => 'Leijdekkers',
+    familyname => 'Leijdekkers',
     givenname => 'Peter',
-    group_id => 'au.edu.uts/parties/group/927'
+    honorific => 'Doctor',
+    jobtitle => 'Senior Lecturer',
+    groupid => '927'
     );
 
 
@@ -68,13 +70,14 @@ my $key = $CoataGlue->conf('Redbox', 'cryptkey');
 my $id = $RESEARCHER{id};
 
 my $person = CoataGlue::Person->lookup(
-    solr => $solr,
-    key => $key,
+    coataglue => $CoataGlue,
     id => $id,
     prefix => ''
     );
 
 ok($person, "Person lookup $id returned a result");
-    
-cmp_ok($person->{
+
+for my $field ( sort keys %RESEARCHER ) {
+    cmp_ok($person->{$field}, 'eq', $RESEARCHER{$field}, "Got $field = $RESEARCHER{$field}");
+}
 

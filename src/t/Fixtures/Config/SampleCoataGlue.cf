@@ -27,6 +27,14 @@ date:			datecreated
 identifier:		id
 source:			service
 
+[PersonCrosswalk]
+givenname:      Given_Name             
+familyname:     Family_Name
+honorific:      Honorific
+jobtitle:       Job_Title
+groupid:        GroupID_1
+
+
 # cryptkey has to match that used to encrypt the staff IDs for Mint
 # integration, in mintIntConfig.xml
 

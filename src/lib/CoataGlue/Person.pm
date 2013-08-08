@@ -18,9 +18,6 @@ use Log::Log4perl;
 use Data::Dumper;
 use Crypt::Skip32;
 
-my %SOLR_FIELDS = (
-
-);
 
 
 =head1 METHODS
@@ -62,13 +59,16 @@ sub lookup {
 
     my $self = $class->new(%params);
 
-    my $solr = $params{solr} || do {
-        $self->{log}->error("${class}->lookup needs a solr parameter");
+    my $cg = $params{coataglue} || do {
+        $self->{log}->error("Person::lookup needs the CoataGlue object");
         return undef;
     };
 
-    my $key = $params{key};
-    my $prefix = $params{prefix};
+    my $solr = $cg->mint;
+
+    my $key = $cg->conf('Redbox', 'cryptkey');
+    my $prefix = $cg->conf('Redbox', 'handleprefix');
+    my $crosswalk = $cg->conf('PersonCrosswalk');
 
     $self->encrypt_id(key => $key);
 
@@ -85,8 +85,6 @@ sub lookup {
 		return undef;
 	}
 
-    $self->{log}->debug("Got $n results for $handle");
-	
 	if( $n > 1 ) {
 		$self->{log}->warn("More than one Solr index with handle $handle");
 	} else {
@@ -94,9 +92,10 @@ sub lookup {
 	}
 	
 	my $doc = $results->selected(0);
-	
-	for my $field ( keys %SOLR_FIELDS ) {
-		$self->{$field} = $doc->content($SOLR_FIELDS{$field}) || '';
+
+	for my $field ( keys %$crosswalk ) {
+        my $solrf = $doc->field($crosswalk->{$field});
+        $self->{$field} = $solrf->{content} || '';
 	}
 	
     return $self;
