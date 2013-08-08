@@ -257,8 +257,6 @@ sub scan {
 	
 	$self->{log}->debug("Scanning with converter $self->{converter}");
 	
-    ## NOTE 7-8-2013 GET THIS TO LOOK UP PEOPLE
-
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
 		if( $status->{status} eq 'new') {
@@ -317,38 +315,42 @@ sub dataset {
 
 
 
-=item person(id => $id)
+=item lookup_person(dataset => $dataset)
 
-Creates a person record by looking up their ID in the Mint Solr index
+Fetches the creator's details from Mint and populates the rest of the
+metadata fields with them (name, honorific, position, primary group id)
 
 =cut
 
-sub person {
+sub lookup_person {
     my ( $self, %params ) = @_;
 
-    my $id = $params{id} || do {
-        $self->{log}->error("No staff id - can't create person");
-        return undef;
-    };
+    my $ds = $params{dataset};
     
-    my $mint = $self->{coataglue}->mint || do {
-        $self->{log}->error("No connection to Mint");
+    if( ! $ds->{creator} ) {
+        $self->{log}->warn("No creator for dataset $ds->{id}");
         return undef;
-    };
+    }
 
-    # 'lookup' is like 'new' except that it encrypts the id provided,
-    # looks it up in Solr, and populates the object's fields
-
+    my $cg = $self->{coataglue};
+    
     my $person = CoataGlue::Person->lookup(
-        solr => $mint,
-        key => $self->conf('Redbox', 'cryptkey'),
-        id => $params{id}
-        ) || do {
-            $self->{log}->error("Mint lookup failed: for $params{id}");
-            return undef;
-        };
+        coataglue => $cg,
+        id => $ds->{creator}
+        );
 
-    return $person;
+    if( !$person ) {
+        $self->{log}->warn("Couldn't find person for $ds->{id} ($ds->{creator})");
+        return undef;
+    }
+
+    my $person_fields = $cg->conf('PersonCrosswalk');
+
+    for my $field ( sort keys %$person_fields ) {
+        $ds->{$field} = $person->{$field};
+    }
+
+    return $ds;
 }
     
 
@@ -474,23 +476,53 @@ sub crosswalk {
 	if( $view_name eq 'metadata' ) {
 		$ds->{metadata} = $new;
 		$ds->{datecreated} = $ds->{metadata}{datecreated};
-		$self->{log}->debug("Date created = $ds->{datecreated}");
-		$self->{log}->debug("Creator = $ds->{creator}");
-		$ds->{metadata}{creator} = $self->staff_id_to_handle(
-			id => $ds->{metadata}{creator}
-		);
+        my $id = $ds->{metadata}{creator};
+        if( my $person = $self->get_person(id => $id) ) {
+            $ds->{metadata}{creator} = $id;
+            my $fields = $self->conf('PersonCrosswalk');
+            for my $field ( keys %$fields ) {
+                $ds->{metadata}{$field} = $person->{$field};
+            }
+        } else {
+            $self->{log}->error("Warning: dataset $ds->{id} creator $id not found");
+        }
 	} else {
 		$ds->{views}{$view_name} = $new;
 	}
 	return $new;
 }
 
-=item staff_id_to_handle(id => $id)
+=item get_person(id => $id)
 
-Convert a staff ID to an encrypted handle
+Takes a staff ID, converts it to an encrypted handle, looks up the
+handle in Mint and returns a CoataGlue::Person handle if this worked
 
 =cut
 
+
+sub get_person {
+ 	my ( $self, %params ) =  @_;
+ 	
+ 	my $id = $params{id};
+ 	
+	my $person = CoataGlue::Person->lookup(
+        coataglue => $self->{coataglue},
+        id => $id
+    ) || do {
+		$self->{log}->error("Couldn't find creator id $id");
+		return undef;
+	};
+
+    return $person;
+}
+
+
+=item staff_id_to_handle
+
+This method has been superseded by get_person (above) but I'm leaving it
+in because some of the tests use it.  FIXME
+
+=cut
 
 sub staff_id_to_handle {
  	my ( $self, %params ) =  @_;
@@ -505,16 +537,13 @@ sub staff_id_to_handle {
 	my $key = $self->conf('Redbox', 'cryptkey');
 
 	my $encrypt = $p->encrypt_id(id => $id, key => $key	);
-		
+
 	my $handle = $self->conf('Redbox', 'handleprefix') . $encrypt;
-	
+
 	$self->{log}->debug("Staff id $id => handle $handle");
-	
+
 	return $handle;
 }
-
-
-
 
 
 
@@ -530,11 +559,9 @@ metadata fields can be combined into a single 'description' element.
 
 All XML views get an 'rdc' element at the top which contains
 the dataset's origin file, global ID, Fedora object ID (if one
-is created)
+is created)  (I don't think this is true yet.)
 
 Returns the resulting XML.
-
-FIXME change this to include expanded creator info.
 
 =cut
 
@@ -556,7 +583,7 @@ sub render_view {
 	
 	my $output;
 	
-	my $writer = XML::Writer->new(OUTPUT => \$output);
+	my $writer = XML::Writer->new(OUTPUT => \$output, DATA_MODE => 1, DATA_INDENT => 4);
 	$writer->startTag($view);
 	$self->write_header_XML(
 		writer => $writer,

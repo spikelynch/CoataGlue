@@ -41,6 +41,7 @@ my %RESEARCHER = (
 
 
 
+
 my $LOGGER = "CoataGlue.tests.008_people";
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
@@ -71,13 +72,18 @@ my $id = $RESEARCHER{id};
 
 my $person = CoataGlue::Person->lookup(
     coataglue => $CoataGlue,
-    id => $id,
-    prefix => ''
+    id => $id
     );
 
-ok($person, "Person lookup $id returned a result");
+if( ok($person, "Person lookup $id returned a result") ) {
 
-for my $field ( sort keys %RESEARCHER ) {
-    cmp_ok($person->{$field}, 'eq', $RESEARCHER{$field}, "Got $field = $RESEARCHER{$field}");
+    for my $field ( sort keys %RESEARCHER ) {
+        cmp_ok(
+            $person->{$field}, 'eq', $RESEARCHER{$field},
+            "Got $field = $RESEARCHER{$field}"
+            );
+    }
+} else {
+    diag("Skipping field tests.");
 }
 

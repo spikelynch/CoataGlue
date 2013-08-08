@@ -90,10 +90,12 @@ for my $source ( @sources ) {
                 projectname =>  sub { $projectname = $_->text },
                 creator =>		sub { $creator     = $_->text },
                 description => 	sub { $description = $_->text },
-                service => 		sub { $service     = $_->text }
+                service => 		sub { $service     = $_->text },
             }
             ); 
         
+#        diag("XML: \n$xml");
+
         eval {
             $twig->parse($xml)
         };

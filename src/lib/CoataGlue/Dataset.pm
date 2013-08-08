@@ -427,6 +427,8 @@ sub write_redbox {
 		$self->{log}->warn("Ingest $file already exists");
 		return undef;
 	}
+
+    $self->{log}->warn("Publishing to $file");
 	
 	open(XMLFILE, ">$file") || do {
 		$self->{log}->error("Could not open $file for writing: $!");
