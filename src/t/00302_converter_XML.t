@@ -20,7 +20,7 @@ use lib $ENV{COATAGLUE_PERLLIB};
 
 
 
-use Test::More tests => 5 + 2 * 8 + ( 1 + 2 ) * 3;
+use Test::More tests => 5 + 2 * 8 + ( 1 + 2 + 4 ) * 3;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -98,19 +98,28 @@ for my $ds ( @datasets ) {
 			"service = $md->{service}"
 		);
 
-        my $raw_id = $ds->{raw_metadata}{creator};
+        my $staff_id = $ds->{raw_metadata}{creator};
 
-		my $handle = $source->staff_id_to_handle(
-			id => $raw_id
+        my $staff = $fixtures->{STAFF}{$staff_id};
+
+        cmp_ok(
+			$md->{creator}{staffid}, 'eq', $staff_id,
+			"creator/staffid = $staff_id"
 		);
 
-        diag("raw id = $raw_id; handle = $handle");
-
-
-		cmp_ok(
-			$md->{creator}, 'eq', $handle,
-			"creator handle: $md->{creator}"
+        cmp_ok(
+			$md->{creator}{mintid}, 'eq', $staff->{handle},
+			"creator/mintid = $staff->{handle}"
 		);
+
+        for my $field ( qw(givenname familyname honorific jobtitle groupid) ) {
+            cmp_ok(
+                $md->{creator}{$field}, 'eq', $staff->{$field},
+                "creator/$field = $staff->{$field}"
+                );
+        }
+
+
 
 		$md->{description} =~ s/\s*$//g;
 

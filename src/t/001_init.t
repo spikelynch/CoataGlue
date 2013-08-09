@@ -53,10 +53,14 @@ my @sources = $sources->sources;
 
 ok(@sources, "Got sources");
 
+my @fixtures = grep { $_ ne 'STAFF' } keys %$fixtures;
+
+
+
 cmp_ok(
 	scalar(@sources),
 	'==',
-	scalar(keys %$fixtures),
+	scalar(@fixtures),
 	"Got correct number of sources"
 );
 

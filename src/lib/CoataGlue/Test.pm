@@ -6,6 +6,7 @@ use parent Exporter;
 
 our @EXPORT_OK = qw(setup_tests teardown is_fedora_up);
 
+use Config::Std;
 use Log::Log4perl;
 use Test::More;
 use File::Path qw(remove_tree);
@@ -87,6 +88,7 @@ sub setup_tests {
 		}
 	}
 
+    $fhash->{STAFF} = read_staff();
 
 	return $fhash
 }
@@ -127,6 +129,18 @@ sub load_datastreams {
     close FILE;
     return $streams;
 }
+
+
+sub read_staff {
+    my $file = $FIXTURES_DIR . '/staff.cf';
+
+    my $list;
+    
+    read_config($file => $list);
+    return $list;
+}
+    
+
 
 sub teardown {
 

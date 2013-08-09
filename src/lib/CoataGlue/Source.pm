@@ -479,16 +479,20 @@ sub crosswalk {
 		$ds->{metadata} = $new;
 		$ds->{datecreated} = $ds->{metadata}{datecreated};
         my $id = $ds->{metadata}{creator};
+        my $creator = {};
         if( my $person = $self->get_person(id => $id) ) {
-            $ds->{metadata}{creator} = $person->{encrypted_id};
             my $fields = $self->conf('PersonCrosswalk');
             for my $field ( keys %$fields ) {
-                $ds->{metadata}{$field} = $person->{$field};
+                $creator->{$field} = $person->{$field};
             }
-
-            
+            $creator->{staffid} = $id;
+            $creator->{mintid} = $person->{encrypted_id};
+            $ds->{metadata}{creator} = $creator;
         } else {
-            $self->{log}->error("Warning: dataset $ds->{id} creator $id not found");
+            $self->{log}->error(
+                "Warning: dataset $ds->{id} creator $id not found"
+                );
+            $ds->{metadata}{creator} = { staffid => $id };
         }
 	} else {
 		$ds->{views}{$view_name} = $new;
@@ -567,11 +571,12 @@ fields, or an expansion of a template.  The templates have access
 to all of the metadata of the dataset, so (for example) technical
 metadata fields can be combined into a single 'description' element.
 
-All XML views get an 'rdc' element at the top which contains
-the dataset's origin file, global ID, Fedora object ID (if one
-is created)  (I don't think this is true yet.)
+All XML views get an 'header' element at the top which contains the
+dataset's origin file, id, location, repositoryURL, date converted
+and 'publish' flag
 
 Returns the resulting XML.
+
 
 =cut
 
@@ -585,7 +590,7 @@ sub render_view {
 		$self->{log}->error("render_view needs a dataset");
 		return undef;
 	}
-	
+
 	my $elements = $self->crosswalk(
 		view => $view,
 		dataset => $dataset
@@ -593,13 +598,26 @@ sub render_view {
 	
 	my $output;
 	
-	my $writer = XML::Writer->new(OUTPUT => \$output, DATA_MODE => 1, DATA_INDENT => 4);
+	my $writer = XML::Writer->new(
+        OUTPUT => \$output,
+        DATA_MODE => 1,
+        DATA_INDENT => 4
+        
+);
 	$writer->startTag($view);
 	$self->write_header_XML(
 		writer => $writer,
 		dataset => $dataset
 	);
-	for my $tag ( keys %$elements ) {
+    if( $view eq 'metadata' ) {
+        $self->write_creator_XML(
+            writer => $writer,
+            dataset => $dataset
+            );
+    }
+
+	for my $tag ( sort keys %$elements ) {
+        next if( $view eq 'metadata' && $tag eq 'creator' );
 		$writer->startTag($tag);
 		$writer->characters($elements->{$tag});
 		$writer->endTag();
@@ -632,6 +650,31 @@ sub write_header_XML {
 	}
 	$writer->endTag();
 }
+
+
+=item write_creator_XML(writer => $writer)
+
+Add the standard creator tag
+
+=cut
+
+sub write_creator_XML {
+	my ( $self, %params ) = @_;
+	
+	my $dataset = $params{dataset};
+	my $writer = $params{writer};
+	
+	my $creator = $dataset->metadata()->{creator};
+
+	$writer->startTag('creator');	
+	for my $field ( qw(staffid mintid givenname familyname honorific jobtitle groupid) ) {
+		$writer->startTag($field);
+		$writer->characters($creator->{$field});
+		$writer->endTag();
+	}
+	$writer->endTag();
+}
+
 
 
 =item expand_template(template => $template, metadata => $metadata)

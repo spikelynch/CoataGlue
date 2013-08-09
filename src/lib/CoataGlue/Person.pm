@@ -111,7 +111,7 @@ sub lookup {
 	
 	my $doc = $results->selected(0);
 
-	for my $field ( keys %$crosswalk ) {
+	for my $field ( sort keys %$crosswalk ) {
         my $solrf = $doc->field($crosswalk->{$field});
         $self->{$field} = $solrf->{content} || '';
 	}

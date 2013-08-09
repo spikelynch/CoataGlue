@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 36;
+use Test::More tests => 66;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -80,9 +80,15 @@ for my $source ( @sources ) {
 				twig_handlers => {
 					title => 		sub { $title       = $_->text },
 					projectname =>  sub { $projectname = $_->text },
-					creator =>		sub { $creator     = $_->text },
 					description => 	sub { $description = $_->text },
-					service => 		sub { $service     = $_->text }
+					service => 		sub { $service     = $_->text },
+                    creator =>		sub {
+                        $creator = {};
+                        for my $f ( qw(mintid staffid givenname familyname
+                                   honorific jobtitle groupid) ) {
+                            $creator->{$f} = $_->first_child_text($f);
+                        }
+                    },
 				}
 			); 
 
@@ -104,10 +110,12 @@ for my $source ( @sources ) {
 					"<projectname> = $projectname"
 				);
 
-				cmp_ok(
-					$creator, 'eq', $md->{creator},
-					"<creator> = $creator"
-				);
+                for my $f ( sort keys %{$md->{creator}} ) {
+                    cmp_ok(
+                        $creator->{$f}, 'eq', $md->{creator}{$f},
+                        "creator/$f = '$md->{creator}{$f}'"
+                        );
+                }
 
                 my $fixture_id = fix_id($ds);
 
