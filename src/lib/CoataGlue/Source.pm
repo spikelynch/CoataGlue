@@ -332,6 +332,8 @@ sub lookup_person {
         return undef;
     }
 
+
+    die("!!!");
     my $cg = $self->{coataglue};
     
     my $person = CoataGlue::Person->lookup(
@@ -478,11 +480,13 @@ sub crosswalk {
 		$ds->{datecreated} = $ds->{metadata}{datecreated};
         my $id = $ds->{metadata}{creator};
         if( my $person = $self->get_person(id => $id) ) {
-            $ds->{metadata}{creator} = $id;
+            $ds->{metadata}{creator} = $person->{encrypted_id};
             my $fields = $self->conf('PersonCrosswalk');
             for my $field ( keys %$fields ) {
                 $ds->{metadata}{$field} = $person->{$field};
             }
+
+            
         } else {
             $self->{log}->error("Warning: dataset $ds->{id} creator $id not found");
         }
@@ -494,8 +498,8 @@ sub crosswalk {
 
 =item get_person(id => $id)
 
-Takes a staff ID, converts it to an encrypted handle, looks up the
-handle in Mint and returns a CoataGlue::Person handle if this worked
+Takes a staff ID and calls CoataGlue::Person::lookup to find them in 
+Mint.
 
 =cut
 
@@ -538,7 +542,13 @@ sub staff_id_to_handle {
 
 	my $encrypt = $p->encrypt_id(id => $id, key => $key	);
 
-	my $handle = $self->conf('Redbox', 'handleprefix') . $encrypt;
+    my $prefix = $self->conf('Redbox', 'handleprefix');
+    my $handle = $encrypt;
+    
+    if( $prefix ne 'none' ) {
+        $handle = $prefix . $handle;
+    }
+
 
 	$self->{log}->debug("Staff id $id => handle $handle");
 

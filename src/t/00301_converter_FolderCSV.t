@@ -100,7 +100,7 @@ for my $ds ( @datasets ) {
 
 		cmp_ok(
 			$md->{creator}, 'eq', $handle,
-			"creator = $md->{creator}"
+			"creator = $handle"
 		);
 		
 		my $service = 'MIF.service.2';

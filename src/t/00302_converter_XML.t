@@ -98,10 +98,14 @@ for my $ds ( @datasets ) {
 			"service = $md->{service}"
 		);
 
+        my $raw_id = $ds->{raw_metadata}{creator};
 
 		my $handle = $source->staff_id_to_handle(
-			id => $ds->{raw_metadata}{creator}
+			id => $raw_id
 		);
+
+        diag("raw id = $raw_id; handle = $handle");
+
 
 		cmp_ok(
 			$md->{creator}, 'eq', $handle,

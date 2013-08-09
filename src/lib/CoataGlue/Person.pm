@@ -72,13 +72,31 @@ sub lookup {
 
     $self->encrypt_id(key => $key);
 
-    $self->{log}->debug("Encrypted id = $self->{encrypted_id}");
+    my $handle;
+
+    # If prefix = 'none', don't use it -  a hack for testing purposes
     
-    my $handle = $self->{encrypted_id};
+    if( $prefix eq 'none' ) {
+        $handle = $self->{encrypted_id};
+    } else {
+        $handle = $prefix . $self->{encrypted_id};
+    }
+
+    # colons need to be escaped in solr queries
+
+	$handle =~ s/:/\\:/g;
+
     my $query = join(':', 'dc_identifier', $handle);
+
+    $self->{log}->debug("Query = $query");
+
 	my $results = $solr->select(q => $query);
-	
+
+	$self->{log}->debug("results = $results");
+
 	my $n = $results->nrSelected;
+    
+    $self->{log}->debug("nresults = $n");
 	
 	if( !$n ) {
 		$self->{log}->warn("Staff handle $handle not found");

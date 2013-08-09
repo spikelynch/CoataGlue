@@ -13,6 +13,7 @@ use File::Copy::Recursive qw(dircopy);
 use Data::Dumper;
 use strict;
 
+use CoataGlue::Person;
 
 my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Capture";
 my $EXISTING_PID = 'RDC:1';
@@ -154,6 +155,8 @@ sub is_fedora_up {
 	}
 	
 }
+
+
 
 
 
