@@ -1,0 +1,24 @@
+{
+    "comment": "XML mapping to work with the standard metadata ingest format which CoataGlue generates from data capture sources.",
+    "mappings": {
+        "//title":       [ "title", "dc:title", "redbox:submissionProcess.dc:title"],
+        "//description": [ "description", "dc:description", "redbox:submissionProcess.dc:description"],
+        "//source":       "workflow_source",
+
+        "//creator/id":         "dc:creator.foaf:Person.0.dc:identifier",
+	"//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
+	"//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
+
+        "//header/location":      "bibo:Website.0.dc:identifier",
+        "//header/repositoryURL": "bibo:Website.0.dc:identifier",
+	"//header/publish":       "dc:relation.vivo:Dataset.0.vivo:Relationship.rdf:PlainLiteral",
+        "//projectname": "swrc:ResearchProject.dc:title",
+    },
+    "exceptions": {
+        "output": "skos:note.0.dc:description",
+        "fields": {
+            "dc:subject.anzsrc:for.0.rdf:resource": "Cannot resolve ANZSRC (FOR) Codes",
+            "dc:subject.anzsrc:seo.0.rdf:resource": "Cannot resolve ANZSRC (SEO) Codes"
+        }
+    }
+}
