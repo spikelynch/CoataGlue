@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 81;
+use Test::More tests => 116;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -84,11 +84,20 @@ for my $source ( @sources ) {
 		if( ok($file, "Wrote XML to file: $file") ) {	
 			my (
 				$title, $projectname,
-				$creator, $description, $service
-			) = ( '', '', '', '', '', '' );
+				$description, $service
+			) = ( '', '', '', '', '' );
+            
+            my ( $header, $creator );
 
 			my $twig = XML::Twig->new(
 				twig_handlers => {
+                    header =>       sub {
+                        $header = {};
+                        for my $f ( qw(id source file location publish
+                                       repositoryURL dateconverted) ) {
+                            $header->{$f} = $_->first_child_text($f);
+                        }
+                    },
 					title => 		sub { $title       = $_->text },
 					projectname =>  sub { $projectname = $_->text },
 					description => 	sub { $description = $_->text },
@@ -115,6 +124,36 @@ for my $source ( @sources ) {
 					$title, 'eq', $md->{title},
 					"<title> = $title"
 				);
+
+
+                cmp_ok(
+                    $header->{id}, 'eq', $ds->{id},
+                    "Header <id> = $ds->{id}"
+                    );
+                cmp_ok(
+                    $header->{file}, 'eq', $ds->{file},
+                    "Header <file> = $ds->{file}"
+                    );
+                cmp_ok(
+                    $header->{source}, 'eq', $ds->{source}{name},
+                    "Header <source> = $ds->{source}{name}"
+                    );
+                cmp_ok(
+                    $header->{location}, 'eq', $ds->{location},
+                    "Header <location> = $ds->{location}"
+                    );
+                cmp_ok(
+                    $header->{repositoryURL}, 'eq', $ds->url,
+                    "Header <repositoryURL> = " . $ds->url
+                    );
+                cmp_ok(
+                    $header->{publish}, 'eq', $ds->{publish},
+                    "Header <publish> = $ds->{publish}"
+                    );
+                cmp_ok(
+                    $header->{dateconverted}, 'eq', $ds->{dateconverted},
+                    "Header <dateconverted> = $ds->{dateconverted}"
+                    );
 
 				cmp_ok(
 					$projectname, 'eq', $md->{projectname},
