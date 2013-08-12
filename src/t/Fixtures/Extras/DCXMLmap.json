@@ -5,14 +5,15 @@
         "//description": [ "description", "dc:description", "redbox:submissionProcess.dc:description"],
         "//source":       "workflow_source",
 
-        "//creator/id":         "dc:creator.foaf:Person.0.dc:identifier",
-	"//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
-	"//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
+        "//creator/mintid":       "dc:creator.foaf:Person.0.dc:identifier",
+	    "//creator/givenname":    "dc:creator.foaf:Person.0.foaf:givenName",
+	    "//creator/familyname":   "dc:creator.foaf:Person.0.foaf:familyName",
+        "//creator/honorific":    "dc:creator.foaf:Person.0.foaf:title",
 
         "//header/location":      "bibo:Website.0.dc:identifier",
         "//header/repositoryURL": "bibo:Website.0.dc:identifier",
-	"//header/publish":       "dc:relation.vivo:Dataset.0.vivo:Relationship.rdf:PlainLiteral",
-        "//projectname": "swrc:ResearchProject.dc:title",
+	    "//header/publish":       "dc:relation.vivo:Dataset.0.vivo:Relationship.rdf:PlainLiteral",
+        "//projectname":         "swrc:ResearchProject.dc:title",
     },
     "exceptions": {
         "output": "skos:note.0.dc:description",

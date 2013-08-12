@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 66;
+use Test::More tests => 81;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -65,7 +65,18 @@ for my $source ( @sources ) {
 
 	ok(@datasets, "Got at least one dataset");
 
-	for my $ds ( @datasets ) {
+	DATASET: for my $ds ( @datasets ) {
+
+		my $datastreams = $ds->{datastreams};
+		ok($datastreams && keys %$datastreams, 
+			"Dataset has datastreams") || next DATASET;
+
+		ok($ds->add_to_repository, "Added dataset to Fedora");
+
+		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}") || do {
+            die("Check that Fedora is running.");
+        };
+
 
 		my $file = $ds->write_redbox;
         
