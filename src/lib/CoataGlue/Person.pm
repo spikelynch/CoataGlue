@@ -126,7 +126,6 @@ sub lookup {
         $self->{$field} = $solrf->{content} || '';
 	}
 	
-    $self->{log}->debug(">>> encryptedid = $self->{encrypted_id}");
     return $self;
 }
 
@@ -174,8 +173,6 @@ sub creator {
             )
     };
 
-    $self->{log}->debug(Dumper({creator => $creator}));
-
     return $creator;
 }
 
@@ -214,7 +211,7 @@ sub encrypt_id {
 	my $plaintext = pack("N", $id);
 	my $encrypted = $cypher->encrypt($plaintext);
 	$self->{encrypted_id} = unpack("H8", $encrypted);
-	$self->{log}->debug("Encrypted $id to $self->{encrypted_id}");
+	$self->{log}->trace("Encrypted $id to $self->{encrypted_id}");
 	return $self->{encrypted_id};
 }	
 

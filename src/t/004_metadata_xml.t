@@ -8,7 +8,6 @@
 
 Tests generating XML versions of a dataset's metadata
 
-TODO: this should test the contents of the <header> element.
 
 =cut
 
@@ -21,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 66;
+use Test::More tests => 71;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -93,7 +92,7 @@ for my $source ( @sources ) {
                 creator =>		sub {
                     $creator = {};
                     for my $f ( qw(mintid staffid givenname familyname
-                                   honorific jobtitle groupid) ) {
+                                   honorific jobtitle groupid name) ) {
                         $creator->{$f} = $_->first_child_text($f);
                     }
                 },
@@ -117,10 +116,6 @@ for my $source ( @sources ) {
                 );
     
     
-            # cmp_ok(
-            #     $creator, 'eq', $md->{creator},
-            #     "<creator> = $creator"
-            #     );
 
             for my $f ( sort keys %{$md->{creator}} ) {
                 cmp_ok(

@@ -19,7 +19,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 116;
+use Test::More tests => 121;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -93,7 +93,7 @@ for my $source ( @sources ) {
 				twig_handlers => {
                     header =>       sub {
                         $header = {};
-                        for my $f ( qw(id source file location publish
+                        for my $f ( qw(id source file location access
                                        repositoryURL dateconverted) ) {
                             $header->{$f} = $_->first_child_text($f);
                         }
@@ -105,7 +105,7 @@ for my $source ( @sources ) {
                     creator =>		sub {
                         $creator = {};
                         for my $f ( qw(mintid staffid givenname familyname
-                                   honorific jobtitle groupid) ) {
+                                   honorific jobtitle groupid name) ) {
                             $creator->{$f} = $_->first_child_text($f);
                         }
                     },
@@ -130,26 +130,32 @@ for my $source ( @sources ) {
                     $header->{id}, 'eq', $ds->{id},
                     "Header <id> = $ds->{id}"
                     );
+
                 cmp_ok(
                     $header->{file}, 'eq', $ds->{file},
                     "Header <file> = $ds->{file}"
                     );
+
                 cmp_ok(
                     $header->{source}, 'eq', $ds->{source}{name},
                     "Header <source> = $ds->{source}{name}"
                     );
+
                 cmp_ok(
                     $header->{location}, 'eq', $ds->{location},
                     "Header <location> = $ds->{location}"
                     );
+
                 cmp_ok(
                     $header->{repositoryURL}, 'eq', $ds->url,
                     "Header <repositoryURL> = " . $ds->url
                     );
+
                 cmp_ok(
-                    $header->{publish}, 'eq', $ds->{publish},
-                    "Header <publish> = $ds->{publish}"
+                    $header->{access}, 'eq', $ds->{access},
+                    "Header <access> = $ds->{access}"
                     );
+
                 cmp_ok(
                     $header->{dateconverted}, 'eq', $ds->{dateconverted},
                     "Header <dateconverted> = $ds->{dateconverted}"
