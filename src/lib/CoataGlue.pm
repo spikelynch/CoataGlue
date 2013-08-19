@@ -216,18 +216,28 @@ researcher details
 sub mint {
     my ( $self ) = @_;
 
+    $self->{log}->warn("About to get Solr");
+    
     if( ! $self->{mint} ) {
         my $mc = $self->{conf}{global}{Mint};
 
-        $self->{mint} = Apache::Solr->new(
-            server => $mc->{solr},
-            core => $mc->{core}
-            ) || do {
-                error("Couldn't connect to ReDBox/Solr");
-                die;
-            };
-    }
+        eval {
+            $self->{log}->warn("In eval");
+            $self->{mint} = Apache::Solr->new(
+                server => $mc->{solr},
+                core => $mc->{core}
+                );
+        };
 
+        if( $@ ) {
+            $self->{log}->error("Mint (solr) connection failed: $@");
+            return undef;
+        } elsif( !$self->{mint} ) {
+            $self->{log}->error("Mint (solr) connection returned nothing");
+            return undef;
+        }
+    }
+    $self->{log}->warn("Returing $self->{mint}");
     return $self->{mint};
 }
 

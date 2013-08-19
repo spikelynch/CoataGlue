@@ -39,7 +39,7 @@ Variables:
 =item datecreated    -> experiment date from the source
 =item dateconverted  -> date it was converted
 =item datastreams    -> an arrayref of payloads (files or URLs)
-=item published      -> which section the dataset has been published to 
+=item access         -> who can access it / where it's published
 
 =back
 
@@ -56,7 +56,6 @@ The standard metadata fields are as follows.
 =item group
 =item creator
 =item supervisor
-=item share
 =item access
 =item spatial
 =item temporal
@@ -320,6 +319,7 @@ sub metadata {
 	my ( $self ) = @_;
 	
 	if ( $self->{source}->crosswalk(dataset => $self) ) {
+        $self->{log}->debug("## metadata = " . Dumper({md => $self->{metadata}}));
 		return $self->{metadata};
 	} else {
 		return undef;
@@ -343,7 +343,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
-		publish => $self->{publish},
+		access => $self->{access},
 		dateconverted => $self->{dateconverted}
 	};
 }
@@ -488,17 +488,17 @@ sub publish {
 	
 	my $old_section = undef;
 	
-	if( $self->{publish} ) {
-		$old_section = $self->{publish};
+	if( $self->{access} ) {
+		$old_section = $self->{access};
 	}
 	
 	my $base = $self->conf('Publish', 'directory');
 	
-	$self->{publish} = $publish_to;
+	$self->{access} = $publish_to;
 	
 	my $id = $self->{repository_id};
 	
-	my $dir = join('/', $base, $self->{publish}, $id);
+	my $dir = join('/', $base, $self->{access}, $id);
 	
 	eval {
 		make_path($dir);

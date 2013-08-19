@@ -137,6 +137,14 @@ sub read_staff {
     my $list;
     
     read_config($file => $list);
+
+    for my $id ( keys %$list ) {
+        $list->{$id}{name} = join(
+            ' ',
+            $list->{$id}{honorific}, $list->{$id}{givenname},
+            $list->{$id}{familyname}
+            );
+    }
     return $list;
 }
     

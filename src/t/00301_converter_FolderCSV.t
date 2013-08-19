@@ -20,7 +20,7 @@ if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
 use lib $ENV{COATAGLUE_PERLLIB};
 
 
-use Test::More tests => 5 + 3 * 8 + ( 1 + 1 + 3 + 6 ) * 3;
+use Test::More tests => 65;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -98,17 +98,8 @@ for my $ds ( @datasets ) {
 
         my $staff = $fixtures->{STAFF}{$staff_id};
 
-        cmp_ok(
-			$md->{creator}{staffid}, 'eq', $staff_id,
-			"creator/staffid = $staff_id"
-		);
-
-        cmp_ok(
-			$md->{creator}{mintid}, 'eq', $staff->{handle},
-			"creator/mintid = $staff->{handle}"
-		);
-
-        for my $field ( qw(givenname familyname honorific jobtitle groupid) ) {
+        for my $field ( qw(mintid name 
+            givenname familyname name jobtitle honorific groupid) ) {
             cmp_ok(
                 $md->{creator}{$field}, 'eq', $staff->{$field},
                 "creator/$field = $staff->{$field}"

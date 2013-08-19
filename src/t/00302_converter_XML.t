@@ -102,17 +102,8 @@ for my $ds ( @datasets ) {
 
         my $staff = $fixtures->{STAFF}{$staff_id};
 
-        cmp_ok(
-			$md->{creator}{staffid}, 'eq', $staff_id,
-			"creator/staffid = $staff_id"
-		);
-
-        cmp_ok(
-			$md->{creator}{mintid}, 'eq', $staff->{handle},
-			"creator/mintid = $staff->{handle}"
-		);
-
-        for my $field ( qw(givenname familyname honorific jobtitle groupid) ) {
+        for my $field ( qw(mintid name
+            givenname familyname honorific jobtitle groupid) ) {
             cmp_ok(
                 $md->{creator}{$field}, 'eq', $staff->{$field},
                 "creator/$field = $staff->{$field}"

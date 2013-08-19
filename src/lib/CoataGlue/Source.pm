@@ -315,46 +315,6 @@ sub dataset {
 
 
 
-=item lookup_person(dataset => $dataset)
-
-Fetches the creator's details from Mint and populates the rest of the
-metadata fields with them (name, honorific, position, primary group id)
-
-=cut
-
-sub lookup_person {
-    my ( $self, %params ) = @_;
-
-    my $ds = $params{dataset};
-    
-    if( ! $ds->{creator} ) {
-        $self->{log}->warn("No creator for dataset $ds->{id}");
-        return undef;
-    }
-
-
-    die("!!!");
-    my $cg = $self->{coataglue};
-    
-    my $person = CoataGlue::Person->lookup(
-        coataglue => $cg,
-        id => $ds->{creator}
-        );
-
-    if( !$person ) {
-        $self->{log}->warn("Couldn't find person for $ds->{id} ($ds->{creator})");
-        return undef;
-    }
-
-    my $person_fields = $cg->conf('PersonCrosswalk');
-
-    for my $field ( sort keys %$person_fields ) {
-        $ds->{$field} = $person->{$field};
-    }
-
-    return $ds;
-}
-    
 
 
 =item load_templates
@@ -383,6 +343,7 @@ sub load_templates {
 			my ( $mdf, @expr ) = split(/\s+/, $crosswalk->{$field});
 			if( @expr ) {
 				my $handler = $self->make_handler(
+                    field => $field,
 					expr => \@expr
 				);
 				if( $handler ) {
@@ -451,9 +412,10 @@ sub crosswalk {
 	}
 	my $new = {};
 	
+    $self->{log}->trace("view keys = " . join(' ', keys %$view));
+
 	for my $field ( keys %$view ) {
 		if( $view->{$field} =~ /\.tt$/ ) {
-			$self->{log}->debug("Expanding template $field: $view->{$field}");
 			$new->{$field} = $self->expand_template(
 				template => $view->{$field},
 				metadata => $original
@@ -461,17 +423,17 @@ sub crosswalk {
 		} else {
 			my $mdfield = $view->{$field};
 			if( !defined $original->{$mdfield} ) {
-				$self->{log}->warn("Raw metadata '$mdfield' not defined for dataset $ds->{id}");
 				$new->{$field} = '';
 			} else {
 				if( $handlers && $handlers->{$field} ) {
 					my $h = $handlers->{$field};
 					$new->{$field} = &$h($original->{$mdfield});
-					$self->{log}->debug("Applying $field handler: $original->{$mdfield} => $new->{$field}");		
 				} else {
 					$new->{$field} = $original->{$mdfield};
 				}
 			}
+            $self->{log}->trace("Crosswalked $mdfield='$original->{$mdfield}' to $field='$new->{$field}'");
+
 		}
 	}
 	
@@ -481,13 +443,7 @@ sub crosswalk {
         my $id = $ds->{metadata}{creator};
         my $creator = {};
         if( my $person = $self->get_person(id => $id) ) {
-            my $fields = $self->conf('PersonCrosswalk');
-            for my $field ( keys %$fields ) {
-                $creator->{$field} = $person->{$field};
-            }
-            $creator->{staffid} = $id;
-            $creator->{mintid} = $person->{encrypted_id};
-            $ds->{metadata}{creator} = $creator;
+            $ds->{metadata}{creator} = $person->creator;
         } else {
             $self->{log}->error(
                 "Warning: dataset $ds->{id} creator $id not found"
@@ -512,15 +468,15 @@ sub get_person {
  	my ( $self, %params ) =  @_;
  	
  	my $id = $params{id};
- 	
-	my $person = CoataGlue::Person->lookup(
+
+    my $person = CoataGlue::Person->lookup(
         coataglue => $self->{coataglue},
         id => $id
-    ) || do {
-		$self->{log}->error("Couldn't find creator id $id");
-		return undef;
-	};
-
+        ) || do {
+            $self->{log}->error("Couldn't find creator id $id");
+            return undef;
+    };
+    
     return $person;
 }
 
@@ -667,7 +623,7 @@ sub write_creator_XML {
 	my $creator = $dataset->metadata()->{creator};
 
 	$writer->startTag('creator');	
-	for my $field ( qw(staffid mintid givenname familyname honorific jobtitle groupid) ) {
+	for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
 		$writer->startTag($field);
 		$writer->characters($creator->{$field});
 		$writer->endTag();
@@ -750,12 +706,15 @@ sub make_handler {
 	my ( $self, %params ) = @_;
 	
 	my $expr = $params{expr};
+    my $field = $params{field};
 
 	if( $expr->[0] eq 'date' ) {
 		shift @$expr;
-		return $self->date_handler(expr => $expr);
-	} else {
-		$self->{log}->error("Only support date() handlers");
+		return $self->date_handler(field => $field, expr => $expr);
+	} elsif( $expr->[0] eq 'map' ) {
+        return $self->map_handler(field => $field, map => $expr->[1]);
+    } else {
+		$self->{log}->error("Unknown handler '$expr->[0]'");
 		return undef;
 	}
 }
@@ -783,6 +742,7 @@ sub date_handler {
 	my ( $self, %params ) = @_;
 	
 	my $expr = $params{expr};
+    my $field => $params{field};
 	
 	my $re = shift @$expr;
 	my @fields = @$expr;
@@ -816,7 +776,7 @@ sub date_handler {
 		}
 		if( $val->{YEAR} && $val->{MON} && $val->{DAY} ) {
 			if( $val->{YEAR} !~ /^\d\d\d\d$/ ) {
-				$self->{log}->error("Invalid date '$value' (year must be four digits)");
+				$self->{log}->error("Invalid date '$value' in $field (year must be four digits)");
 				return undef;
 			}
 			return strftime(
@@ -837,7 +797,35 @@ sub date_handler {
 }
 
 
+=item map_handler(map => $configmap)
+
+Maps raw values onto another set, as defined by the [map] section of
+the source's config file
+
+=cut
+
+sub map_handler {
+	my ( $self, %params ) = @_;
 	
+    my $mapname = $params{map};
+    
+    
+    my $map = $self->{template_cf}{$mapname};
+
+    if( !$map ) {
+        $self->{log}->error("map handler: no config section '$mapname'");
+        return undef;
+    }
+    return sub { 
+        my ( $value ) = @_;
+        if( $map->{$value} ) {
+            return $map->{$value}
+        } else {
+            $self->{log}->warn("Warning: no map value for $value");
+            return undef;
+        }
+    };
+}
 
 
 1;

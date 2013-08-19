@@ -26,6 +26,9 @@ use Crypt::Skip32;
 
 =item new(%params)
 
+New is used to create stub Person objects for encrypting IDs.  It is
+also used as a kind of mock method to run tests without needing an
+operational Mint server.
 
 
 =cut
@@ -38,10 +41,14 @@ sub new {
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 
-	$self->{id}   = $params{id} || do {
+    for my $key ( %params ) {
+        $self->{$key} = $params{$key};
+    }
+
+	if( !$self->{id} ) {
 		$self->{log}->error("$class requires an id");
 		return undef;
-	};
+	}
 	
 	return $self;
 }
@@ -70,6 +77,8 @@ sub lookup {
     my $prefix = $cg->conf('Redbox', 'handleprefix');
     my $crosswalk = $cg->conf('PersonCrosswalk');
 
+    $self->{coataglue} = $cg;
+
     $self->encrypt_id(key => $key);
 
     my $handle;
@@ -87,17 +96,17 @@ sub lookup {
 	$handle =~ s/:/\\:/g;
 
     my $query = join(':', 'dc_identifier', $handle);
-
-    $self->{log}->debug("Query = $query");
-
 	my $results = $solr->select(q => $query);
+    my $n = undef;
+    eval {
+        $n = $results->nrSelected;
+    };
 
-	$self->{log}->debug("results = $results");
-
-	my $n = $results->nrSelected;
-    
-    $self->{log}->debug("nresults = $n");
-	
+    if( $@ ) {
+        $self->{log}->error("Apache::Solr lookup failed: check that Mint is running.");
+        return undef;
+    };
+    	
 	if( !$n ) {
 		$self->{log}->warn("Staff handle $handle not found");
 		return undef;
@@ -111,16 +120,64 @@ sub lookup {
 	
 	my $doc = $results->selected(0);
 
+
 	for my $field ( sort keys %$crosswalk ) {
         my $solrf = $doc->field($crosswalk->{$field});
         $self->{$field} = $solrf->{content} || '';
 	}
 	
+    $self->{log}->debug(">>> encryptedid = $self->{encrypted_id}");
     return $self;
 }
 
 
 
+
+
+=item creator()
+
+Return a $hashref of fields for the <creator> tag in the metadata interchange
+format, as follows:
+
+=over 4
+
+=item staffid
+
+=item mintid
+
+=item name
+
+=item givenname
+
+=item familyname
+
+=item honorific
+
+=item name
+
+=cut
+
+sub creator {
+    my ( $self ) = @_;
+
+    my $creator = {
+        staffid => $self->{staffid},
+        mintid => $self->{encrypted_id},
+        groupid => $self->{groupid},
+        givenname => $self->{givenname},
+        familyname => $self->{familyname},
+        honorific => $self->{honorific},
+        jobtitle => $self->{jobtitle},
+        name => join(
+            ' ', 
+            $self->{honorific}, $self->{givenname}, $self->{familyname}
+            )
+    };
+
+    $self->{log}->debug(Dumper({creator => $creator}));
+
+    return $creator;
+}
 
 
 
@@ -160,7 +217,6 @@ sub encrypt_id {
 	$self->{log}->debug("Encrypted $id to $self->{encrypted_id}");
 	return $self->{encrypted_id};
 }	
-
 
 
 1;
