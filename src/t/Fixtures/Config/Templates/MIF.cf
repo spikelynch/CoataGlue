@@ -15,4 +15,10 @@ supervisor:     MIF.supervisor.tt
 datecreated:    Experiment_Date date (\d+)\/(\d+)\/(\d+) DAY MON YEAR
 description:	MIF.description.tt
 service:		MIF.instruments.tt
+publish:        "UTS"
 
+[access]
+public:         open access
+uts:            uts
+email:          email
+closed:         closed

@@ -3,6 +3,8 @@
 # In CoataGlue::Converter::XML, datastreams is taken to be one or
 # more payload files.
 
+# metadata maps: standard_field: local_field
+
 [metadata]
 title: 			title
 projectnumber: 	activity
@@ -12,6 +14,15 @@ supervisor:     supervisor
 datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
 description:	description
 service:		service
-access:         access
+access:         access map map_access
 share:          share
 datastreams:    location
+
+# value map for access rights. Values on the right are converted to
+# values on the left - ie 'open access' => 'public'
+
+[map_access]
+public:         open access
+uts:            uts
+email:          email
+closed:         closed

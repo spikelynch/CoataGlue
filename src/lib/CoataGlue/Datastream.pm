@@ -130,7 +130,7 @@ sub url {
 		return undef;
 	}
 	
-	if( !$self->{dataset}{publish} ) {
+	if( !$self->{dataset}{access} ) {
 		$self->{log}->error("Can't build a URL - dataset not published");
 		return undef;
 	}
@@ -144,7 +144,7 @@ sub url {
 	
 	$self->{url} = $base_url .= join(
 		'/',
-		$self->{dataset}{publish},
+		$self->{dataset}{access},
 		$self->{dataset}{repository_id},
 		$self->{id}
 	);

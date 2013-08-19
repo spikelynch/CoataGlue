@@ -12,8 +12,8 @@
 
         "//header/location":      "bibo:Website.0.dc:identifier",
         "//header/repositoryURL": "bibo:Website.0.dc:identifier",
-	    "//header/publish":       "dc:relation.vivo:Dataset.0.vivo:Relationship.rdf:PlainLiteral",
-        "//projectname":         "swrc:ResearchProject.dc:title",
+        "//header/access":        "dc:accessRights.skos:prefLabel",
+        "//header/accessURL":     "dc:accessRights.dc:identifier"
     },
     "exceptions": {
         "output": "skos:note.0.dc:description",

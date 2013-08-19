@@ -5,9 +5,9 @@
 # Each data source has a section in [Brackets]
 #
 # mandatory fields:
-#   converter - a CoataGlue::Converter class
+#   converter - A CoataGlue::Converter subclass
 #   templates - the directory containing XML templates
-#
+#   ids       - A CoataGlue::ID subclass
 # All the other fields depend on the converter class 
 
 [MIF]
