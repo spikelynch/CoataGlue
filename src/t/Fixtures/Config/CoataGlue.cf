@@ -9,9 +9,8 @@ store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 [Repository]
 baseurl:		http://localhost:8080/fedora
 username:		fedoraAdmin
-password:		hce39alp
+password:		
 model:			Catmandu::Store::FedoraCommons::DC
-
 
 [Publish]
 datastreams: 	urls
@@ -27,6 +26,14 @@ date:			datecreated
 identifier:		id
 source:			service
 
+[PersonCrosswalk]
+givenname:      Given_Name             
+familyname:     Family_Name
+honorific:      Honorific
+jobtitle:       Job_Title
+groupid:        GroupID_1
+
+
 # cryptkey has to match that used to encrypt the staff IDs for Mint
 # integration, in mintIntConfig.xml
 
@@ -34,5 +41,13 @@ source:			service
 directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
 #directory:      /opt/redbox/home/alerts
 extension:		dc
-handleprefix:   http://hdl.handle.net/11057/id
-cryptkey:       1E23F1709478F63D2083
+#handleprefix:   http://hdl.handle.net/11057/id
+handleprefix:   none
+cryptkey:      
+
+[Mint]
+# if 'mode' = 'mock', don't do Mint queries
+mode:           mock
+solr:           http://mint.research.uts.edu.au/solr
+core:           fascinator
+
