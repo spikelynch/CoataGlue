@@ -18,10 +18,10 @@ my @MODULES = qw(
         Crypt::Skip32
         Data::Dumper
         File::Copy::Recursive
-        File::MimeInfo
         File::Path
         Getopt::Std
         Log::Log4perl
+        MIME::Types
         Module::Pluggable
         POSIX
         Text::CSV

@@ -57,7 +57,7 @@ use Dancer ':syntax';
 
 use Apache::Solr;
 use Data::Dumper;
-use File::MimeInfo;
+use MIME::Types qw(by_suffix);
 use Catmandu::FedoraCommons;
 
 our $VERSION = '0.1';
@@ -93,8 +93,6 @@ my $fedora = Catmandu::FedoraCommons->new(
 	error("Couldn't connect to Fedora Commons");
 	die;
 };
-
-debug({ "Fedora credentials:" => $conf->{fedora} } );
 
 
 =head DANCER PATHS
@@ -170,15 +168,11 @@ get '/fs/:section/:id/:ds' => sub {
 	my $id = param('id');
 	my $ds = param('ds');
 	
-#my ( $file, $ext ) = split(/\./, $ds);
-	
-	my $mimetype = mimetype($ds);
+	my ( $mimetype, $encoding ) = by_suffix($ds);
 	
 	my $path = join(
 		'/', $conf->{filestore}{basedir}, $section, $id, $ds
 	);
-	
-	warning("***File path = $path");
 	
 	send_file(
 		$path,
@@ -347,8 +341,6 @@ sub find_dataset {
 	$esc_uri =~ s/:/\\:/g;
 	
 	my $solr_query = join(':', $urifield, $esc_uri);
-
-	debug("Solr query: '$solr_query'");
 
 	my $results = $solr->select(q => $solr_query);
 	
