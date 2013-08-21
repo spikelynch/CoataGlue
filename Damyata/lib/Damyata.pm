@@ -69,7 +69,7 @@ our %REQUIRED_CONF = (
 		title description access created
 		creator_title creator_familyname creator_givenname
 	) ],
-	filestore => [ qw(basedir) ]
+	data => [ qw(baseurl) ]
 );
 
 
@@ -142,7 +142,7 @@ get '/:id' => sub {
 		template 'not_found' => { uri => $uri };
 	} else {
 		
-		if( $dataset->{access} eq 'local' && !request_is_local() ) {
+		if( $dataset->{access} eq 'uts' && !request_is_local() ) {
 			template 'forbidden' => { uri => $uri };
 		} else {
 			template 'dataset' => $dataset
@@ -153,32 +153,30 @@ get '/:id' => sub {
 
 =item get /fs/:audience/:id/:ds
 
-Serves a datastream which is located in the filesystem, NOT Fedora.
-
-Note: for production, if we use this, needs security based on the
-:section parameter.
+This route is obsolete - was used when we were serving datastreams 
+via Dancer, but now they're static.
 
 =cut
 
 get '/fs/:section/:id/:ds' => sub {
 	
-	warning("In datastream section");
+    send_error(404, "Not found");
+
+	# my $section = param('section');
+	# my $id = param('id');
+	# my $ds = param('ds');
 	
-	my $section = param('section');
-	my $id = param('id');
-	my $ds = param('ds');
+	# my ( $mimetype, $encoding ) = by_suffix($ds);
 	
-	my ( $mimetype, $encoding ) = by_suffix($ds);
+	# my $path = join(
+	# 	'/', $conf->{filestore}{basedir}, $section, $id, $ds
+	# );
 	
-	my $path = join(
-		'/', $conf->{filestore}{basedir}, $section, $id, $ds
-	);
-	
-	send_file(
-		$path,
-		content_type => $mimetype,
-		filename => $ds
-	);
+	# send_file(
+	# 	$path,
+	# 	content_type => $mimetype,
+	# 	filename => $ds
+	# );
 	
 };
 
@@ -370,13 +368,22 @@ sub find_dataset {
 	);
 	
 	# build a url for each datastream
-    # Pay No Attention to the Man behind the Curtain
 	
-	for my $ds ( @{$dataset->{datastreams}} ) {
-		$ds->{url} = uri_for(join('/', 'fs', 'local', $fedora_id, $ds->{dsid}));
-	}
-	
-	return $dataset;
+    my $access = $dataset->{access};
+
+    if( !$access ) {
+        $access = 'public';
+    }
+
+    debug("Base URL for data = " . $conf->{data}{baseurl});
+
+    for my $ds ( @{$dataset->{datastreams}} ) {
+        $ds->{url} = join(
+            '/', $conf->{data}{baseurl}, 
+            $access, $fedora_id, $ds->{dsid}
+            );
+    }
+    return $dataset;
 }
 
 
