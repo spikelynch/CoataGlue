@@ -96,6 +96,9 @@ sub lookup {
 	$handle =~ s/:/\\:/g;
 
     my $query = join(':', 'dc_identifier', $handle);
+
+    $self->{log}->debug("Solr query: $query");
+
 	my $results = $solr->select(q => $query);
     my $n = undef;
     eval {

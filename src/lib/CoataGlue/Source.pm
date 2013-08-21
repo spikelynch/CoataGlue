@@ -329,7 +329,8 @@ sub load_templates {
 	
 	my $template_cf = join('/', 
                            $self->{coataglue}{templates},
-                           "$self->{settings}{templates}.cf");
+                           "$self->{settings}{templates}.cf"
+        );
 	
 	if( !-f $template_cf ) {
 		$self->{log}->error("$self->{name}: Template config $template_cf not found");
@@ -338,7 +339,10 @@ sub load_templates {
 	
 	read_config($template_cf => $self->{template_cf});
 	
-	for my $view ( keys %{$self->{template_cf}} ) {
+    # sections starting with _ are not views but handler maps etc
+
+	VIEW: for my $view ( keys %{$self->{template_cf}} ) {
+        next VIEW if $view =~ /^_/;
 		my $crosswalk = $self->{template_cf}{$view};
 		for my $field ( keys %$crosswalk ) {
 			# generate code snippets for converting dates etc
@@ -350,7 +354,7 @@ sub load_templates {
 				);
 				if( $handler ) {
  					$self->{template_handlers}{$view}{$field} = $handler; 
-					$self->{log}->debug("Added $view.$field handler: $handler");
+					$self->{log}->debug("Added $view.$field handler: $handler to source $self");
 				} else {
 					$self->{log}->error("Handler init failed for $view.$field: check config");
 				}
@@ -363,7 +367,7 @@ sub load_templates {
 	
 	$self->{log}->debug("Data source $self->{name} loaded template config $template_cf");
 	$self->{tt} = Template->new({
-		INCLUDE_PATH => $ENV{COATAGLUE_TEMPLATES},
+		INCLUDE_PATH => $self->{coataglue}{templates},
 		POST_CHOMP => 1
 	});
 }
@@ -654,7 +658,7 @@ sub expand_template {
 	if( $self->{tt}->process($params{template}, $metadata, \$output) ) {
 		return $output;
 	}
-	$self->{log}->error("Template error in $template " . $self->{tt}->error);
+	$self->{log}->error("Template error ($template) " . $self->{tt}->error);
 	return undef;
 }
 
@@ -811,8 +815,9 @@ sub map_handler {
 	
     my $mapname = $params{map};
     
-    
     my $map = $self->{template_cf}{$mapname};
+
+    $self->{log}->debug("Map handler $params{field} $mapname");
 
     if( !$map ) {
         $self->{log}->error("map handler: no config section '$mapname'");

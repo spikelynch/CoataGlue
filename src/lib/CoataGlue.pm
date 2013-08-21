@@ -216,13 +216,10 @@ researcher details
 sub mint {
     my ( $self ) = @_;
 
-    $self->{log}->warn("About to get Solr");
-    
     if( ! $self->{mint} ) {
         my $mc = $self->{conf}{global}{Mint};
 
         eval {
-            $self->{log}->warn("In eval");
             $self->{mint} = Apache::Solr->new(
                 server => $mc->{solr},
                 core => $mc->{core}
@@ -237,7 +234,6 @@ sub mint {
             return undef;
         }
     }
-    $self->{log}->warn("Returing $self->{mint}");
     return $self->{mint};
 }
 
