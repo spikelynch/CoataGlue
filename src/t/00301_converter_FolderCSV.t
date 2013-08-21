@@ -35,6 +35,7 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
+
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
 ok($CoataGlue, "Initialised CoataGlue object");

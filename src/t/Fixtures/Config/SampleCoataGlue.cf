@@ -3,6 +3,7 @@
 [General]
 timeformat: %FT%T%z
 
+
 [Store]
 store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
 

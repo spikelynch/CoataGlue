@@ -14,15 +14,15 @@ supervisor:     supervisor
 datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
 description:	description
 service:		service
-access:         access map map_access
+access:         access map _mapaccess
 share:          share
 datastreams:    location
 
-# value map for access rights. Values on the right are converted to
-# values on the left - ie 'open access' => 'public'
+# value map for access rights. Values on the left are converted to
+# values on the right - ie 'open access' => 'public'
 
-[map_access]
-public:         open access
+[_mapaccess]
+open access:    public
 uts:            uts
 email:          email
 closed:         closed

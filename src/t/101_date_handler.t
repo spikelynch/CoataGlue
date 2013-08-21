@@ -48,9 +48,9 @@ my $fixtures = setup_tests(log => $log);
 
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
-ok($sources, "Initialised CoataGlue object");
+ok($CoataGlue, "Initialised CoataGlue object");
 
-my @sources = $sources->sources;
+my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 

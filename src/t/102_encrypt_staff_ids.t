@@ -27,11 +27,18 @@ use CoataGlue::Person;
 use CoataGlue::Test qw(setup_tests);
 
 
+# my %STAFF_IDS = (
+# 	910031 => 'b14e8cdc',
+# 	105465 => 'aac499d9',
+# 	890007 => 'b1e5f066'
+# );
+
 my %STAFF_IDS = (
-	910031 => 'b14e8cdc',
-	105465 => 'aac499d9',
-	890007 => 'b1e5f066'
-);
+    398502 => '7ad2110d',
+    943004 => 'b8453bc8',
+    '032492' => 'bf62712a'
+    );
+
 
 my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.102_encrypt_staff_ids";
@@ -40,11 +47,7 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $cg = CoataGlue->new(
-	global => $ENV{COATAGLUE_CONFIG},
-	sources => $ENV{COATAGLUE_SOURCES},
-	templates => $ENV{COATAGLUE_TEMPLATES}
-);
+my $cg = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
 ok($cg, "Initialised CoataGlue object");
 
