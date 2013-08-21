@@ -327,7 +327,9 @@ Loads this data source's template config.
 sub load_templates {
 	my ( $self ) = @_;
 	
-	my $template_cf = "$ENV{COATAGLUE_TEMPLATES}/$self->{settings}{templates}.cf";
+	my $template_cf = join('/', 
+                           $self->{coataglue}{templates},
+                           "$self->{settings}{templates}.cf");
 	
 	if( !-f $template_cf ) {
 		$self->{log}->error("$self->{name}: Template config $template_cf not found");

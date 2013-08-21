@@ -1,8 +1,10 @@
 package CoataGlue::Test;
 
+use strict;
+
 # Buildup routines for the tests
 
-use parent Exporter;
+use parent qw(Exporter);
 
 our @EXPORT_OK = qw(setup_tests teardown is_fedora_up);
 
@@ -12,11 +14,16 @@ use Test::More;
 use File::Path qw(remove_tree);
 use File::Copy::Recursive qw(dircopy);
 use Data::Dumper;
-use strict;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
 
 use CoataGlue::Person;
 
-my $FIXTURES_DIR = "$ENV{COATAGLUE_TESTDIR}/Capture";
+
+my $FIXTURES_DIR = "$Bin/Test";
+my $CAPTURE_DIR = "$FIXTURES_DIR/Capture";
 my $EXISTING_PID = 'RDC:1';
 
 
@@ -27,21 +34,15 @@ sub setup_tests {
 	my %params = @_;
 	
 	my $log = $params{log};
-	my $fixtures = $ENV{COATAGLUE_FIXTURES} || die("Need to set COATAGLUE_FIXTURES");
-	my $test = $ENV{COATAGLUE_TESTDIR} || die("Need to set COATAGLUE_TESTDIR");
-
-	if( !$ENV{COATAGLUE_CONFIG} ) {
-		$log && $log->error("Need to set COATAGLUE_CONFIG to a data source config file");
-		die;
-	}
+	my $fixtures = "$Bin/Fixtures";
+	my $test = "$Bin/Test";
 
 
 	if( ! -d $fixtures ) {
 		die("'$fixtures' is not a directory");
 	}
 	
-	
-	if( -d $test ) {
+  	if( -d $test ) {
 		$log && $log->info("Fixtures: remove $test");
 		remove_tree($test, { keep_root => 1 }) || die(
 			"remove_tree $test failed: $!"
@@ -58,13 +59,14 @@ sub setup_tests {
 	my $dh;
 		
 
-	opendir(my $dh, $FIXTURES_DIR) || do {
-		die("Couldn't scan $FIXTURES_DIR");
+	opendir(my $dh, $CAPTURE_DIR) || do {
+		die("Couldn't scan $CAPTURE_DIR");
 	};
 		
 	SOURCE: for my $item ( readdir($dh) ) {
 		next SOURCE if $item =~ /^\./;
-		my $path = "$FIXTURES_DIR/$item/Test";
+        next SOURCE if ! -d "$CAPTURE_DIR/$item";
+		my $path = "$CAPTURE_DIR/$item/Test";
 		if( !-d $path ) {
 			$log && $log->warn("No fixture path $path for $item");
 			next SOURCE;
@@ -89,7 +91,12 @@ sub setup_tests {
 	}
 
     $fhash->{STAFF} = read_staff();
-
+    $fhash->{LOCATIONS} = {
+        global => "$FIXTURES_DIR/Config/CoataGlue.cf",
+        sources => "$FIXTURES_DIR/Config/DataSources.cf",
+        templates => "$FIXTURES_DIR/Config/Templates"
+    };
+       
 	return $fhash
 }
 
@@ -132,7 +139,7 @@ sub load_datastreams {
 
 
 sub read_staff {
-    my $file = $FIXTURES_DIR . '/staff.cf';
+    my $file = $CAPTURE_DIR . '/staff.cf';
 
     my $list;
     

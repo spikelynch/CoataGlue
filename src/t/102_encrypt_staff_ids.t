@@ -12,12 +12,8 @@ Test the staff_id => handle encryption
 
 use strict;
 
-if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
-	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
-}
-
-use lib $ENV{COATAGLUE_PERLLIB};
-
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use Test::More tests => 5;
 use Data::Dumper;
@@ -37,16 +33,9 @@ my %STAFF_IDS = (
 	890007 => 'b1e5f066'
 );
 
-
-
+my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.102_encrypt_staff_ids";
-
-if( !$ENV{COATAGLUE_LOG4J} ) {
-	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
-}
-
-Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
-
+Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);

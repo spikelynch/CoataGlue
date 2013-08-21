@@ -13,12 +13,8 @@ Tests generating XML versions of a dataset's metadata
 
 use strict;
 
-if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
-	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
-}
-
-use lib $ENV{COATAGLUE_PERLLIB};
-
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use Test::More tests => 71;
 use Data::Dumper;
@@ -32,25 +28,15 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
+
+my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.004_xml";
-
-if( !$ENV{COATAGLUE_LOG4J} ) {
-	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
-}
-
-Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
-
+Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-
-
-my $CoataGlue = CoataGlue->new(
-	global => $ENV{COATAGLUE_CONFIG},
-	sources => $ENV{COATAGLUE_SOURCES},
-	templates => $ENV{COATAGLUE_TEMPLATES}
-);
+my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
 ok($CoataGlue, "Initialised CoataGlue object");
 

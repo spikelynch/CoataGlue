@@ -13,12 +13,8 @@ data sources from it.
 
 use strict;
 
-if( ! $ENV{COATAGLUE_PERLLIB} || ! $ENV{COATAGLUE_LOG4J}) {
-	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
-}
-
-use lib $ENV{COATAGLUE_PERLLIB};
-
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use Test::More tests => 5;
 use Data::Dumper;
@@ -29,23 +25,14 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 use CoataGlue::Test qw(setup_tests);
 
+my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.001_init";
-
-if( !$ENV{COATAGLUE_LOG4J} ) {
-	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
-}
-
-Log::Log4perl->init($ENV{COATAGLUE_LOG4J});
-
+Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $sources = CoataGlue->new(
-	global => $ENV{COATAGLUE_CONFIG},
-	sources => $ENV{COATAGLUE_SOURCES},
-	templates => $ENV{COATAGLUE_TEMPLATES}
-);
+my $sources = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
 ok($sources, "Initialised CoataGlue object");
 
@@ -53,9 +40,7 @@ my @sources = $sources->sources;
 
 ok(@sources, "Got sources");
 
-my @fixtures = grep { $_ ne 'STAFF' } keys %$fixtures;
-
-
+my @fixtures = sort grep { $_ !~ /STAFF|LOCATIONS/ } keys %$fixtures;
 
 cmp_ok(
 	scalar(@sources),
@@ -65,10 +50,9 @@ cmp_ok(
 );
 
 my @got_names = sort map { $_->{name} } @sources;
-my @expect_names = sort keys %$fixtures;
 
 for my $got ( @got_names ) {
-	my $expect = shift @expect_names;
+	my $expect = shift @fixtures;
 	cmp_ok(
 		$got, 'eq', $expect,
 		"Got source name $expect"

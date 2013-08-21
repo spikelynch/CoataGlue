@@ -41,12 +41,10 @@ my @MODULES = qw(
 
 BEGIN: {
 
-       
-    if( ! $ENV{COATAGLUE_PERLLIB} ) {
-        die("Needs environment COATAGLUE_PERLLIB");
-    }
+    use FindBin qw($Bin);
+    use lib "$Bin/../lib";
 
-    use lib $ENV{COATAGLUE_PERLLIB};
+       
 
     use Test::More tests => 22;
     
