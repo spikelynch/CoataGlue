@@ -1,0 +1,11 @@
+# Staff list for CoataGlue tests.
+# You need to add test staff to this
+
+[STAFFID]
+mintid:         ENCRYPTED_ID
+familyname:     SURNAME
+givenname:      FIRSTNAME
+groupid:        GROUP_ID
+honorific:      FOR_EG_DR
+jobtitle:       FOR_EG_SENIOR_LECTURER
+
