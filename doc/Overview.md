@@ -22,3 +22,36 @@ It handles the following:
 * Serving data collections (and data payloads) on the web via a
   landing page app which controls access to datasets based on their
   RDC record (ie private, UTS-only, public)
+
+Terminology
+-----------
+
+* Dataset - a collection of research data with a singe title,
+  description, principal author, other metadata, and possibly a URL
+  and/or DOI.  Datasets can contain more than one file (and more than
+  one type of file).  They may also be called 'records' or
+  'collections' (in ReDBoxese) or 'digital objects' (in Fedorian).
+  The line between a dataset and a collection is not prescribed and
+  comes down to the researcher's own practice and the standards in her
+  discipline.
+
+* Datastream - Fedoran terminology for a single file.  A Fedora object
+  (and a dataset) can have any number of datastreams.
+
+* Source - a data capture source.  All datasets from a single source
+  will be in te same format (for some value of 'same' - it depends on
+  the converter)
+
+* Converter - a CoataGlue plugin which reads datasets and metadata and
+  crosswalks the metadata into the standard metadata format.  Each
+  Source has one and only one Converter, but one Converter can be used
+  for lots of Sources.
+
+
+Components
+----------
+
+[CoataGlue Core]
+
+[Damyata]
+ 
