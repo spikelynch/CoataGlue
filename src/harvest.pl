@@ -55,7 +55,7 @@ use strict;
 
 my $missing = 0;
 
-for my $ev ( qw(PERLLIB LOG4J CONFIG SOURCES TEMPLATES) ) {
+for my $ev ( qw(HOME PERLLIB LOG4J CONFIG SOURCES TEMPLATES) ) {
 	my $full_ev = "COATAGLUE_$ev"; 
 	if( !$ENV{$full_ev} ) {
 		warn("Missing environment variable $full_ev\n");

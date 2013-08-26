@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# NOTE: this script is obsolete, since I fixed the tests so that they
+# use FindBin to figure out where they are being run.
+
 # runtests.sh [ $testscript ]
 
 # This sets up environment variables and then runs either $testscript

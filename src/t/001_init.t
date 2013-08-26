@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 5;
+use Test::More tests => 10;
 use Data::Dumper;
 
 use CoataGlue;
@@ -27,16 +27,17 @@ use CoataGlue::Test qw(setup_tests);
 
 my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.001_init";
+
 Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
 
-my $sources = CoataGlue->new(%{$fixtures->{LOCATIONS}});
+my $cg = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
-ok($sources, "Initialised CoataGlue object");
+ok($cg, "Initialised CoataGlue object");
 
-my @sources = $sources->sources;
+my @sources = $cg->sources;
 
 ok(@sources, "Got sources");
 
@@ -59,7 +60,22 @@ for my $got ( @got_names ) {
 	);
 }
 
+my @confdirs = (
+    [ 'Store', 'store', ],
+    [ 'Publish', 'directory' ],
+    [ 'Redbox', 'directory' ]
+);
 
+my $home = $fixtures->{LOCATIONS}{home};
 
+for my $conf ( @confdirs ) {
+    my $value = $cg->conf(@$conf);
+    like($value, qr/^$home/, "\$COATAGLUE expanded in $conf->[0].$conf->[1]");
+}
+
+for my $source ( @sources ) {
+    my $value = $source->{converter}{basedir};
+    like($value, qr/^$home/, "\$COATAGLUE expanded in source basedir");
+}
 
 

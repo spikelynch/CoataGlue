@@ -5,7 +5,7 @@ timeformat: %FT%T%z
 
 
 [Store]
-store:		/home/mike/workspace/RDC Data Capture/src/t/Test/Store/
+store:		$COATAGLUE/src/t/Test/Store/
 
 [Repository]
 baseurl:		http://localhost:8080/fedora
@@ -16,7 +16,7 @@ model:			Catmandu::Store::FedoraCommons::DC
 
 [Publish]
 datastreams: 	urls
-directory:   	/home/mike/workspace/RDC Fedora/Damyata/public/data
+directory:   	$COATAGLUE/Damyata/public/data
 datastreamurl: 	http://0.0.0.0:3000/fs
 dataseturl:    	http://0.0.0.0:3000/
 
@@ -40,8 +40,7 @@ groupid:        GroupID_1
 # integration, in mintIntConfig.xml
 
 [Redbox]
-directory:      /home/mike/workspace/RDC Data Capture/src/t/Test/ReDBox
-#directory:      /opt/redbox/home/alerts
+directory:      $COATAGLUE/src/t/Test/ReDBox
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       ############################# 

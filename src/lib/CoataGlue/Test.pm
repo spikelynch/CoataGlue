@@ -14,8 +14,9 @@ use Test::More;
 use File::Path qw(remove_tree);
 use File::Copy::Recursive qw(dircopy);
 use Data::Dumper;
-
+use Cwd qw(abs_path);
 use FindBin qw($Bin);
+
 use lib "$Bin/../lib";
 
 
@@ -23,6 +24,7 @@ use CoataGlue::Person;
 
 
 my $FIXTURES_DIR = "$Bin/Test";
+my $COATAGLUE_HOME = abs_path("$Bin/../..");
 my $CAPTURE_DIR = "$FIXTURES_DIR/Capture";
 my $EXISTING_PID = 'RDC:1';
 
@@ -94,7 +96,8 @@ sub setup_tests {
     $fhash->{LOCATIONS} = {
         global => "$FIXTURES_DIR/Config/CoataGlue.cf",
         sources => "$FIXTURES_DIR/Config/DataSources.cf",
-        templates => "$FIXTURES_DIR/Config/Templates"
+        templates => "$FIXTURES_DIR/Config/Templates",
+        home => $COATAGLUE_HOME
     };
        
 	return $fhash

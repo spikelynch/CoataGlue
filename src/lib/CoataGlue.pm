@@ -4,12 +4,13 @@ use strict;
 use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
+
 use Apache::Solr;
 
 use CoataGlue::Repository;
 
 
-my @MANDATORY_PARAMS = qw(global sources templates);
+my @MANDATORY_PARAMS = qw(home global sources templates);
 
 my %MANDATORY_CONFIG = (
 	General => [ 'timeformat' ],
@@ -43,6 +44,7 @@ sub new {
 		return undef;
 	}
 	
+    $self->{home} = $params{home};
 	$self->{globalcf} = $params{global};
 	$self->{sourcescf} = $params{sources};
 	$self->{templates} = $params{templates};
@@ -63,6 +65,8 @@ sub new {
             die;
         }
     }
+
+    $self->expand_conf();
 
 	my $missing = 0;
 	for my $section ( keys %MANDATORY_CONFIG ) {
@@ -151,6 +155,26 @@ sub conf {
 		$self->{log}->error("No config section '$section'");
 	}
     return undef;
+}
+
+# expand_conf goes through all the config values and expands
+# $COATAGLUE to the value of $self->{home}
+
+sub expand_conf {
+    my ( $self ) = @_;
+
+    $self->{log}->debug("Expanding home directory YO");
+    for my $file ( keys %{$self->{conf}} ) {
+        for my $section ( keys %{$self->{conf}{$file}} ) {
+            for my $field ( keys %{$self->{conf}{$file}{$section}} ) {
+                
+                $self->{log}->debug("$file/$section/$field = $self->{conf}{$file}{$section}{$field}");
+                if( $self->{conf}{$file}{$section}{$field} =~ s/^\$COATAGLUE/$self->{home}/ ) {
+                    $self->{log}->debug("Expanded \$COATAGLUE to $self->{home} in $file/$section/$field");
+                }
+            }
+        }
+    }
 }
 
 
