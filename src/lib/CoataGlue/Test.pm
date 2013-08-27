@@ -130,7 +130,7 @@ sub load_datastreams {
         chomp $l;
         my ( $id, $file, $mimetype ) = split(/,/, $l);
         $streams->{$id} = {
-            file => $file, 
+            file => join('/', $COATAGLUE_HOME, $file), 
             id => $id,
             mimetype => $mimetype
         };
