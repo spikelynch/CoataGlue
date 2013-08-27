@@ -249,14 +249,14 @@ sub is_fedora_up {
 		die;
 	};
 	
-	my $result = $fc->getObjectProfile(pid => $EXISTING_PID);
-	
-	if( ok($result->is_ok, "Got an object profile") ) {
-		return 1;
-	} else {
-		$log->fatal("No repository.  Make sure Fedora Commons is running.");
-		die;
-	}
+#	my $result = $fc->getObjectProfile(pid => $EXISTING_PID);
+#	
+#	if( ok($result->is_ok, "Got an object profile") ) {
+#		return 1;
+#	} else {
+#		$log->fatal("No repository.  Make sure Fedora Commons is running.");
+#		die;
+#	}
 	
 }
 

@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 47;
+use Test::More tests => 46;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;

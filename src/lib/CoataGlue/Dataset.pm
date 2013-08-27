@@ -531,32 +531,26 @@ sub publish {
 			};
 			if( $@ ) {
 				$self->{log}->error("Removing $old_dir failed: $@");
+                return undef;
 			}
 		}
 	}
 	
-	
-#	my $base_url = $self->conf('Repository', 'publishurl');
-#	$base_url = join('/', $base_url, $section, $id);
-#	
-#	for my $dsid ( keys %{$self->{datastreams}} ) {
-#		$self->{datastreams}{$dsid}->write(
-#			section => $section
-#		)
-#		$self->{datastreams}{$dsid}->write(
-#			url => "$base_url/$dsid"
-#		) || do {
-#			$self->{log}->error("Couldn't update datastream $dsid");
-#		}
-#	}
+	my @bad_ds = ();
 
 	for my $dsid ( keys %{$self->{datastreams}} ) {
 		my $ds = $self->{datastreams}{$dsid};
 		my $url = $ds->url;  # this inherits from the dataset's publish
 		$ds->write(url => $url) || do {
-			$self->{log}->error("Couldn't update datastream $dsid")
+			$self->{log}->error("Couldn't update datastream $dsid");
+            push @bad_ds, $dsid;
 		}
 	}
+
+    if( @bad_ds ) {
+        $self->{log}->error("One or more datastreams not updated");
+        return undef;
+    }
 
 
 	return 1;

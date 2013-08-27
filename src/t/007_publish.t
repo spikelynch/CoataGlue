@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 34;
+use Test::More tests => 33;
 use Test::WWW::Mechanize;
 use Data::Dumper;
 use XML::Twig;
