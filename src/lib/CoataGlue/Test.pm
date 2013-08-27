@@ -21,7 +21,7 @@ use lib "$Bin/../lib";
 
 
 use CoataGlue::Person;
-
+use CoataGlue::Dataset;
 
 my $FIXTURES_DIR = "$Bin/Test";
 my $COATAGLUE_HOME = abs_path("$Bin/../..");
@@ -85,7 +85,8 @@ sub setup_tests {
 				);
 				$fhash->{$source}{$ds}{description} =~ s/\s+$//g;
                 $fhash->{$source}{$ds}{datastreams} = load_datastreams(
-                    file => "$dspath/datastreams.csv"
+                    file => "$dspath/datastreams.csv",
+                    log => $log
                 );
 			}
 		} else {
@@ -116,17 +117,22 @@ sub load_file {
 	return $contents;
 }
 
+
+
 sub load_datastreams {
     my ( %params ) = @_;
 
     my $streams = {};
 
     my $file = $params{file};
+    my $log = $params{log};
 
     open(FILE, "<$file") || do {
         warn("No datastreams.csv in dataset fixtures");
         return undef;
     };
+
+    my @ids = ();
 
     while ( my $l = <FILE> ) {
         chomp $l;
@@ -136,9 +142,36 @@ sub load_datastreams {
             id => $id,
             mimetype => $mimetype
         };
+        push @ids, $id;
     }
 
     close FILE;
+    
+    # if the datastream ids have $COATAGLUE, use IDset to generate
+    # a set of Fedora-compliant IDs from them
+
+    if( $ids[0] =~ /^\$COATAGLUE/ ) {
+        my $estreams = {};
+        for my $id ( keys %$streams ) {
+            my $nid = $id;
+            $nid =~ s/^\$COATAGLUE/$COATAGLUE_HOME/;
+            $estreams->{$nid} = $streams->{$id};
+        }
+        my $idset = CoataGlue::IDset->new(raw => $estreams);
+        my $map = $idset->make_ids;
+        if( !$map ) {
+            $log->error("Couldn't map fixture ID streams");
+            return undef;
+        }
+        my $nstreams = {};
+        for my $dsid ( keys %$map ) {
+            $nstreams->{$dsid} = $estreams->{$map->{$dsid}};
+        }
+
+        $streams = $nstreams;
+
+    }
+
     return $streams;
 }
 
@@ -177,6 +210,7 @@ sub expand_home {
   }
     closedir($dh);
 }
+
 
 
 sub read_staff {

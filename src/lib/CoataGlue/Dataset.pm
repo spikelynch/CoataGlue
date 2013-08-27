@@ -72,15 +72,11 @@ use Carp qw(cluck);
 use Data::Dumper;
 use File::Path qw(make_path);
 use File::Copy;
-use XML::RegExp;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
 
 use CoataGlue::Datastream;
-
-our $MAX_DSID_LENGTH = 64;
-our $MAX_DSID_EXTENSION = 4;
-our $MAX_DSID_SUFFIX = 1000000;
+use CoataGlue::IDset;
 
 =head1 METHODS
 
@@ -628,16 +624,12 @@ sub add_to_repository {
 
 =item create_datastreams(raw => $hashref)
 
-Goes through the $self->{datastreams} hash and ensures that all
-of the IDs are compliant with Fedora's requirements (XML NCnames
-no more than 64 chars), then creates CoataGlue::Datastream objects
-for them.
+Takes a hashref of raw datastreams and uses Dataset::IDset to 
+convert the raw keys to values which Fedora Commons will accept.
 
-Will throw an error if it can't generate unique IDs, otherwise
-returns a hash of the datastreams by the new ids (with the original
-ID stored in old_id)
+Then adds Datastream objects with the new ids.
 
-Modified so that it preserves file extensions.
+See Dataset::IDset for the details of how IDs are converted.
 
 =cut
 
@@ -647,132 +639,34 @@ sub create_datastreams {
 	my $raw = $params{raw} || return undef;
 	
 	$self->{datastreams} = {};
+
+    my $idset = CoataGlue::IDset->new(raw => $raw);
+
+    my $cooked = $idset->make_ids;
+
+    if( !$cooked ) {
+        $self->{log}->debug("Couldn't create unique datastream IDs");
+        return undef;
+    }
 	
-	for my $id ( sort keys %$raw ) {
-		if( !$self->add_datastream(id => $id, datastream => $raw->{$id} ) ) {
-			return undef;
-		}
-	}
+    for my $dsid ( sort keys %$cooked ) {
+        my $oid = $cooked->{$dsid};
+        $self->{datastreams}{$dsid} = CoataGlue::Datastream->new(
+            dataset => 	$self,
+            id => 		$dsid,
+            oid => 		$oid,
+            original => $raw->{$oid}{original},
+            mimetype => $raw->{$oid}{mimetype},
+            label => 	$raw->{$oid}{label}
+        ) || do {
+            $self->{log}->error("Create datastream failed");
+            return undef;
+        }
+    }
+
 	return $self->{datastreams};
 }
 
-
-=item add_datastream(id => $id, datastream => $ds)
-
-Tries to add a datastream to the hash, fixing the id if required.
-Returns undef if it couldn't be truncated andd uniquified.
-
-=cut
-
-
-sub add_datastream {
-	my ( $self, %params ) = @_;
-
-	my $id = $params{id};
-	my $raw = $params{datastream};	
-
-	$self->{log}->debug("Adding datastream $id");
-	
-	my $oid = $id;
-
-	# remove and keep the extension, if it exists
-
-	my $ext = undef;
-	my $length = $MAX_DSID_LENGTH;
-	if( $id =~ /^(.*)\.([^.]*)$/ ) {
-		( $id, $ext ) = ( $1, $2 );
-		$self->{log}->debug("Split extension $ext");
-		$length = $MAX_DSID_LENGTH - (length($ext) + 1);
-	} else {
-		$self->{log}->debug("Extension not found");
-	}
-		
-	# Replace forbidden characters with '_'
-		
-	$id =~ s/[^A-Za-z0-9_.]/_/g;
-		
-	# make sure first character is alphabetical
-	if( $id !~ /^[A-Za-z]/ ) {
-		$id = 'D' . $id;
-	}
-
-	if( $id !~ /^$XML::RegExp::NCName$/ ) {
-		$self->{log}->error("Couldn't make NCName from $oid");
-		return undef;
-	}
-		
-	# truncate to the maximum length (allows for extension)
-	if( length($id) > $length ) {
-		$id = substr($id, 0, $length);
-	}
-	my $id1 = $id;
-	my $inc = 1;
-		
-	# ...and if it's not unique, just keep appending integers
-	# to it and truncating until we get to a ridiculously high
-	# number.
-		
-	while( $self->has_dsid(id => $id, ext => $ext) && $inc < $MAX_DSID_SUFFIX ) {
-        $self->{log}->debug("Incrementing sequence number: $inc");
-		$id = substr($id1, 0, $length - length($inc)) . $inc;
-		$inc++;
-	}
-		
-	if( $self->has_dsid(id => $id, ext => $ext) ) {
-		$self->{log}->error("Couldn't generate unique dataset ID");
-		return undef;
-	}
-	my $dsid = $self->dsid(id => $id, ext => $ext);
-	$self->{log}->debug("Adding datastream $dsid");
-	$self->{log}->debug("raw datastream:"  . Dumper($raw));
-	$self->{datastreams}{$dsid} = CoataGlue::Datastream->new(
-		dataset => 	$self,
-		id => 		$dsid,
-		oid => 		$oid,
-		original => $raw->{original},
-		mimetype => $raw->{mimetype},
-		label => 	$raw->{label}
-	) || do {
-		$self->{log}->error("Create datastream failed");
-		return undef;
-	};
-	return 1;
-}
-
-
-=item has_dsid(id => $id, ext => $ext)
-
-Reassemble the id with dsid and checks if it's already in 
-the datastreams hash.
-
-=cut
-
-sub has_dsid {
-	my ( $self, %params ) = @_;
-	
-	my $dsid = $self->dsid(%params);
-	
-	return exists $self->{datastreams}{$dsid};
-}
-
-
-=item dsid(id => $id, ext => $ext)
-
-Utility to reassemble an id and the file extension. Returns
-"$id.$ext" if $ext is defined, otherwise just returns $id
-
-=cut
-
-sub dsid {
-	my ( $self, %params ) = @_;
-	
-	my $dsid = $params{id};
-	if( $params{ext} ) {
-		 $dsid .= '.' . $params{ext};
-	}
-	#$self->{log}->debug("dsid: $params{id}/$params{ext} = $dsid");
-	return $dsid;
-}
 
 
 
