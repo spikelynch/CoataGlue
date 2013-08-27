@@ -681,7 +681,7 @@ sub add_datastream {
 	my $length = $MAX_DSID_LENGTH;
 	if( $id =~ /^(.*)\.([^.]*)$/ ) {
 		( $id, $ext ) = ( $1, $2 );
-		#$self->{log}->debug("Split extension $ext");
+		$self->{log}->debug("Split extension $ext");
 		$length = $MAX_DSID_LENGTH - (length($ext) + 1);
 	} else {
 		$self->{log}->debug("Extension not found");
@@ -713,6 +713,7 @@ sub add_datastream {
 	# number.
 		
 	while( $self->has_dsid(id => $id, ext => $ext) && $inc < $MAX_DSID_SUFFIX ) {
+        $self->{log}->debug("Incrementing sequence number: $inc");
 		$id = substr($id1, 0, $length - length($inc)) . $inc;
 		$inc++;
 	}

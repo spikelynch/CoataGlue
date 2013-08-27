@@ -65,31 +65,33 @@ sub setup_tests {
 		die("Couldn't scan $CAPTURE_DIR");
 	};
 		
-	SOURCE: for my $item ( readdir($dh) ) {
-		next SOURCE if $item =~ /^\./;
-        next SOURCE if ! -d "$CAPTURE_DIR/$item";
-		my $path = "$CAPTURE_DIR/$item/Test";
+	SOURCE: for my $source ( readdir($dh) ) {
+        $log->info("Scanning fixtures: $source");
+		next SOURCE if $source =~ /^\./;
+        next SOURCE if ! -d "$CAPTURE_DIR/$source";
+		my $path = "$CAPTURE_DIR/$source/Test";
 		if( !-d $path ) {
-			$log && $log->warn("No fixture path $path for $item");
+			$log && $log->warn("No fixture path $path for $source");
 			next SOURCE;
 		}
-		$fhash->{$item} = {};
+		$fhash->{$source} = {};
 		if( opendir(my $sdh, $path)) {
 			DATASET: while( my $ds = readdir($sdh) ) {
 				next DATASET if $ds =~ /^\./;
 				my $dspath = "$path/$ds";
 				$log && $log->debug("path $path / $ds");
-				$fhash->{$item}{$ds}{description} = load_file(
+				$fhash->{$source}{$ds}{description} = load_file(
 					file => "$dspath/description.txt"
 				);
-				$fhash->{$item}{$ds}{description} =~ s/\s+$//g;
-                $fhash->{$item}{$ds}{datastreams} = load_datastreams(
+				$fhash->{$source}{$ds}{description} =~ s/\s+$//g;
+                $fhash->{$source}{$ds}{datastreams} = load_datastreams(
                     file => "$dspath/datastreams.csv"
                 );
 			}
 		} else {
 			$log && $log->warn("Couldn't open $path")
 		}
+        expand_home($log, "$CAPTURE_DIR/$source");
 	}
 
     $fhash->{STAFF} = read_staff();
@@ -138,6 +140,42 @@ sub load_datastreams {
 
     close FILE;
     return $streams;
+}
+
+
+sub expand_home {
+    my ( $log, $path ) = @_;
+
+    opendir(my $dh, $path) || die("Couldn't read $path: $!");
+
+  FILE: while( my $file = readdir($dh) ) {
+      next FILE if $file =~ /^\./;
+      next FILE unless $file =~ /\.xml$/;
+      $log->debug("Expanding homedir in $path/$file");
+
+      my $xml = '';
+
+      local $/ = undef;
+
+      open(my $fh, "<$path/$file") || die("Couldn't open $path/$file: $!");
+
+      my $xml = <$fh>;
+
+      close $fh;
+      
+      if( my $n = ( $xml =~ s/\$COATAGLUE/$COATAGLUE_HOME/g ) ) {
+          $log->debug("Expanded \$COATAGLUE $n times");
+      }
+      
+      open(my $fh2, ">$path/$file") || die("Couldn't open $path/$file for writing: $!");
+      
+      print $fh2 $xml;
+      
+      close $fh2;
+
+      $log->debug("Expanded XML:\n$xml");
+  }
+    closedir($dh);
 }
 
 
