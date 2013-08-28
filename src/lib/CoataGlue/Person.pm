@@ -163,7 +163,7 @@ sub creator {
     my ( $self ) = @_;
 
     my $creator = {
-        staffid => $self->{staffid},
+        staffid => $self->{id},
         mintid => $self->{encrypted_id},
         groupid => $self->{groupid},
         givenname => $self->{givenname},

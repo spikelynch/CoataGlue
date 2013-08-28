@@ -156,6 +156,8 @@ sub parse_metadata {
 
 	$md->{dateconverted} = $self->timestamp;
 	
+    $self->{log}->debug("Metadata: " . Dumper({md => $md}));
+
 	return {
 		file => $path,
 		location => $path,

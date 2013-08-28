@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 5 + 2 * 8 + ( 1 + 2 + 4 ) * 3;
+use Test::More tests => 46;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -61,34 +61,44 @@ cmp_ok($n, '==', $nf, "Got $nf datasets") || die;
 
 $source->close;
 
+my $access_map = $source->{template_handlers}{metadata}{access};
+
 for my $ds ( @datasets ) {
 	my $file = $ds->short_file;
 	my $md = $ds->metadata;
    
     my $f = $fixtures->{Labshare}{$file};
 
+    my $raw = $ds->{raw_metadata};
+    $raw->{access} = &$access_map($raw->{access});
+
 	if( ok($md, "Got metadata for $file") ) {
 
 		cmp_ok(
-			$md->{title}, 'eq', $ds->{raw_metadata}{title},
-			"title = $md->{title}"
+			$md->{title}, 'eq', $raw->{title},
+			"title = $raw->{title}"
 		);
 
 		cmp_ok(
-			$md->{projectnumber}, 'eq', $ds->{raw_metadata}{activity},
-			"projectnumber = activity = $md->{projectnumber}"
+			$md->{project}, 'eq', $raw->{activity},
+			"project = activity = $raw->{activity}"
 		);
+
+        cmp_ok(
+            $md->{access}, 'eq', $raw->{access},
+            "access = $raw->{access}"
+            );
 
 		cmp_ok(
 			$md->{service}, 'eq', $md->{service},
-			"service = $md->{service}"
+			"service = $raw->{service}"
 		);
 
-        my $staff_id = $ds->{raw_metadata}{creator};
+        my $staff_id = $raw->{creator};
 
         my $staff = $fixtures->{STAFF}{$staff_id};
 
-        for my $field ( qw(mintid name
+        for my $field ( qw(staffid mintid name
             givenname familyname honorific jobtitle groupid) ) {
             cmp_ok(
                 $md->{creator}{$field}, 'eq', $staff->{$field},

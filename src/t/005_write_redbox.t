@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 121;
+use Test::More tests => 126;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -33,6 +33,10 @@ Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
+
+my @CREATOR_FIELDS = qw(mintid staffid givenname familyname
+                          honorific jobtitle groupid name);
+
 
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
@@ -69,7 +73,7 @@ for my $source ( @sources ) {
 
 		if( ok($file, "Wrote XML to file: $file") ) {	
 			my (
-				$title, $projectname,
+				$title, $project,
 				$description, $service
 			) = ( '', '', '', '', '' );
             
@@ -85,13 +89,12 @@ for my $source ( @sources ) {
                         }
                     },
 					title => 		sub { $title       = $_->text },
-					projectname =>  sub { $projectname = $_->text },
+					project     =>  sub { $project      = $_->text },
 					description => 	sub { $description = $_->text },
 					service => 		sub { $service     = $_->text },
                     creator =>		sub {
                         $creator = {};
-                        for my $f ( qw(mintid staffid givenname familyname
-                                   honorific jobtitle groupid name) ) {
+                        for my $f ( @CREATOR_FIELDS ) {
                             $creator->{$f} = $_->first_child_text($f);
                         }
                     },
@@ -138,8 +141,8 @@ for my $source ( @sources ) {
                     );
 
                 cmp_ok(
-                    $header->{access}, 'eq', $ds->{access},
-                    "Header <access> = $ds->{access}"
+                    $header->{access}, 'eq', $md->{access},
+                    "Header <access> = $md->{access}"
                     );
 
                 cmp_ok(
@@ -148,15 +151,19 @@ for my $source ( @sources ) {
                     );
 
 				cmp_ok(
-					$projectname, 'eq', $md->{projectname},
-					"<projectname> = $projectname"
+					$project, 'eq', $md->{project},
+					"<project> = $project"
 				);
 
-                for my $f ( sort keys %{$md->{creator}} ) {
-                    cmp_ok(
-                        $creator->{$f}, 'eq', $md->{creator}{$f},
-                        "creator/$f = '$md->{creator}{$f}'"
-                        );
+                if( ok(my $staffid = $creator->{staffid}, "Got creator staffid") ) {
+                    my $fixture = $fixtures->{STAFF}{$staffid};
+                    
+                    for my $f ( @CREATOR_FIELDS ) {
+                        cmp_ok(
+                            $creator->{$f}, 'eq', $fixture->{$f},
+                            "creator/$f = '$fixture->{$f}'"
+                            );
+                    }
                 }
 
                 my $fixture_id = fix_id($ds);

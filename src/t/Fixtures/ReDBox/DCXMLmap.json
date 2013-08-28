@@ -21,7 +21,7 @@
         "//header/location":      "bibo:Website.1.dc:identifier",
 
 
-	    "//header/publish":       "dc:relation.vivo:Dataset.0.vivo:Relationship.rdf:PlainLiteral",
+	    "//header/access":       "dc:accessRights.skos:prefLabel",
         "//projectname":         "swrc:ResearchProject.dc:title",
 
 

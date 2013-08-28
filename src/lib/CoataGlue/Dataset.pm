@@ -147,10 +147,9 @@ sub new {
 		}
 	}
 	
-	$self->clean_metadata_keys();
+	$self->clean_metadata_keys;
 	
 	$self->get_status;
-	
 
 	if( $error ) {
 		return undef;
@@ -332,6 +331,8 @@ metadata, which is why it's called 'header'
 
 sub header {
 	my ( $self ) = @_;
+
+    $self->{log}->debug("###-----> Dataset $self->{id}, access = $self->{access}");
 	
 	return {
 		id => $self->{id},
@@ -339,7 +340,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
-		access => $self->{access},
+		access => $self->{metadata}{access},
 		dateconverted => $self->{dateconverted}
 	};
 }

@@ -102,7 +102,7 @@ sub setup_tests {
         templates => "$FIXTURES_DIR/Config/Templates",
         home => $COATAGLUE_HOME
     };
-       
+
 	return $fhash
 }
 
@@ -226,7 +226,10 @@ sub read_staff {
             $list->{$id}{honorific}, $list->{$id}{givenname},
             $list->{$id}{familyname}
             );
+        $list->{$id}{staffid} = $id;
+
     }
+
     return $list;
 }
     

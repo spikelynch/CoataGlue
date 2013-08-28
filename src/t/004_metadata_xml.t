@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 71;
+use Test::More tests => 76;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -35,6 +35,9 @@ Log::Log4perl->init($LOG4J);
 my $log = Log::Log4perl->get_logger($LOGGER);
 
 my $fixtures = setup_tests(log => $log);
+
+my @CREATOR_FIELDS = qw(mintid staffid givenname familyname
+                        honorific jobtitle groupid name);
 
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
@@ -67,25 +70,23 @@ for my $source ( @sources ) {
 
         ok($xml, "Generated some XML");
 
-        my ( $title, $projectname, $creator, $description, $service ) = ( '', '', '', '', '', '' );
+        my ( $title, $project, $creator, $description, $service ) = ( '', '', '', '', '', '' );
 
         my $twig = XML::Twig->new(
             twig_handlers => {
                 title => 		sub { $title       = $_->text },
-                projectname =>  sub { $projectname = $_->text },
+                project     =>  sub { $project     = $_->text },
                 description => 	sub { $description = $_->text },
                 service => 		sub { $service     = $_->text },
                 creator =>		sub {
                     $creator = {};
-                    for my $f ( qw(mintid staffid givenname familyname
-                                   honorific jobtitle groupid name) ) {
+                    for my $f ( @CREATOR_FIELDS ) {
                         $creator->{$f} = $_->first_child_text($f);
                     }
                 },
 
             }
             ); 
-        
         eval {
             $twig->parse($xml)
         };
@@ -96,18 +97,20 @@ for my $source ( @sources ) {
                 "<title> = $md->{title}"
                 );
             
-            cmp_ok(
-                $projectname, 'eq', $md->{projectname},
-                "<projectname> = $md->{projectname}"
-                );
-    
-    
 
-            for my $f ( sort keys %{$md->{creator}} ) {
-                cmp_ok(
-                    $creator->{$f}, 'eq', $md->{creator}{$f},
-                    "creator/$f = '$md->{creator}{$f}'"
-                    );
+            cmp_ok(
+                $project, 'eq', $md->{project},
+                "<project> = $md->{project}"
+                );
+            
+            if( ok(my $staffid = $creator->{staffid}, "Got creator staffid") ) {
+                my $fixture = $fixtures->{STAFF}{$staffid};
+                for my $f ( @CREATOR_FIELDS ) {
+                    cmp_ok(
+                        $creator->{$f}, 'eq', $fixture->{$f},
+                        "creator/$f = '$fixture->{$f}'"
+                        );
+                }
             }
 
             my $fdesc = $fixtures->{$sname}{$file}{description};

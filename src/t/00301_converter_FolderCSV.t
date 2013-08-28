@@ -71,18 +71,19 @@ for my $ds ( @datasets ) {
     my $f = $fixtures->{MIF}{$file};
 
 	if( ok($md, "Got metadata for $file") ) {
+        my $raw = $ds->{raw_metadata};
 
 		cmp_ok(
-			$md->{title}, 'eq', $ds->{raw_metadata}{Experiment_Name},
-			"title = Experiment_Name = $md->{title}"
+			$md->{title}, 'eq', $raw->{Experiment_Name},
+			"title = Experiment_Name = $raw->{Experiment_Name}"
 		);
 
 		cmp_ok(
-			$md->{projectname}, 'eq', $ds->{raw_metadata}{Project_Name},
-			"projectname = Project_Name = $md->{projectname}"
+			$md->{project}, 'eq', $raw->{Project_Name},
+			"project = Project_Name = $raw->{Project_Name}"
 		);
 
-        my $staff_id = $ds->{raw_metadata}{Project_Creator_Staff_Student_ID};
+        my $staff_id = $raw->{Project_Creator_Staff_Student_ID};
 
         my $staff = $fixtures->{STAFF}{$staff_id};
 
@@ -95,7 +96,7 @@ for my $ds ( @datasets ) {
         }
 		
 		my $service = 'MIF.service.2';
-		if( $ds->{raw_metadata}{Instrument_Name} eq "UTS Demo Microscope" ) {
+		if( $raw->{Instrument_Name} eq "UTS Demo Microscope" ) {
 			$service = 'MIF.service.1';
 		}
 

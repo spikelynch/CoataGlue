@@ -428,7 +428,9 @@ sub crosswalk {
 			);
 		} else {
 			my $mdfield = $view->{$field};
-			if( !defined $original->{$mdfield} ) {
+            if( $mdfield =~ /^"(.*)"$/ ) {
+                $new->{$field} = $1;
+            } elsif( !defined $original->{$mdfield} ) {
 				$new->{$field} = '';
 			} else {
 				if( $handlers && $handlers->{$field} ) {
@@ -579,7 +581,7 @@ sub render_view {
     }
 
 	for my $tag ( sort keys %$elements ) {
-        next if( $view eq 'metadata' && $tag eq 'creator' );
+        next if( $view eq 'metadata' && $tag =~ /access|creator/ );
 		$writer->startTag($tag);
 		$writer->characters($elements->{$tag});
 		$writer->endTag();
@@ -605,7 +607,7 @@ sub write_header_XML {
 	my $header = $dataset->header();
 
 	$writer->startTag('header');	
-	for my $field ( qw(source id file location publish repositoryURL dateconverted) ) {
+	for my $field ( qw(source id file location access repositoryURL dateconverted) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
 		$writer->endTag();
@@ -627,6 +629,8 @@ sub write_creator_XML {
 	my $writer = $params{writer};
 	
 	my $creator = $dataset->metadata()->{creator};
+
+    $self->{log}->debug("### creator" . Dumper({creator => $creator}));
 
 	$writer->startTag('creator');	
 	for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
