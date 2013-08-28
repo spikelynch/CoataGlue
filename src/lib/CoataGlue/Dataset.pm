@@ -350,18 +350,40 @@ sub url {
 	
 	my $base = $self->conf('Publish', 'dataseturl');
 	
-	if( !$self->{repository_id} ) {
+	if( !$self->safe_repository_id ) {
 		$self->{log}->warn(
 			"repositoryURL failed: no repository_id.  Need to add it to the repository first."
 		);
 		return undef;
 	}
+    my $repo = $self->safe_repository_id;
 	
 	if( $base !~ /\/$/ ) {
-		return join('/', $base, $self->{repository_id});
+		return join('/', $base, $repo);
 	} else {
-		return join('', $base, $self->{repository_id});
+		return join('', $base, $repo);
 	}
+}
+
+
+=item safe_repository_id()
+
+This removes the colon from the dataset's repository ID.  Some day we'll
+implement a 'get this dataset as a zip' feature and the filenames will
+break on Windows if they have colons.  Thanks, Paul.
+
+=cut
+
+sub safe_repository_id {
+    my ( $self ) = @_;
+
+    return undef unless $self->{repository_id};
+
+    my $repoid = $self->{repository_id};
+
+    $repoid =~ s/://g;
+
+    return $repoid;
 }
 
 
@@ -492,7 +514,7 @@ sub publish {
 	
 	$self->{access} = $publish_to;
 	
-	my $id = $self->{repository_id};
+	my $id = $self->safe_repository_id;
 	
 	my $dir = join('/', $base, $self->{access}, $id);
 	

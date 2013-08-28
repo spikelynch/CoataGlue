@@ -72,7 +72,7 @@ for my $source ( @sources ) {
 		if( $expect !~ /\/$/ ) {
 			$expect .= '/';
 		}
-		$expect .= $ds->{repository_id};
+		$expect .= $ds->safe_repository_id;
 		cmp_ok($url, 'eq', $expect, "Dataset has URL $expect");
 	
 		ok($ds->write_redbox, "Wrote metadata record for ReDBox");
@@ -84,14 +84,11 @@ for my $source ( @sources ) {
 			my $stream_url = $datastream->url;
 			my $expect_stream = join(
 				'/', $source->conf('Publish', 'datastreamurl'),
-				'local', $ds->{repository_id}, $datastream->{id}
+				'local', $ds->safe_repository_id, $datastream->{id}
 			);
 					
 			cmp_ok($stream_url, 'eq', $expect_stream, "Datastream has URL: $expect_stream");
 		}
-		
-		
-		
 	}
 
 }

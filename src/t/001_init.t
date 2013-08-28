@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 10;
+use Test::More tests => 9;
 use Data::Dumper;
 
 use CoataGlue;
@@ -60,9 +60,12 @@ for my $got ( @got_names ) {
 	);
 }
 
+# Not checking the publish directory because it isn't inside the
+# Coataglue home
+
 my @confdirs = (
     [ 'Store', 'store', ],
-    [ 'Publish', 'directory' ],
+#    [ 'Publish', 'directory' ],
     [ 'Redbox', 'directory' ]
 );
 

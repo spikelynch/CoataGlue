@@ -63,9 +63,6 @@ if( $prefix eq 'none' ) {
     $prefix = '';
 }
 
-diag("prefix = $prefix");
-
-
 for my $id ( keys %STAFF_IDS ) {
 	my $expect = $prefix . $STAFF_IDS{$id};
 	my $got = $source->staff_id_to_handle(id => $id);

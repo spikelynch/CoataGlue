@@ -54,8 +54,6 @@ my @sources = $CoataGlue->sources;
 
 ok(@sources, "Got sources");
 
-diag("TODO: make this test check more than one source");
-
 my ( $source ) = grep { $_->{name} eq 'MIF' } @sources;
 
 my $handler = $source->{template_handlers}{metadata}{datecreated};

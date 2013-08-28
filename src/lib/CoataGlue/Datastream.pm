@@ -125,8 +125,8 @@ parent dataset
 sub url {
 	my ( $self ) = @_;
 	
-	if( !$self->{dataset}{repository_id} ) {
-		$self->{log}->error("Can't build a URL - dataset has no repository_id");
+	if( !$self->{dataset}->safe_repository_id ) {
+		$self->{log}->error("Can't build a URL - parent dataset has no repository id");
 		return undef;
 	}
 	
@@ -137,6 +137,8 @@ sub url {
 	 
 	 
 	my $base_url = $self->conf('Publish', 'datastreamurl');
+
+    $self->{log}->debug("Datastream base URL = $base_url");
 	
 	if( $base_url !~ /\/$/ ) {
 		$base_url .= '/';
@@ -145,9 +147,11 @@ sub url {
 	$self->{url} = $base_url .= join(
 		'/',
 		$self->{dataset}{access},
-		$self->{dataset}{repository_id},
+		$self->{dataset}->safe_repository_id,
 		$self->{id}
 	);
+
+    $self->{log}->debug("Full URL = $self->{url}");
 	
 	return $self->{url};
 	
