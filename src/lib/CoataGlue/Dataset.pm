@@ -70,7 +70,7 @@ use strict;
 use Log::Log4perl;
 use Carp qw(cluck);
 use Data::Dumper;
-use File::Path qw(make_path);
+use File::Path qw(make_path remove_tree);
 use File::Copy;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
@@ -332,15 +332,13 @@ metadata, which is why it's called 'header'
 sub header {
 	my ( $self ) = @_;
 
-    $self->{log}->debug("###-----> Dataset $self->{id}, access = $self->{access}");
-	
 	return {
 		id => $self->{id},
 		source => $self->{source}{name},
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
-		access => $self->{metadata}{access},
+		access => $self->access,
 		dateconverted => $self->{dateconverted}
 	};
 }
@@ -447,7 +445,7 @@ sub write_redbox {
 		return undef;
 	}
 
-    $self->{log}->warn("Publishing to $file");
+    $self->{log}->info("Writing redbox metadata to $file");
 	
 	open(XMLFILE, ">$file") || do {
 		$self->{log}->error("Could not open $file for writing: $!");
@@ -463,7 +461,7 @@ sub write_redbox {
 
 
 
-=item publish_urls(to => [$audience])
+=item publish_urls([to => $audience])
 
 Version of the publish method where hosted datastreams are stored
 in a filesystem and pushed into Fedora as URLs.  For this to work,
@@ -480,11 +478,11 @@ A dataset can only be in one of these folders, so if the
 publication status changes, it's deleted from the current
 one after it's been successfully added to the new one.
 
+If no audience is passed in, the datastream's metadata.access value
+is used.
+
 This method also updates the datastreams in the Fedora object
 so that they point to the new URLs.
-
-We need to add the extension $ext so that Damyata can set the 
-mime type when serving the file.
 
 =cut
 
@@ -495,11 +493,15 @@ sub publish {
 		$self->{log}->error("Can't publish dataset $self->{global_id} - no repository ID")
 	}
 	
-	my $publish_to = $params{to} || do {
-		$self->{log}->error("Publish needs a 'to' param");
-		return undef;
-	};
-	
+    my $publish_to = $params{to};
+    if( $publish_to ) {
+        if( $publish_to eq $self->access ) {
+            $self->{log}->debug("Dataset already published to $params{to}");
+        }
+    } else {
+        $publish_to = $self->access;
+    }
+
 	if( !keys %{$self->{datastreams}} ) {
 		$self->{log}->error("Dataset $self->{global_id} has no datastreams");
 		return undef;
@@ -507,17 +509,17 @@ sub publish {
 	
 	my $old_section = undef;
 	
-	if( $self->{access} ) {
-		$old_section = $self->{access};
+	if( $self->access && $self->access ne $publish_to) {
+		$old_section = $self->access;
 	}
 	
 	my $base = $self->conf('Publish', 'directory');
 	
-	$self->{access} = $publish_to;
+	$self->{metadata}{access} = $publish_to;
 	
 	my $id = $self->safe_repository_id;
 	
-	my $dir = join('/', $base, $self->{access}, $id);
+	my $dir = join('/', $base, $self->{metadata}{access}, $id);
 	
 	eval {
 		make_path($dir);
@@ -581,6 +583,18 @@ sub publish {
 
 
 
+=item access()
+
+Returns the access category of the dateset: basically, who can see
+it.  Corresponds to a directory in the web hosting setup.
+
+=cut
+
+sub access {
+    my ( $self ) = @_;
+
+    return $self->{metadata}{access}
+}
 
 
 

@@ -6,7 +6,7 @@
 
 =head1 DESCRIPTION
 
-Tests adding a record to Fedora.
+Publishes all of the text fixture records and adds them to Fedora.
 
 =cut
 
@@ -68,27 +68,34 @@ for my $source ( @sources ) {
             die("Check that Fedora is running.");
         };
 		my $url = $ds->url;
+
 		my $expect = $source->conf('Publish', 'dataseturl');
+
 		if( $expect !~ /\/$/ ) {
 			$expect .= '/';
 		}
+
 		$expect .= $ds->safe_repository_id;
 		cmp_ok($url, 'eq', $expect, "Dataset has URL $expect");
 	
 		ok($ds->write_redbox, "Wrote metadata record for ReDBox");
 		
-		ok($ds->publish(to => 'local'), "Published dataset to local");			
+		ok($ds->publish(to => $ds->{metadata}{access}), 
+
+           "Published dataset to $ds->{metadata}{access}");			
 	
 		for my $id ( keys %$datastreams ) {
 			my $datastream = $datastreams->{$id};
 			my $stream_url = $datastream->url;
 			my $expect_stream = join(
 				'/', $source->conf('Publish', 'datastreamurl'),
-				'local', $ds->safe_repository_id, $datastream->{id}
+				$ds->access, $ds->safe_repository_id, $datastream->{id}
 			);
 					
 			cmp_ok($stream_url, 'eq', $expect_stream, "Datastream has URL: $expect_stream");
 		}
+
 	}
 
+    
 }

@@ -130,8 +130,8 @@ sub url {
 		return undef;
 	}
 	
-	if( !$self->{dataset}{access} ) {
-		$self->{log}->error("Can't build a URL - dataset not published");
+	if( !$self->{dataset}->access ) {
+		$self->{log}->error("Can't build a URL - dataset has no access setting");
 		return undef;
 	}
 	 
@@ -146,7 +146,7 @@ sub url {
 	
 	$self->{url} = $base_url .= join(
 		'/',
-		$self->{dataset}{access},
+		$self->{dataset}->access,
 		$self->{dataset}->safe_repository_id,
 		$self->{id}
 	);
