@@ -24,6 +24,8 @@ If any of these is missing, the script won't run:
 
 =over 4
 
+=item COATAGLUE_HOME - the root of the CoataGlue installation
+
 =item COATAGLUE_PERLLIB - location of CoataGlue::* perl libraries
 
 =item COATAGLUE_LOG4J - location of the log4j.properties file
@@ -36,17 +38,6 @@ If any of these is missing, the script won't run:
 
 =back
 
-=head2 Command-line switches
-
-=over 4
-
-=item -s DATASOURCE: only harvest one datasource
-
-=item -n            
-
-=item -h            - Print help
-
-=back
 
 =cut
 
@@ -100,6 +91,7 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 
 my $CoataGlue = CoataGlue->new(
+    home => $ENV{COATAGLUE_HOME},
 	global => $ENV{COATAGLUE_CONFIG},
 	sources => $ENV{COATAGLUE_SOURCES},
 	templates => $ENV{COATAGLUE_TEMPLATES}
