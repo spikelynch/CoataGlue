@@ -22,7 +22,7 @@
 
 
 	    "//header/access":       "dc:accessRights.skos:prefLabel",
-        "//projectname":         "swrc:ResearchProject.dc:title",
+        "//project":         "swrc:ResearchProject.dc:title",
 
 
     },
