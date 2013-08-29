@@ -246,7 +246,7 @@ which haven't been ingested on a previous pass
 sub scan {
 	my ( $self ) = @_;
 	
-	$self->{log}->info("Scanning source $self->{name}");
+	$self->{log}->info("$self->{converter} scanning $self->{name}");
 	
 	my @datasets = ();
 	
@@ -254,9 +254,7 @@ sub scan {
 		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
 		return ();
 	}
-	
-	$self->{log}->debug("Scanning with converter $self->{converter}");
-	
+	    	
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
 		if( $status->{status} eq 'new') {
@@ -268,12 +266,12 @@ sub scan {
 					status => 'new'
 				);
 				push @datasets, $dataset;
-				$self->{log}->debug("New id for dataset $dataset->{file}: $id");
+				$self->{log}->info("New id for dataset $dataset->{file}: $id");
 			} else {
 				$self->{log}->error("New id for dataset $dataset->{file} failed");
 			}
 		} else {
-			$self->{log}->debug("Skipping $dataset->{file}: status = $status->{status}");
+			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
 		}
 	}
 	return @datasets;
