@@ -246,9 +246,9 @@ which haven't been ingested on a previous pass
 sub scan {
 	my ( $self ) = @_;
 	
-	$self->{log}->info("Scanning $self->{name} [$self->{conveter}{name}]");
+	$self->{log}->info("Scanning $self->{name} [" . ref($self->{converter}) . "]");
 	
-	my @datasets = ();
+   	my @datasets = ();
 	
 	if( !$self->{locked} ) {
 		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
