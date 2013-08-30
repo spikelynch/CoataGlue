@@ -1,4 +1,4 @@
-{
+x{
     "comment": "XML mapping to work with the standard metadata ingest format which CoataGlue generates from data capture sources.",
     "mappings": {
         "//title":       [ "title", 
