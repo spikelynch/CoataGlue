@@ -16,8 +16,9 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 9;
+use Test::More tests => 12;
 use Data::Dumper;
+use JSON;
 
 use CoataGlue;
 use CoataGlue::Source;
@@ -81,4 +82,28 @@ for my $source ( @sources ) {
     like($value, qr/^$home/, "\$COATAGLUE expanded in source basedir");
 }
 
+my $jsonmap = join(
+    '/',
+    $cg->conf('Redbox', 'directory'),
+    $cg->conf('Redbox', 'jsonmap')
+    );
 
+if( ok(-f $jsonmap, "Found JSON map $jsonmap") ) {
+    local $/ = undef;
+    open(my $fh, "<$jsonmap") || die("Couldn't read; $!");
+    my $json = <$fh>;
+    close $fh;
+
+    my $j = JSON->new;
+    my $data = undef;
+
+    eval {
+        $data = $j->decode($json);
+    };
+
+    ok(!$@, "JSON map parsed OK") || do {
+        diag("JSON parse error: $@");
+    };
+    
+    ok($data->{mappings}, "JSON has a 'mappings' value");
+}
