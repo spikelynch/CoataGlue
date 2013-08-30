@@ -236,18 +236,30 @@ sub set_status {
 
 
 
-=item scan
+=item scan([test => 1])
 
 Calls scan on this source's converter and returns all datasets 
-which haven't been ingested on a previous pass
+which haven't been ingested on a previous pass.
+
+If a true value is passed in for 'test', this will revisit datasets
+which have already been scanned - this is useful for testing, as it
+lets us multiple batches of test metadata files with unique Ids.
 
 =cut
 
 sub scan {
-	my ( $self ) = @_;
+	my ( $self, %params ) = @_;
 	
-	$self->{log}->info("Scanning $self->{name} [" . ref($self->{converter}) . "]");
+	$self->{log}->info(
+        "Scanning $self->{name} [" . ref($self->{converter}) . "]"
+        );
+
+    my $test = $params{test} || undef;
 	
+    if( $test ) {
+        $self->{log}->info("Running in test mode");
+    }
+
    	my @datasets = ();
 	
 	if( !$self->{locked} ) {
@@ -257,8 +269,8 @@ sub scan {
 	    	
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
-		if( $status->{status} eq 'new') {
-			my $id = $self->{ids}->create_id;
+		if( $test || $status->{status} eq 'new') {
+			my $id = $self->{ids}->create_id();
 			if( $id ) {
 				$dataset->{id} = $id;
 				$self->set_status(

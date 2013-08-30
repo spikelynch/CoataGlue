@@ -7,8 +7,7 @@ harvest.pl
 =head1 SYNOPSIS
 
     ./harvest.pl
-    ./harvest.pl -s MIF
-    ./harvest.pl -n
+    ./harvest.pl -t
 
 =head1 DESCRIPTION
 
@@ -89,6 +88,10 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 	die;
 }
 
+my %opts;
+
+getopts('t', \%opts) || die;
+
 
 my $CoataGlue = CoataGlue->new(
     home => $ENV{COATAGLUE_HOME},
@@ -106,7 +109,7 @@ if( !$CoataGlue ) {
 SOURCE: for my $source ( $CoataGlue->sources ) {
 	$log->debug("Scanning source $source->{name}");
 	if( $source->open ) {
-		for my $dataset ( $source->scan ) {
+		for my $dataset ( $source->scan(test => $opts{t}) ) {
 			$log->debug("Dataset: $dataset->{global_id}");
 			
 			if( $dataset->add_to_repository ) {

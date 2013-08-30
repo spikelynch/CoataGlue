@@ -21,7 +21,7 @@ getting the same sequence number.
 
 Rough idea:
 
-    my $id = $IDs->new_id
+    my $id = $IDs->new_id([test => 1])
     
     ... add the new ID to the source history while other
         processes wanting IDs wait till you're done...
@@ -29,6 +29,7 @@ Rough idea:
     $IDs->release 
     
     ... now other processes will get IDs
+
 
 
 =cut
@@ -41,7 +42,6 @@ sub new {
 	my $self = {};
 	
 	bless $self, $class;
-	
 	
 	$self->{log} = Log::Log4perl->get_logger($class);
 	
