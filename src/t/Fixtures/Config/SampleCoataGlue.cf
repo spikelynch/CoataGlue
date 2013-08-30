@@ -44,6 +44,7 @@ directory:      $COATAGLUE/src/t/Test/ReDBox
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       ############################# 
+jsonmap:        Config/DCXMLmap.json
 
 [Mint]
 solr:           http://mint.research.uts.edu.au/solr
