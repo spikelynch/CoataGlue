@@ -6,7 +6,7 @@
 # metadata maps: standard_field: local_field
 
 [metadata]
-title: 			title
+title: 			title timestamp
 project: 	    activity
 group:          group
 creator: 		creator

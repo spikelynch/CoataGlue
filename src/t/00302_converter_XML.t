@@ -74,9 +74,9 @@ for my $ds ( @datasets ) {
 
 	if( ok($md, "Got metadata for $file") ) {
 
-		cmp_ok(
-			$md->{title}, 'eq', $raw->{title},
-			"title = $raw->{title}"
+		like(
+			$md->{title}, qr/^$raw->{title}/,
+			"title =~ /^$raw->{title}/"
 		);
 
 		cmp_ok(

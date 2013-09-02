@@ -640,8 +640,6 @@ sub write_creator_XML {
 	
 	my $creator = $dataset->metadata()->{creator};
 
-    $self->{log}->debug("### creator" . Dumper({creator => $creator}));
-
 	$writer->startTag('creator');	
 	for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
 		$writer->startTag($field);
@@ -733,6 +731,8 @@ sub make_handler {
 		return $self->date_handler(field => $field, expr => $expr);
 	} elsif( $expr->[0] eq 'map' ) {
         return $self->map_handler(field => $field, map => $expr->[1]);
+    } elsif( $expr->[0] eq 'timestamp' ) {
+        return $self->timestamp_handler(field => $field, expt => $expr)
     } else {
 		$self->{log}->error("Unknown handler '$expr->[0]'");
 		return undef;
@@ -846,6 +846,26 @@ sub map_handler {
             return undef;
         }
     };
+}
+
+=item timestamp_handler
+
+This just appends a timestamp to the end of the field value.  A utility
+for testing so that you can tell which version of a test dataset is 
+which.
+
+=cut
+
+
+sub timestamp_handler {
+    my ( $self, %params ) = @_;
+    
+    return sub {
+        my ( $value ) = @_;
+        my $ts = time;
+
+        return "$value $ts";
+    }
 }
 
 

@@ -91,10 +91,22 @@ for my $source ( @sources ) {
             $twig->parse($xml)
         };
         
+
+
         if( ok(!$@, "XML parsed OK") ) {
-            cmp_ok(
-                $title, 'eq', $md->{title},
-                "<title> = $md->{title}"
+
+            # Titles have timestamps appended to them.  Because it's 
+            # refreshed when the ->metadata method is called, we remove
+            # the timestamp and use like(/^$title/) to compare it to the
+            # parsed XML.
+            
+            my @title = split(/ /, $md->{title});
+            pop @title;
+            my $title_less_ts = join(' ', @title);
+
+            like(
+                $title, qr/^$title_less_ts/,
+                "<title> =~ /^$title_less_ts/"
                 );
             
 

@@ -72,10 +72,12 @@ for my $ds ( @datasets ) {
 
 	if( ok($md, "Got metadata for $file") ) {
         my $raw = $ds->{raw_metadata};
+        
+        # like, because test titles have timestamps appended to them
 
-		cmp_ok(
-			$md->{title}, 'eq', $raw->{Experiment_Name},
-			"title = Experiment_Name = $raw->{Experiment_Name}"
+		like(
+			$md->{title}, qr/^$raw->{Experiment_Name}/,
+			"title =~ /^$raw->{Experiment_Name}/"
 		);
 
 		cmp_ok(
