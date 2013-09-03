@@ -17,12 +17,10 @@
         "//creator/honorific":  "dc:creator.foaf:Person.0.foaf:title",
 
 
-        "//header//link": {
-            "URI" :             "bibo:Website.0.dc:identifier",
-            "type" :            "bibo.Website.0.dc:title"
+        "//header/links": {
+            "link/@URI" :   "bibo:Website.0.dc:identifier",
+            "link/@type" :  "bibo.Website.0.dc:title"
         },
-
-        "//header/URL[@type]"   : "bibo:Website.0.dc:title",
 
 	    "//header/access":       "dc:accessRights.skos:prefLabel",
         "//project":         "swrc:ResearchProject.dc:title"
