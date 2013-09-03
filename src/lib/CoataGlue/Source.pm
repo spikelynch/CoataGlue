@@ -450,7 +450,9 @@ sub crosswalk {
 					$new->{$field} = $original->{$mdfield};
 				}
 			}
-            $self->{log}->trace("Crosswalked $mdfield='$original->{$mdfield}' to $field='$new->{$field}'");
+            $self->{log}->trace(
+                "Crosswalked $mdfield='$original->{$mdfield}' to $field='$new->{$field}'"
+                );
 
 		}
 	}
@@ -616,13 +618,26 @@ sub write_header_XML {
 	
 	my $header = $dataset->header();
 
+    $self->{log}->debug(Dumper({ header => $header }));
+
+
 	$writer->startTag('header');	
-	for my $field ( qw(source id file location access repositoryURL dateconverted) ) {
+	for my $field ( qw(source id file access dateconverted) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
-		$writer->endTag();
+		$writer->endTag;
 	}
-	$writer->endTag();
+    
+    $writer->startTag('links');
+
+    for my $uri ( qw(location repositoryURL) ) {
+        $writer->startTag('link',
+                          'type' => $uri,
+                          'uri' => $header->{$uri} );
+        $writer->endTag;
+    }
+    $writer->endTag;
+	$writer->endTag;
 }
 
 

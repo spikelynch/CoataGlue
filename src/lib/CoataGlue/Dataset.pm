@@ -314,7 +314,6 @@ sub metadata {
 	my ( $self ) = @_;
 	
 	if ( $self->{source}->crosswalk(dataset => $self) ) {
-        $self->{log}->debug("## metadata = " . Dumper({md => $self->{metadata}}));
 		return $self->{metadata};
 	} else {
 		return undef;

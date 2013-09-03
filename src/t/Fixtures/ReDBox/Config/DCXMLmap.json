@@ -16,10 +16,13 @@
 	    "//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
         "//creator/honorific":  "dc:creator.foaf:Person.0.foaf:title",
 
-        "//header/repositoryURL": "bibo:Website.0.dc:identifier",
 
-        "//header/location":      "bibo:Website.1.dc:identifier",
+        "//header//link": {
+            "URI" :             "bibo:Website.0.dc:identifier",
+            "type" :            "bibo.Website.0.dc:title"
+        },
 
+        "//header/URL[@type]"   : "bibo:Website.0.dc:title",
 
 	    "//header/access":       "dc:accessRights.skos:prefLabel",
         "//project":         "swrc:ResearchProject.dc:title"

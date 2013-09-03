@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 76;
+use Test::More tests => 81;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -70,7 +70,7 @@ for my $source ( @sources ) {
 
         ok($xml, "Generated some XML");
 
-        my ( $title, $project, $creator, $description, $service ) = ( '', '', '', '', '', '' );
+        my ( $title, $project, $creator, $links, $description, $service );
 
         my $twig = XML::Twig->new(
             twig_handlers => {
@@ -82,6 +82,12 @@ for my $source ( @sources ) {
                     $creator = {};
                     for my $f ( @CREATOR_FIELDS ) {
                         $creator->{$f} = $_->first_child_text($f);
+                    }
+                },
+                links => sub {
+                    $links = {};
+                    for my $link ( $_->children('link') ) {
+                        $links->{$link->atts->{type}} = $link->atts->{uri}
                     }
                 },
 
@@ -138,9 +144,14 @@ for my $source ( @sources ) {
                     my $diff = diff \$fdesc, \$description;
                     print "DIFF: \n$diff\n";
             };
-            
-           
+
+            cmp_ok(
+                $links->{location}, 'eq', $ds->{location},
+                "Location link = $ds->{location}"
+                );
+
+
         }
-	}
+    }
 }
 

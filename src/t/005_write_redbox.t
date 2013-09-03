@@ -77,14 +77,14 @@ for my $source ( @sources ) {
 				$description, $service
 			) = ( '', '', '', '', '' );
             
-            my ( $header, $creator );
+            my ( $header, $creator, $links );
 
 			my $twig = XML::Twig->new(
 				twig_handlers => {
                     header =>       sub {
                         $header = {};
-                        for my $f ( qw(id source file location access
-                                       repositoryURL dateconverted) ) {
+                        for my $f ( qw(id source file  access
+                                       dateconverted) ) {
                             $header->{$f} = $_->first_child_text($f);
                         }
                     },
@@ -98,6 +98,12 @@ for my $source ( @sources ) {
                             $creator->{$f} = $_->first_child_text($f);
                         }
                     },
+                    links => sub {
+                        $links = {};
+                        for my $link ( $_->children('link') ) {
+                            $links->{$link->atts->{type}} = $link->atts->{uri}
+                        }
+                    },
 				}
 			); 
 
@@ -109,11 +115,21 @@ for my $source ( @sources ) {
 
 				my $md = $ds->metadata;
 				my $mdfile = $ds->short_file;
-				cmp_ok(
-					$title, 'eq', $md->{title},
-					"<title> = $title"
-				);
 
+            # Titles have timestamps appended to them.  Because it's 
+            # refreshed when the ->metadata method is called, we remove
+            # the timestamp and use like(/^$title/) to compare it to the
+            # parsed XML.
+            
+                my @title = split(/ /, $md->{title});
+                pop @title;
+                my $title_less_ts = join(' ', @title);
+
+                like(
+                    $title, qr/^$title_less_ts/,
+                    "<title> =~ /^$title_less_ts/"
+                    );
+                
 
                 cmp_ok(
                     $header->{id}, 'eq', $ds->{id},
@@ -131,13 +147,13 @@ for my $source ( @sources ) {
                     );
 
                 cmp_ok(
-                    $header->{location}, 'eq', $ds->{location},
-                    "Header <location> = $ds->{location}"
+                    $links->{location}, 'eq', $ds->{location},
+                    "Header <links type=\"location\"> = $ds->{location}"
                     );
 
                 cmp_ok(
-                    $header->{repositoryURL}, 'eq', $ds->url,
-                    "Header <repositoryURL> = " . $ds->url
+                    $links->{repositoryURL}, 'eq', $ds->url,
+                    "Header <links type=\"repositoryURL\" > = " . $ds->url
                     );
 
                 cmp_ok(
