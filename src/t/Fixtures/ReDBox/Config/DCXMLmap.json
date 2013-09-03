@@ -18,7 +18,7 @@
 
 
         "//header/links": {
-            "link/@URI" :   "bibo:Website.0.dc:identifier",
+            "link/@uri" :   "bibo:Website.0.dc:identifier",
             "link/@type" :  "bibo.Website.0.dc:title"
         },
 
