@@ -69,7 +69,7 @@ our %REQUIRED_CONF = (
 		title description access created
 		creator_title creator_familyname creator_givenname
 	) ],
-	data => [ qw(baseurl) ]
+	urls => [ qw(datastreams) ]
 );
 
 
@@ -128,8 +128,12 @@ get '/:id' => sub {
 	} else {
 		$base = request->uri_base; 
 	}
-	
-	$uri = $base . $uri;
+
+    if( $conf->{urls}{datasetpath} ) {
+        $uri = $base . '/' . $conf->{urls}{datasetpath} . $uri;
+    } else {
+        $uri = $base . $uri;
+    }
 
 	my $dataset = find_dataset(
 		solr_field => $conf->{solr}{search},
@@ -375,14 +379,13 @@ sub find_dataset {
         $access = 'public';
     }
 
-    debug("Base URL for data = " . $conf->{data}{baseurl});
-
     for my $ds ( @{$dataset->{datastreams}} ) {
         $ds->{url} = join(
-            '/', $conf->{data}{baseurl}, 
+            '/', $conf->{urls}{datastreams}, 
             $access, $fedora_id, $ds->{dsid}
             );
     }
+
     return $dataset;
 }
 

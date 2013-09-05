@@ -32,8 +32,9 @@ auto_reload: 0
 
 # fake_baseurl: http://research.uts.edu.au/datasets
 
-data:
-  baseurl: http://localhost:8080/data/
+urls:
+  datastreams: http://localhost:8080/data
+  datasetpath: 
 
 solr:
   server: http://localhost:9000/solr
