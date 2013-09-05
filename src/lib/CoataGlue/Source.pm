@@ -630,7 +630,11 @@ sub write_header_XML {
     
     $writer->startTag('links');
 
-    for my $uri ( qw(location repositoryURL) ) {
+    # The order of these is important: we put the repository URL
+    # first so that we can look the ReDBox record up using
+    # 'bibo:Website.1.dc:identifier'
+
+    for my $uri ( qw(repositoryURL location) ) {
         $writer->startTag('link',
                           'type' => $uri,
                           'uri' => $header->{$uri} );
