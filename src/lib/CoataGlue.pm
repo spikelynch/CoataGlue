@@ -1,4 +1,35 @@
 package CoataGlue;
+
+=head1 NAME
+
+CoataGlue
+
+=head1 DESCRIPTION
+
+Object representing a CoataGlue installation.
+
+=head1 SYNOPSIS
+
+    my $coataglue = CoataGlue->new(
+        home      => $CG_HOME_DIR,
+	    global    => $CG_GLOBAL_CONF,
+	    sources   => $CG_SOURCES_CONF,
+	    templates => $CG_TEMPLATES_DIR
+    );
+
+    my @sources = $coataglue->sources;
+
+    my $repo = $coataglue->repository;
+
+    my $solr = $coataglue->mint;
+
+=head1 CONFIGURATION
+
+See the Wiki: https://github.com/spikelynch/CoataGlue/wiki/Configuration
+
+=cut
+
+
 use strict;
 
 use Config::Std;
@@ -13,14 +44,39 @@ use CoataGlue::Repository;
 my @MANDATORY_PARAMS = qw(home global sources templates);
 
 my %MANDATORY_CONFIG = (
-	General => [ 'timeformat' ],
-	Store => [ 'store' ],
+	General => [ 'timeformat', 'store' ],
 	Repository => [ 'baseurl', 'username', 'password' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
+    Publish => [ 'datastreams',
+                 'directory', 'targets',
+                 'datastreamurl', 'dataseturl' ],
 	Redbox => [ 'directory', 'extension', 'handleprefix' ],
     Mint => [ 'solr', 'core' ]
 );
 
+
+=item new(%params)
+
+Create an new CoataGlue object.  Parameters:
+
+=over 4
+
+=item home - CoataGlue installation directory
+
+=item global - The global config file (see CONFIGURATION)
+
+=item sources - The data source config file (see DATA SOURCES)
+
+=item templates - The metadata templates directory (see TEMPLATES)
+
+=back
+
+If either of the config files can't be parsed, returns undef.
+
+If an individual data source's config is unparsable, this will be logged
+but the CoataGlue object will be returned.
+
+=cut
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -85,7 +141,7 @@ sub new {
 	
 	die if $missing;
 	
-	$self->{store} = $self->{conf}{global}{Store}{store};
+	$self->{store} = $self->{conf}{global}{General}{store};
 	
 	$self->{converters} = CoataGlue::Converter->new();
 	
@@ -112,7 +168,7 @@ sub new {
 		my $source = CoataGlue::Source->new(
 			coataglue => $self,
 			name => $name,
-			store => $self->{conf}{global}{Store}{store},
+			store => $self->{store},
 			converter => $converter,
 			ids => $settings{ids},
 			settings => \%settings
