@@ -6,3 +6,5 @@ This code was developed with funding from ANDS - the Australian
 National Data Service - as part of projects DC18 Data Capture and MS22
 Metadata Stores
 
+For documentation, refer to the [Project Wiki](https://github.com/spikelynch/CoataGlue/wiki)
+
