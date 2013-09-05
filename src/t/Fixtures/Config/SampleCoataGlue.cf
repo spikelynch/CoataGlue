@@ -18,6 +18,7 @@ datastreams: 	urls
 directory:   	$COATAGLUE/Damyata/public/data
 datastreamurl: 	http://0.0.0.0:3000/fs
 dataseturl:    	http://0.0.0.0:3000/
+access:         public base
 
 [RepositoryCrosswalk]
 title:			title

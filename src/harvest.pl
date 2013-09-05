@@ -105,6 +105,9 @@ if( !$CoataGlue ) {
 	die;
 }
 
+my @pub_options = split(/ /, $CoataGlue->conf('Publish', 'access'));
+my $pub_re = "^(" . join('|', @pub_options) . ")\n";
+
 
 SOURCE: for my $source ( $CoataGlue->sources ) {
 	$log->debug("Scanning source $source->{name}");
@@ -114,6 +117,12 @@ SOURCE: for my $source ( $CoataGlue->sources ) {
 			
 			if( $dataset->add_to_repository ) {
 				$log->info("Added $dataset->{global_id} to repository: $dataset->{repository_id}");
+                if( $dataset->publish ) {
+                    $log->info("Published to " . $dataset->access);
+                } else {
+                    $log->warn("Dataset not published to " . $dataset->access);
+                }
+
 			} else {
 				$log->error("Couldn't add $dataset->{global_id} to repository");
 			}

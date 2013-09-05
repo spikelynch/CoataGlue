@@ -65,7 +65,7 @@ for my $got ( @got_names ) {
 # Coataglue home
 
 my @confdirs = (
-    [ 'Store', 'store', ],
+    [ 'General', 'store', ],
 #    [ 'Publish', 'directory' ],
     [ 'Redbox', 'directory' ]
 );

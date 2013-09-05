@@ -76,7 +76,6 @@ use Carp qw(cluck);
 use Data::Dumper;
 use POSIX qw(strftime);
 
-my $TIMEFORMAT = "%FT%T%z";
 
 sub new {
 	my ( $class, %params ) = @_;

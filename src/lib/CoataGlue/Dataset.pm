@@ -493,12 +493,19 @@ sub publish {
 	}
 	
     my $publish_to = $params{to};
+    
+
     if( $publish_to ) {
         if( $publish_to eq $self->access ) {
             $self->{log}->debug("Dataset already published to $params{to}");
         }
     } else {
         $publish_to = $self->access;
+    }
+
+    if( !$self->is_publish_target(to => $publish_to) ) {
+        $self->{log}->error("Publication target '$publish_to' not found");
+        return undef;
     }
 
 	if( !keys %{$self->{datastreams}} ) {
@@ -596,6 +603,27 @@ sub access {
 }
 
 
+=item is_publish_target(to => $to) 
+
+Returns true if $to is a valid publication target (as defined by
+Publish.targets in the global config).
+
+
+=cut
+
+sub is_publish_target {
+    my ( $self, %params ) = @_;
+
+    my $to = $params{to} || return undef;
+
+    for my $target ( split(/ /, $self->{source}->conf('Publish', 'targets') ) ) {
+        if( $to eq $target ) {
+            return $to
+        } 
+    }
+
+    return undef;
+}
 
 
 
