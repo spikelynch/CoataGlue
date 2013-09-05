@@ -394,7 +394,14 @@ sub find_dataset {
 
 Looks the dataset up in Fedora and returns a list of datastreams.
 The list is an arrayref of hashrefs: keys are dsid, mimeType and
-label
+label.
+
+This method broke when I started dropping the colons out of Fedora IDs
+back up the chain -- because they're illegal in Windows filesystems,
+and we might want to build zips with folder names containing them.
+
+Now if it doesn't find a colon in the ID, it pulls the number off the
+end and reinstates it.
 
 =cut
 
@@ -405,6 +412,15 @@ sub find_datastreams {
 	
 	my $fedora_id = $params{fedora_id};
 	my $datastreams = {};
+
+    if( $fedora_id !~ /:/ ) {
+        if( $fedora_id =~ /^(\D+)(\d+)$/ ) {
+            $fedora_id = join(':', $1, $2);
+        } else {
+            warn("No colon in fedora_id $fedora_id but couldn't split and repair");
+        }
+    }
+            
 	
 	my $result = $fedora->listDatastreams(pid => $fedora_id);
 
