@@ -38,10 +38,10 @@ urls:
 
 solr:
   server: http://localhost:9000/solr
-  core:   fascinator
+  core:   fascinator
   search: bibo:Website.1.dc:identifier
   
 fedora:
   url:       http://localhost:8080/fedora
   user:      fedoraAdmin
-  password:  hce39alp
+  password:  ..........
