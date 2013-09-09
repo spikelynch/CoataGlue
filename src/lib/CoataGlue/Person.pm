@@ -19,16 +19,21 @@ use Data::Dumper;
 use Crypt::Skip32;
 
 
+our @MANDATORY_PARAMS = qw(source id);
+
+
 
 =head1 METHODS
 
 =over 4
 
-=item new(%params)
+=item new(id => $ID, source => $SOURCE, [ %details ])
 
 New is used to create stub Person objects for encrypting IDs.  It is
 also used as a kind of mock method to run tests without needing an
 operational Mint server.
+
+It needs a staff ID and a CoataGlue::Source, at least.
 
 
 =cut
@@ -45,11 +50,26 @@ sub new {
         $self->{$key} = $params{$key};
     }
 
-	if( !$self->{id} ) {
-		$self->{log}->error("$class requires an id");
-		return undef;
+    my $error = undef;
+
+    for my $field ( @MANDATORY_PARAMS ) {
+        if( !$self->{$field} ) {
+            $self->{log}->error("$class requires an id");
+            $self->{log}->error("Miscreant responsible: " . join(' ', caller));
+            $error = 1;
+        }
 	}
-	
+
+    if( $error ) {
+        return undef;
+    }
+
+    my $cg = $self->{source}{coataglue};
+
+    $self->{key} = $cg->conf('Redbox', 'cryptkey');
+    $self->{prefix} = $cg->conf('Redbox', 'handleprefix');
+    $self->{crosswalk} = $cg->conf('PersonCrosswalk');
+
 	return $self;
 }
 
@@ -66,30 +86,14 @@ sub lookup {
 
     my $self = $class->new(%params);
 
-    my $cg = $params{coataglue} || do {
-        $self->{log}->error("Person::lookup needs the CoataGlue object");
+    if( !$self ) { 
+        warn("Need a source and id for lookup");
         return undef;
-    };
-
-    my $solr = $cg->mint;
-
-    my $key = $cg->conf('Redbox', 'cryptkey');
-    my $prefix = $cg->conf('Redbox', 'handleprefix');
-    my $crosswalk = $cg->conf('PersonCrosswalk');
-
-    $self->{coataglue} = $cg;
-
-    $self->encrypt_id(key => $key);
-
-    my $handle;
-
-    # If prefix = 'none', don't use it -  a hack for testing purposes
-    
-    if( $prefix eq 'none' ) {
-        $handle = $self->{encrypted_id};
-    } else {
-        $handle = $prefix . $self->{encrypted_id};
     }
+
+    my $solr = $self->{source}{coataglue}->mint;
+
+    my $handle = $self->encrypt_id;
 
     # colons need to be escaped in solr queries
 
@@ -124,8 +128,8 @@ sub lookup {
 	my $doc = $results->selected(0);
 
 
-	for my $field ( sort keys %$crosswalk ) {
-        my $solrf = $doc->field($crosswalk->{$field});
+	for my $field ( sort keys %{$self->{crosswalk}} ) {
+        my $solrf = $doc->field($self->{crosswalk}->{$field});
         $self->{$field} = $solrf->{content} || '';
 	}
 	
@@ -195,25 +199,23 @@ Encrypt a staff ID to put in a handle
 sub encrypt_id {
 	my ( $self, %params ) = @_;
 	
-	my $key = $params{key} || do {
-		$self->{log}->error("encrypt_id requires a key");
-		return undef;
-	};
-
-	if( $key !~ /^[0-9A-F]{20}$/ ) {
+	if( $self->{key} !~ /^[0-9A-F]{20}$/ ) {
 		$self->{log}->error("cryptKey must be a 20-digit hexadecimal number.");
 		die("Invalid cryptKey - must be 20-digit hex");
 	}
 
 	my $id = $self->{id};	
 	
-	my $keybytes = pack("H20", $key);
+	my $keybytes = pack("H20", $self->{key});
 	
 	my $cypher = Crypt::Skip32->new($keybytes);
 	
 	my $plaintext = pack("N", $id);
 	my $encrypted = $cypher->encrypt($plaintext);
 	$self->{encrypted_id} = unpack("H8", $encrypted);
+    if( $self->{prefix} ne 'none' ) {
+        $self->{encrypted_id} = $self->{prefix} . $self->{encrypted_id};
+    }
 	$self->{log}->trace("Encrypted $id to $self->{encrypted_id}");
 	return $self->{encrypted_id};
 }	

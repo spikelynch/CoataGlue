@@ -490,7 +490,7 @@ sub get_person {
  	my $id = $params{id};
 
     my $person = CoataGlue::Person->lookup(
-        coataglue => $self->{coataglue},
+        source => $self,
         id => $id
         ) || do {
             $self->{log}->error("Couldn't find creator id $id");
@@ -513,22 +513,12 @@ sub staff_id_to_handle {
  	
  	my $id = $params{id};
  	
-	my $p = CoataGlue::Person->new(id => $id) || do {
+	my $p = CoataGlue::Person->new(source => $self, id => $id) || do {
 		$self->{log}->error("Couldn't create CoataGlue::Person");
 		die;
 	};
 
-	my $key = $self->conf('Redbox', 'cryptkey');
-
-	my $encrypt = $p->encrypt_id(id => $id, key => $key	);
-
-    my $prefix = $self->conf('Redbox', 'handleprefix');
-    my $handle = $encrypt;
-    
-    if( $prefix ne 'none' ) {
-        $handle = $prefix . $handle;
-    }
-
+	my $handle = $p->encrypt_id;
 
 	$self->{log}->debug("Staff id $id => handle $handle");
 

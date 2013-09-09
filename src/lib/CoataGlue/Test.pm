@@ -227,7 +227,6 @@ sub read_staff {
             $list->{$id}{familyname}
             );
         $list->{$id}{staffid} = $id;
-
     }
 
     return $list;
