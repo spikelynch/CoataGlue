@@ -16,7 +16,7 @@ use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
 
-use Test::More tests => 9;
+use Test::More tests => 3 + 5 * 9;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -26,15 +26,6 @@ use CoataGlue;
 use CoataGlue::Source;
 use CoataGlue::Person;
 use CoataGlue::Test qw(setup_tests);
-
-my %RESEARCHER = (
-    id => '040221',
-    familyname => 'Leijdekkers',
-    givenname => 'Peter',
-    honorific => 'Doctor',
-    jobtitle => 'Senior Lecturer',
-    groupid => '927'
-    );
 
 
 my $LOG4J = "$Bin/log4j.properties";
@@ -48,28 +39,37 @@ my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
 ok($CoataGlue, "Initialised CoataGlue object");
 
+my ( $source ) = $CoataGlue->sources;
+
+ok($source, "Got a source");
 
 my $solr = $CoataGlue->mint;
 
 ok($solr, "Initialised Apache::Solr object");
 
-my $key = $CoataGlue->conf('Redbox', 'cryptkey');
-my $id = $RESEARCHER{id};
+# loop over all staff in the fixtures.
 
-my $person = CoataGlue::Person->lookup(
-    coataglue => $CoataGlue,
-    id => $id
-    );
+my $staff = $fixtures->{STAFF};
 
-if( ok($person, "Person lookup $id returned a result") ) {
+for my $id ( sort keys %$staff ) {
 
-    for my $field ( sort keys %RESEARCHER ) {
-        cmp_ok(
-            $person->{$field}, 'eq', $RESEARCHER{$field},
-            "Got $field = $RESEARCHER{$field}"
-            );
+    diag("Looking up $id $staff->{$id}{name}");
+
+    my $person = CoataGlue::Person->lookup(
+        source => $source,
+        id => $id
+        );
+    
+    if( ok($person, "Person lookup $id returned a result") ) {
+        my $creator = $person->creator;
+        for my $field ( sort keys %{$staff->{$id}} ) {
+            cmp_ok(
+                $creator->{$field}, 'eq', $staff->{$id}{$field},
+                "Got $field = $staff->{$id}{$field}"
+                );
+        }
+    } else {
+        diag("#### Person lookup failed, skipped 6 field tests");
     }
-} else {
-    diag("Skipping field tests.");
 }
 
