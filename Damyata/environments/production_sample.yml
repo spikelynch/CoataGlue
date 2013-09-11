@@ -15,3 +15,17 @@ show_errors: 0
 # cache route resolution for maximum performance
 route_cache: 1
 
+
+urls:
+  datastreams: http://my.url.for.damyata/data
+  datasets: http://my.static.web.hosting/ 
+
+solr:
+  server: http://localhost:9000/solr
+  core:   fascinator
+  search: bibo:Website.1.dc:identifier
+  
+fedora:
+  url:       http://localhost:8080/fedora
+  user:      fedoraAdmin
+  password:  ..........
