@@ -72,6 +72,7 @@ our %REQUIRED_CONF = (
 	urls => [ qw(datasets datastreams) ]
 );
 
+our @OPTIONAL_CONF = qw(fake_baseurl test_page);
 
 my $conf = load_config();
 
@@ -101,12 +102,12 @@ my $fedora = Catmandu::FedoraCommons->new(
 
 =item get /
 
-A placeholder index page
+A placeholder.  
 
 =cut
 
 get '/' => sub {
-    template 'index';
+    template 'index', { test_page => $conf->{test_page} };
 };
 
 =item get /:id
@@ -135,17 +136,22 @@ get '/:id' => sub {
         $uri = $base . $uri;
     }
 
-	my $dataset = find_dataset(
+	my $dataset = undef;
+
+    if( $id eq $conf->{test_page} ) {
+        $dataset = test_dataset();
+    } else {
+        $dataset = find_dataset(
 		solr_field => $conf->{solr}{search},
 		redbox_map => $conf->{redbox_map},
 		fedora_id => $id,
 		uri => $uri
-	);
+            );
+    }
 	
 	if( !$dataset ) {
 		template 'not_found' => { uri => $uri };
 	} else {
-		
 		if( $dataset->{access} eq 'uts' && !request_is_local() ) {
 			template 'forbidden' => { uri => $uri };
 		} else {
@@ -154,83 +160,6 @@ get '/:id' => sub {
 	}
 };
 
-
-=item get /fs/:audience/:id/:ds
-
-This route is obsolete - was used when we were serving datastreams 
-via Dancer, but now they're static.
-
-=cut
-
-get '/fs/:section/:id/:ds' => sub {
-	
-    send_error(404, "Not found");
-
-	# my $section = param('section');
-	# my $id = param('id');
-	# my $ds = param('ds');
-	
-	# my ( $mimetype, $encoding ) = by_suffix($ds);
-	
-	# my $path = join(
-	# 	'/', $conf->{filestore}{basedir}, $section, $id, $ds
-	# );
-	
-	# send_file(
-	# 	$path,
-	# 	content_type => $mimetype,
-	# 	filename => $ds
-	# );
-	
-};
-
-
-=item get /fedora/:id/:ds
-
-Serves a datastream which is stored in Fedora Commons, rather
-than the filesystem.
-
-
-=cut
-
-
-get '/fedora/:id/:ds' => sub {
-	
-	my $id = param('id');
-	my $dsid = param('ds');
-	
-	my $data = '';
-	
-	my $datastreams = find_datastreams(fedora_id => $id);
-
-	my @ds = grep { $_->{dsid} eq $dsid } @$datastreams;
-	
-	if( !@ds ) {
-		template 'not_found';
-	} else {
-		my $mimetype = $ds[0]->{mimeType};
-		debug("mimetype $dsid = $mimetype");
-		content_type $mimetype;
-		
-		my $data = '';
-		$fedora->getDatastreamDissemination(
-			pid => $id,
-			dsID => $dsid,
-			callback => sub {
-				my ( $d, $response, $protocol ) = @_;
-				$data .= $d;
-			}
-		);
-		my @mimeparts = split('/', $mimetype);
-		my $filename = join('.', $id, $dsid, $mimeparts[1]);
-		return send_file(
-			\$data,
-			content_type => $mimetype,
-			filename => $filename
-		);
-	}
-	
-};
 
 
 =back
@@ -274,9 +203,11 @@ sub load_config {
 	
 	$conf->{solr}{search} =~ s/:/\\:/g;
 	
-	# not a mandatory field so we have to fetch it explicitly
+	# optional fields
 	
-	$conf->{fake_baseurl} = config->{fake_baseurl};
+    for my $field ( @OPTIONAL_CONF ) {
+        $conf->{$field} = config->{$field};
+    }
 
 	return $conf;
 }
@@ -311,6 +242,8 @@ The return value is a hash as follows:
 =item datastreams
 
 =back
+
+FIXME: this needs to get more info from ReDBox
 
 Mapping from the ReDBox/Solr index to these fieldnames is controlled
 by redbox_map in the config file.
@@ -446,6 +379,65 @@ Return true if this request is 'local'
 
 sub request_is_local {
 	return true;
+}
+
+
+=item test_dataset
+
+Returns a mock dataset for testing the page templates and css
+
+=over 4
+
+=item title
+=item description
+=item access
+=item created
+=item creator_title
+=item creator_familyname
+=item creator_givenname
+=item datastreams
+
+=back
+
+
+=over 4
+
+=item dsid
+=item label
+=item mimeType
+=item url
+
+=back
+
+
+
+=cut
+
+sub test_dataset {
+
+    return {
+        title => 'Test Dataset',
+        description => '<p>This is a placeholder</p><p>For testing</p>',
+        access => 'public',
+        created => '12 September 2013',
+        creator_title => 'Dr',
+        creator_familyname => 'Smith',
+        creator_givenname => 'Jane',
+        datastreams => [
+            {
+                dsid => 'DS1',
+                label => 'Datastream1.jpg',
+                mimeType => 'image/jpg',
+                url => 'http://localhost/Datastream1.jpg'
+            },
+            {
+                dsid => 'DS2',
+                label => 'Datastream2.jpg',
+                mimeType => 'image/jpg',
+                url => 'http://localhost/Datastream1.jpg'
+            }
+            ]
+    };
 }
 
 true;

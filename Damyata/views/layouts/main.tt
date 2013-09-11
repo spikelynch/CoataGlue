@@ -2,26 +2,42 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>UTS / Data Repository / <% title %></title>
+    <title>UTS Research Data | <% title %></title>
 
     <link rel="icon" type="image/vnd.microsoft.com" href="favicon.ico">
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/css/screen.css">
     
                 
   </head>
     <body>
 
-        <div class="grid_16 branding">
-          <a href="/">
-            <img src="/images/utslogo.png" align="left" height="30"> &nbsp; UTS Research Data Repository </a>
-        </div>
-
-        <div class="grid_16">
-        <div class="grid_4">
-        </div>
-        <div style="float:clear" class="grid_12">
-        <% content %>
+      <div class="logo">
+        <a href="/">
+          <img src="/images/utslogo.png" align="left" height="30"> &nbsp; UTS Research Data</a>
       </div>
 
-</body></html>
+      <div class="body">
+      
+      <% content %>
+      </div>
+
+      <div class="footer">
+        <div class="footer-right">
+          &copy; 2013 copyright UTS - CRICOS Provider No: 00099F<br />
+          This page is authorised by 
+          Comments to <a href="mailto:eResearch-IT@uts.edu.au">eResearch-IT@uts.edu.au</a><br />
+          <a href="http://www.uts.edu.au/disclaimer.html">Disclaimer</a> |
+          <a href="http://www.uts.edu.au/privacy.html">Privacy</a> |
+          <a href="http://www.uts.edu.au/copyright.html">Copyright</a> |
+          <a href="http://www.uts.edu.au/accessibility.html">Accessibility</a> |
+          <a href="http://www.gsu.uts.edu.au/policies/webpolicy.html">Web policy</a>
+        </div>
+        <div class="footer-right">
+          <a href="http://www.uts.edu.au/"><img src="http://www.uts.edu.au/images/css/uts_logo_footer.gif" alt="UTS Homepage" width="130" height="29" /></a>
+          <br />
+          <a href="http://www.atn.edu.au">UTS is a member of the<br />Australian Technology Network of Universities</a>
+        </div>
+      </div>
+    </body>
+
+</html>

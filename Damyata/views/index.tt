@@ -4,8 +4,11 @@
 -->
 
 <div id="page">
-<h1>Damyata</h1>
 
-<p>...is running...</p>
+<% IF test_page %>
+   <p><a href="/<% test_page %>">Test dataset page</a></p>
+<% ELSE %>
+   <p>Damyata is running</p>
+<%END %>
 
 </div>

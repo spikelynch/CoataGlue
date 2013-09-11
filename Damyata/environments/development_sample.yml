@@ -32,6 +32,11 @@ auto_reload: 0
 
 # fake_baseurl: http://research.uts.edu.au/datasets
 
+# Setting test_page to a value gives a mock dataset at
+# $urls.datasets/_test
+
+test_page: _test
+
 urls:
   datastreams: http://my.url.for.damyata/data
   datasets: http://my.static.web.hosting/ 
