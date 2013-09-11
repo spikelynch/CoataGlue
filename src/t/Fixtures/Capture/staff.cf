@@ -1,11 +1,13 @@
 # Staff list for CoataGlue tests.
-# You need to add test staff to this
+# Needs to have staff details which are in your Mint and in 
+# the test fixtures.
+# TODO: the tests should really use mocking to provide the Apache::Solr
+# responses from Mint.
 
-[STAFFID]
-mintid:         ENCRYPTED_ID
+[DATA_ID] 
+mintid:         PUBLIC_ID
 familyname:     SURNAME
 givenname:      FIRSTNAME
-groupid:        GROUP_ID
-honorific:      FOR_EG_DR
-jobtitle:       FOR_EG_SENIOR_LECTURER
-
+groupid:        GROUPID
+honorific:      Professor
+jobtitle:       Associate Dean of Research
