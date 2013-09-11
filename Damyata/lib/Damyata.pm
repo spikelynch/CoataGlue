@@ -69,7 +69,7 @@ our %REQUIRED_CONF = (
 		title description access created
 		creator_title creator_familyname creator_givenname
 	) ],
-	urls => [ qw(datastreams) ]
+	urls => [ qw(datasets datastreams) ]
 );
 
 
@@ -129,8 +129,8 @@ get '/:id' => sub {
 		$base = request->uri_base; 
 	}
 
-    if( $conf->{urls}{datasetpath} ) {
-        $uri = $base . '/' . $conf->{urls}{datasetpath} . $uri;
+    if( $conf->{urls}{datasets} ) {
+        $uri = $conf->{urls}{datasets} . $uri;
     } else {
         $uri = $base . $uri;
     }

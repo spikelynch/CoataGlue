@@ -53,8 +53,6 @@ my $staff = $fixtures->{STAFF};
 
 for my $id ( sort keys %$staff ) {
 
-    diag("Looking up $id $staff->{$id}{name}");
-
     my $person = CoataGlue::Person->lookup(
         source => $source,
         id => $id

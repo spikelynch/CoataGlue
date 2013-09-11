@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+009_full_publish.t
+
+=head1 DESCRIPTION
+
+End-to-end test: scans the data capture directories, adds the records
+to Fedora, writes metadata out to ReDBox, 
+
+=cut
+
+use strict;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
+use Test::More tests => 47;
+use Data::Dumper;
+use XML::Twig;
+use Text::Diff;
+
+
+use CoataGlue;
+use CoataGlue::Source;
+
+use CoataGlue::Converter;
+use CoataGlue::Dataset;
+use CoataGlue::Test qw(setup_tests is_fedora_up);
+
+my $LOG4J = "$Bin/log4j.properties";
+my $LOGGER = "CoataGlue.tests.009_full_publish";
+Log::Log4perl->init($LOG4J);
+my $log = Log::Log4perl->get_logger($LOGGER);
+
+my $fixtures = setup_tests(log => $log);
+
+my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
+
+ok($CoataGlue, "Initialised CoataGlue object");
+
+my $repo = $CoataGlue->repository;
+
+ok($repo, "Connected to Fedora Commons");
+
+is_fedora_up(log => $log, repository => $repo);
+
+my @sources = $CoataGlue->sources;
+
+ok(@sources, "Got sources");
+
+for my $source ( @sources ) {
+ 	my $sname = $source->{name};
+	ok($source->open, "Opened source '$sname'");
+
+	my @datasets = $source->scan;
+
+	ok(@datasets, "Got at least one dataset");
+
+ 	DATASET: for my $ds ( @datasets ) {
+		my $datastreams = $ds->{datastreams};
+		ok($datastreams && keys %$datastreams, 
+			"Dataset has datastreams") || next DATASET;
+
+		ok($ds->add_to_repository, "Added dataset to Fedora");
+
+		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}") || do {
+            die("Check that Fedora is running.");
+        };
+		my $url = $ds->url;
+		my $expect = $source->conf('Publish', 'dataseturl');
+		if( $expect !~ /\/$/ ) {
+			$expect .= '/';
+		}
+		$expect .= $ds->{repository_id};
+		cmp_ok($url, 'eq', $expect, "Dataset has URL $expect");
+	
+		ok($ds->write_redbox, "Wrote metadata record for ReDBox");
+		
+		ok($ds->publish(to => 'local'), "Published dataset to local");			
+	
+		for my $id ( keys %$datastreams ) {
+			my $datastream = $datastreams->{$id};
+			my $stream_url = $datastream->url;
+			my $expect_stream = join(
+				'/', $source->conf('Publish', 'datastreamurl'),
+				'local', $ds->{repository_id}, $datastream->{id}
+			);
+					
+			cmp_ok($stream_url, 'eq', $expect_stream, "Datastream has URL: $expect_stream");
+		}
+		
+		
+		
+	}
+
+}

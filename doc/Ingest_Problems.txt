@@ -1,3 +1,18 @@
+
+For crosswalk tests
+
+004 - empty projectname
+      empty creator     <- done
+
+005 - access
+    - project name
+    - creator           <- done
+
+: warnings about datasets?
+
+
+
+
 TODO for metadata ingest
 
 - Decide which field we are using to control publication and

@@ -71,6 +71,7 @@ for my $ds ( @datasets ) {
     my $f = $fixtures->{MIF}{$file};
 
 	if( ok($md, "Got metadata for $file") ) {
+
         my $raw = $ds->{raw_metadata};
         
         # like, because test titles have timestamps appended to them
