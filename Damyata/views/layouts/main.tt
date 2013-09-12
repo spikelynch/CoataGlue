@@ -5,15 +5,16 @@
     <title>UTS Research Data | <% title %></title>
 
     <link rel="icon" type="image/vnd.microsoft.com" href="favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/css/styles.css">
-    
-                
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+<!--[if IE 7]>
+    <link rel="stylesheet" href="font-awesome/css/font-awesome-ie7.min.css">
+<![endif]-->
   </head>
     <body>
 
-      <div class="logo">
-        <a href="/">
-          <img src="/images/utslogo.png" align="left" height="30"> &nbsp; UTS Research Data</a>
+      <div class="header">
+        UTS Research Data Repository
       </div>
 
       <div class="body">
@@ -22,7 +23,7 @@
       </div>
 
       <div class="footer">
-        <div class="footer-right">
+        <div class="footer-left">
           &copy; 2013 copyright UTS - CRICOS Provider No: 00099F<br />
           This page is authorised by 
           Comments to <a href="mailto:eResearch-IT@uts.edu.au">eResearch-IT@uts.edu.au</a><br />

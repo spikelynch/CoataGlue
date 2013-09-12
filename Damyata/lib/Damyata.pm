@@ -57,7 +57,10 @@ use Dancer ':syntax';
 
 use Apache::Solr;
 use Data::Dumper;
+
 use MIME::Types qw(by_suffix);
+use Number::Bytes::Human qw(format_bytes);
+
 use Catmandu::FedoraCommons;
 
 our $VERSION = '0.1';
@@ -69,7 +72,8 @@ our %REQUIRED_CONF = (
 		title description access created
 		creator_title creator_familyname creator_givenname
 	) ],
-	urls => [ qw(datasets datastreams) ]
+	urls => [ qw(datasets datastreams) ],
+    webroot => 1
 );
 
 our @OPTIONAL_CONF = qw(fake_baseurl test_page);
@@ -191,12 +195,14 @@ sub load_config {
 			error("Missing config section $section");
 			$missing = 1;
 		} else {
-			for my $value ( @$req ) {
-				if( ! $conf->{$section}{$value} ) {
-					error("Missing config value $section.$value");
-					$missing = 1;
-				}
-			}
+            if( ref($req) ) {
+                for my $value ( @$req ) {
+                    if( ! $conf->{$section}{$value} ) {
+                        error("Missing config value $section.$value");
+                        $missing = 1;
+                    }
+                }
+            }
 		}
 	}
 	die if $missing;
@@ -300,11 +306,10 @@ sub find_dataset {
 		$dataset->{$field} = $doc->content($redbox_map->{$field}) || '';
 	}
 	
-	$dataset->{datastreams} = find_datastreams(
-		fedora_id => $fedora_id
-	);
+	$dataset->{datastreams} = find_datastreams(fedora_id => $fedora_id);
 	
-	# build a url for each datastream
+	# build a url for each datastream.. also hackily look up the
+    # file size in the web hosting directory
 	
     my $access = $dataset->{access};
 
@@ -317,6 +322,14 @@ sub find_dataset {
             '/', $conf->{urls}{datastreams}, 
             $access, $fedora_id, $ds->{dsid}
             );
+        my $file = join('/',
+                        $conf->{webroot}, $access, $fedora_id, $ds->{dsid}
+            );
+        my $size = '';
+        if( $size = -s $file ) {
+            $size = format_bytes($size);
+        }
+        $ds->{size} = $size;
     }
 
     return $dataset;
@@ -328,6 +341,9 @@ sub find_dataset {
 Looks the dataset up in Fedora and returns a list of datastreams.
 The list is an arrayref of hashrefs: keys are dsid, mimeType and
 label.
+
+This filters out any datastream with the id DC (that's the Dublin
+Core metadata, which is already on the landing page).
 
 This method broke when I started dropping the colons out of Fedora IDs
 back up the chain -- because they're illegal in Windows filesystems,
@@ -354,14 +370,12 @@ sub find_datastreams {
         }
     }
             
-	
 	my $result = $fedora->listDatastreams(pid => $fedora_id);
 
 	if( $result->is_ok ) {
 		my $dss = $result->parse_content;
-		
-		return $dss->{datastream};
-		
+        my $no_dc = [ grep { $_->{dsid} ne 'DC' } @{$dss->{datastream}} ];
+		return $no_dc;
 	} else {
 		debug("Error looking up datastreams in FC: " . $result->error);
 		return []
@@ -428,13 +442,15 @@ sub test_dataset {
                 dsid => 'DS1',
                 label => 'Datastream1.jpg',
                 mimeType => 'image/jpg',
-                url => 'http://localhost/Datastream1.jpg'
+                url => 'http://localhost/Datastream1.jpg',
+                size => '10m'
             },
             {
                 dsid => 'DS2',
                 label => 'Datastream2.jpg',
                 mimeType => 'image/jpg',
-                url => 'http://localhost/Datastream1.jpg'
+                url => 'http://localhost/Datastream1.jpg',
+                size => '12m'
             }
             ]
     };

@@ -1,31 +1,54 @@
 <!-- Template page for a single dataset -->
 
-<div id="page">
-
 <table>
 <tbody>
 
-<tr><td colspan="2"><h1 id="title"><% title %></h1></td></tr>
+<tr id="row_title">
+    <td colspan="2" class="title">
+    <h1><% title %></h1>
+    </td>
+</tr>
 
-<tr><td>Description</td><td id="description"><% description %></td></tr>
+<tr id="row_description">
+    <td class="label">Description</td>
+    <td class="value" id="description"><% description %></td>
+</tr>
 
-<tr><td>Created</td><td id="date_created">2013-07-31T04:15:04Z<!--<% created %>--> </td></tr>
+<tr id="row_created">
+    <td class="label">Date created</td>
+    <td class="value" id="date_created"><% created %></td>
+</tr>
 
-<tr><td>Creator</td>
-<td id="creator">Dr Jane Researcher</td>
-<!-- <% creator_title %> <% creator_givenname %> <% creator_familyname %> -->
-</td>
+<tr id="row_creator">
+    <td class="label">Researcher</td>
+    <td class="value" id="creator"><% creator_title %> <% creator_givenname %> <% creator_familyname %></td>
+</tr>
 
-<tr><td>Datastreams</td>
-<td id="datastreams">
+<tr id="row_datastreams"><td>Data</td>
+<td class="value" id="datastreams">
 
 <% IF datastreams.size > 0 %>
+   <table id="datastreams">
+
+   <tr class="datastream">
+   <th class="ds_id">Name</th>
+   <th class="ds_mime">Format</th>
+   <th class="ds_mime">Size</th>
+   </tr>
+      
   <% FOREACH ds IN datastreams %>
-    <div class="datastream">
-    <a href="<% ds.url %>"><% ds.dsid %> <% ds.label %></a></div>
+   <tr class="datastream">
+   <td class="ds_id"><% ds.dsid %></td>
+   <td class="ds_mime"><% ds.mimeType %></td>
+   <td class="ds_size"><% ds.size %></td>
+   <td class="ds_download">
+   <a class="download" href="<% ds.url %>"><i class="icon-download-alt"></i></a>
+   </td>
+   </tr>
   <% END %>
+   </table>
 <% ELSE %>
-  (No datastreams found)
+   <p>Sorry, an error occurred when retrieving the requested data.</p>
 <% END %>
 
 </td></tr>
