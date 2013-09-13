@@ -1,57 +1,65 @@
 <!-- Template page for a single dataset -->
 
-<table>
-<tbody>
+   <div class="page-header">
+      <h1><% title %></h1>
+   </div>
+   
 
-<tr id="row_title">
-    <td colspan="2" class="title">
-    <h1><% title %></h1>
-    </td>
-</tr>
+   <div class="row">
+      <div class="field_label col-md-2">Description</div>
+      <div class="col-md-8"><% description %></div>
+   </div>
 
-<tr id="row_description">
-    <td class="label">Description</td>
-    <td class="value" id="description"><% description %></td>
-</tr>
+   <div class="row">
+      <div class="field_label col-md-2">Date Created</div>
+      <div class="col-md-8"><% created %></div>
+   </div>
 
-<tr id="row_created">
-    <td class="label">Date created</td>
-    <td class="value" id="date_created"><% created %></td>
-</tr>
+   <div class="row">
+      <div class="field_label col-md-2">Created By</div>
+      <div class="col-md-8">
+      <% IF creator_url %><a href="<% creator_url %>"><% END %>
+<% creator_title %> <% creator_givenname %> <% creator_familyname %>
+      <% IF creator_url %></a><% END %>
+      <% IF creator_email %>
+      <br />
+      <a href="mailto:<% creator_email %>"><% creator_email %></a>
+      <% END %>
+</div>
+   </div>
 
-<tr id="row_creator">
-    <td class="label">Researcher</td>
-    <td class="value" id="creator"><% creator_title %> <% creator_givenname %> <% creator_familyname %></td>
-</tr>
-
-<tr id="row_datastreams"><td>Data</td>
-<td class="value" id="datastreams">
+   <div class="row">
+      <div class="col-md-2">&nbsp;</div>
+      <div class="col-md-8">
 
 <% IF datastreams.size > 0 %>
-   <table id="datastreams">
-
-   <tr class="datastream">
-   <th class="ds_id">Name</th>
-   <th class="ds_mime">Format</th>
-   <th class="ds_mime">Size</th>
-   </tr>
+   
+   <div id="datastreams">
+   <div class="row">
+     <div class="col-md-4">Name</div>
+     <div class="col-md-2">Type</div>
+     <div class="col-md-1">Size</div>
+     <div class="col-md-1">Download</div>
+   </div>
       
   <% FOREACH ds IN datastreams %>
-   <tr class="datastream">
-   <td class="ds_id"><% ds.dsid %></td>
-   <td class="ds_mime"><% ds.mimeType %></td>
-   <td class="ds_size"><% ds.size %></td>
-   <td class="ds_download">
+
+   <div class="datastream row">
+     <div class="col-md-4"><% ds.dsid %></div>
+     <div class="col-md-2"><% ds.mimeType %></div>
+     <div class="col-md-1"><% ds.size %></div>
+     <div class="col-md-1">
    <a class="download" href="<% ds.url %>"><i class="icon-download-alt"></i></a>
-   </td>
-   </tr>
+   </div>
+   </div>
   <% END %>
-   </table>
+
+  </div>
+
 <% ELSE %>
    <p>Sorry, an error occurred when retrieving the requested data.</p>
 <% END %>
 
-</td></tr>
 
-</tbody>
-</table>
+      </div>
+   </div>

@@ -437,20 +437,22 @@ sub test_dataset {
         creator_title => 'Dr',
         creator_familyname => 'Smith',
         creator_givenname => 'Jane',
+        creator_email => 'Jane.Smith@institution',
+        creator_url => 'http://www.uts.edu.au/~jane.smith',
         datastreams => [
             {
                 dsid => 'DS1',
                 label => 'Datastream1.jpg',
                 mimeType => 'image/jpg',
                 url => 'http://localhost/Datastream1.jpg',
-                size => '10m'
+                size => '10M'
             },
             {
                 dsid => 'DS2',
                 label => 'Datastream2.jpg',
                 mimeType => 'image/jpg',
                 url => 'http://localhost/Datastream1.jpg',
-                size => '12m'
+                size => '12K'
             }
             ]
     };

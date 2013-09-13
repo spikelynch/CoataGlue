@@ -1,0 +1,43 @@
+.container {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+h4 {
+  margin-top: 25px;
+}
+.row {
+  margin-bottom: 20px;
+}
+.row .row {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+[class*="col-"] {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+hr {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+div.field_label {
+    text-align: right;
+    font-weight: bold;
+}
+
+#datastreams div {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+div.datastream:nth-child(odd) {
+    background-color: #eee;
+}
+
+div.datastream:nth-child(even) {
+    background-color: #ccc;
+}

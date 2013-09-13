@@ -1,44 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/vnd.microsoft.com" href="favicon.ico">
+
     <title>UTS Research Data | <% title %></title>
 
-    <link rel="icon" type="image/vnd.microsoft.com" href="favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Navbar, footer and overrides to Bootstrap -->
+    <link href="css/main.css" rel="stylesheet">
+
+    <!-- Styles for the dataset grid -->
+    <link href="css/dataset.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="bootstrap/assets/js/html5shiv.js"></script>
+      <script src="bootstrap/assets/js/respond.min.js"></script>
+    <![endif]-->
     <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
 <!--[if IE 7]>
     <link rel="stylesheet" href="font-awesome/css/font-awesome-ie7.min.css">
 <![endif]-->
+
   </head>
-    <body>
 
-      <div class="header">
-        UTS Research Data Repository
+  <body>
+
+    <!-- Wrap all page content here -->
+    <div id="wrap">
+
+      <!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://www.uts.edu.au/">UTS Research Data</a>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li><a href="about">About</a></li>
+              <li><a href="contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
 
-      <div class="body">
-      
-      <% content %>
-      </div>
+    <div class="container">
 
-      <div class="footer">
-        <div class="footer-left">
+    <% content %>
+
+    </div>
+    </div>
+
+    <div id="footer">
+        <div id="footer-left"  class="container">
           &copy; 2013 copyright UTS - CRICOS Provider No: 00099F<br />
-          This page is authorised by 
-          Comments to <a href="mailto:eResearch-IT@uts.edu.au">eResearch-IT@uts.edu.au</a><br />
+          This page is authorised by Mike Lynch / Comments to <a href="mailto:eResearch-IT@uts.edu.au">eResearch-IT@uts.edu.au</a><br />
           <a href="http://www.uts.edu.au/disclaimer.html">Disclaimer</a> |
           <a href="http://www.uts.edu.au/privacy.html">Privacy</a> |
           <a href="http://www.uts.edu.au/copyright.html">Copyright</a> |
           <a href="http://www.uts.edu.au/accessibility.html">Accessibility</a> |
           <a href="http://www.gsu.uts.edu.au/policies/webpolicy.html">Web policy</a>
         </div>
-        <div class="footer-right">
+        <div id="footer-right" class="container">
           <a href="http://www.uts.edu.au/"><img src="http://www.uts.edu.au/images/css/uts_logo_footer.gif" alt="UTS Homepage" width="130" height="29" /></a>
           <br />
           <a href="http://www.atn.edu.au">UTS is a member of the<br />Australian Technology Network of Universities</a>
         </div>
-      </div>
-    </body>
 
+    </div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap/assets/js/jquery.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+  </body>
 </html>

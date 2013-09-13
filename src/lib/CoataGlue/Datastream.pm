@@ -38,6 +38,7 @@ use Carp qw(cluck);
 use Data::Dumper;
 use File::Path qw(make_path);
 use File::Copy;
+use Number::Bytes::Human;
 
 
 =head1 METHODS
@@ -230,7 +231,6 @@ sub write {
 		$self->{log}->warn("Datastream has no file, url or xml");
 		$p{file} = $self->{original};
 	}
-
 
 	return $repo->set_datastream(%p);
 }
