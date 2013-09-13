@@ -10,22 +10,22 @@
     <title>UTS Research Data | <% title %></title>
 
     <!-- Bootstrap core CSS -->
-    <link href="bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
 
     <!-- Navbar, footer and overrides to Bootstrap -->
-    <link href="css/main.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
 
     <!-- Styles for the dataset grid -->
-    <link href="css/dataset.css" rel="stylesheet">
+    <link href="/css/dataset.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-      <script src="bootstrap/assets/js/html5shiv.js"></script>
-      <script src="bootstrap/assets/js/respond.min.js"></script>
+      <script src="/bootstrap/assets/js/html5shiv.js"></script>
+      <script src="/bootstrap/assets/js/respond.min.js"></script>
     <![endif]-->
-    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
 <!--[if IE 7]>
-    <link rel="stylesheet" href="font-awesome/css/font-awesome-ie7.min.css">
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome-ie7.min.css">
 <![endif]-->
 
   </head>
