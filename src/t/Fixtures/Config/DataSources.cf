@@ -18,6 +18,7 @@ basedir:      $COATAGLUE/src/t/Test/Capture/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
 
+
 [Labshare]
 converter:    CoataGlue::Converter::XML
 ids:          CoataGlue::ID::NaiveSequence

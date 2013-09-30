@@ -72,7 +72,6 @@ sub scan {
 		my $path = "$basedir/$item";
 		next ITEM unless -f $path;
 		
-		
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
@@ -137,7 +136,7 @@ sub parse_metadata {
 		}
 		for my $file ( @$ds ) {
 			if( $file =~ /^file:\/\/(.*)$/ ) {
-				$file = $1;
+				$file = $self->{basedir} . $1;
 				if( -f $file ) {
                     my ( $mimetype, $encoding ) = by_suffix($file);
 					$datastreams->{$file} = {
