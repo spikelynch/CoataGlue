@@ -60,18 +60,14 @@ sub scan {
 		return undef;
 	};
 	
-	$self->{log}->debug("Scanning $basedir");
-	
 	my @datasets = ();
 	
 	ITEM: for my $item ( readdir($dh) ) {
 		next ITEM if $item =~ /^\./;
 		
-		$self->{log}->debug("Scanning $item");
 		next ITEM unless $item =~ /$self->{metadatafile}/;
 		my $path = "$basedir/$item";
 		next ITEM unless -f $path;
-		
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
@@ -80,11 +76,15 @@ sub scan {
 				location => $md->{location},
 				file => $md->{file},
 				datastreams => $md->{datastreams}
-			);	
+			);
 			if( $dataset ) {
 				push @datasets, $dataset;
-			}
-		} 
+			} else {
+                $self->{log}->error("Dataset creation failed for $path");
+            }
+		} else {
+            $self->{log}->error("Metadata parse failed for $path");
+        }
 	}
 	closedir($dh);
 	return @datasets ;
@@ -134,6 +134,7 @@ sub parse_metadata {
 		if( !ref($ds) ) {
 			$ds = [ $ds ];
 		}
+
 		for my $file ( @$ds ) {
 			if( $file =~ /^file:\/\/(.*)$/ ) {
 				$file = $self->{basedir} . $1;
@@ -155,8 +156,6 @@ sub parse_metadata {
 
 	$md->{dateconverted} = $self->timestamp;
 	
-    $self->{log}->debug("Metadata: " . Dumper({md => $md}));
-
 	return {
 		file => $path,
 		location => $path,

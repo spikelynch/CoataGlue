@@ -29,4 +29,5 @@ while getopts ":f" opt; do
 done
 
 
-/home/mikelynch/CoataGlue/src/harvest.pl -t
+
+/home/mikelynch/CoataGlue/src/coataglue.pl -t

@@ -350,7 +350,7 @@ sub url {
 	
 	if( !$self->safe_repository_id ) {
 		$self->{log}->warn(
-			"repositoryURL failed: no repository_id.  Need to add it to the repository first."
+			"repositoryURL failed: no repository_id."
 		);
 		return undef;
 	}
@@ -409,19 +409,21 @@ sub xml {
 	);
 }
 
-=item write_redbox
+=item write_redbox([test => 1])
 
 Writes the 'redbox' XML to the redbox directory, using the global_id
 as the filename.
+
+If the param 'test' is true, write it to the test directory.
 
 =cut
 
 
 sub write_redbox {
-	my ( $self ) = @_;
+	my ( $self, %params ) = @_;
 	
-	if( !$self->{repository_id} ) {
-		$self->{log}->warn("The dataset needs to be added to Fedora before writing XML to ReDBox.");;
+	if( !$params{test} && !$self->{repository_id} ) {
+		$self->{log}->warn("The dataset needs to be added to Fedora before writing XML to ReDBox.");
 	}
 	
 	my $xml = $self->xml;
@@ -437,11 +439,15 @@ sub write_redbox {
 		return undef;	
 	}
 	
-	my $file = $self->xml_filename;
+	my $file = $self->xml_filename(test => $params{test});
 	
 	if( -f $file ) {
-		$self->{log}->warn("Ingest $file already exists");
-		return undef;
+        if( $params{test} ) {
+            $self->{log}->warn("Overwriting test file $file");
+        } else {
+            $self->{log}->warn("Ingest $file already exists");
+            return undef;
+        }
 	}
 
     $self->{log}->info("Writing redbox metadata to $file");
@@ -636,10 +642,20 @@ ReDBox directory and the dataset's global ID.
 =cut
 
 sub xml_filename {
-	my ( $self ) = @_;
+	my ( $self, %params ) = @_;
 	
 	my $ext = $self->conf('Redbox', 'extension');
-	my $dir = $self->conf('Redbox', 'directory');
+
+    my $dir;
+
+    if( $params{test} ) {
+        $dir = $self->conf('Redbox', 'testdirectory') || do {
+            $self->{log}->error("Can't write XML to test directory - not configured");
+            return undef;
+        }
+    } else {
+        $dir = $self->conf('Redbox', 'directory');
+    }
 	
     if( ref($dir) eq 'ARRAY' ) {
         $self->{log}->debug("Dir is array: " . join(', ', @$dir));
@@ -697,6 +713,8 @@ sub create_datastreams {
 	my $raw = $params{raw} || return undef;
 	
 	$self->{datastreams} = {};
+
+    $self->{log}->debug(Dumper({ raw => $raw }));
 
     my $idset = CoataGlue::IDset->new(raw => $raw);
 

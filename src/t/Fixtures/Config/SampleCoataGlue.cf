@@ -39,6 +39,7 @@ groupid:        GroupID_1
 
 [Redbox]
 directory:      $COATAGLUE/src/t/Test/ReDBox
+testdirectory:  $COATAGLUE/src/t/Testier/ReDBox
 extension:		dc
 handleprefix:   http://hdl.handle.net/11057/id
 cryptkey:       ############################# 

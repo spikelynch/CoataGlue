@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 46;
+use Test::More tests => 48;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -122,6 +122,9 @@ for my $ds ( @datasets ) {
 
     if( ok(my $datastreams = $ds->{datastreams}, "Got datastreams") ) {
 
+        my $n = scalar keys %$datastreams;
+        my $nf = scalar keys %{$f->{datastreams}};
+        cmp_ok($n, '==', $nf, "Got expected number of datastreams ($nf)");
         for my $dsid ( keys %$datastreams ) {
             my $ds = $datastreams->{$dsid};
             my $fds = $f->{datastreams}{$dsid};

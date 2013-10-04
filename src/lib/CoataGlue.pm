@@ -203,6 +203,7 @@ sub conf {
                 return $self->{conf}{global}{$section}{$field};
             } else {
                 $self->{log}->error("No config setting '$field' in section '$section'");
+                return undef;
             }
         } else {
             return $self->{conf}{global}{$section};
@@ -219,12 +220,10 @@ sub conf {
 sub expand_conf {
     my ( $self ) = @_;
 
-    $self->{log}->debug("Expanding home directory YO");
     for my $file ( keys %{$self->{conf}} ) {
         for my $section ( keys %{$self->{conf}{$file}} ) {
             for my $field ( keys %{$self->{conf}{$file}{$section}} ) {
                 
-                $self->{log}->debug("$file/$section/$field = $self->{conf}{$file}{$section}{$field}");
                 if( $self->{conf}{$file}{$section}{$field} =~ s/^\$COATAGLUE/$self->{home}/ ) {
                     $self->{log}->debug("Expanded \$COATAGLUE to $self->{home} in $file/$section/$field");
                 }

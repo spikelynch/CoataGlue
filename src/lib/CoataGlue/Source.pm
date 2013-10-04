@@ -212,7 +212,6 @@ sub set_status {
 	
 	if( !$dataset->{file} || !$dataset->{id} ) {
 		$self->{log}->error("dataset needs 'file' and 'id', can't set status");
-		$self->{log}->error(Dumper({ dataset => $dataset }));
 		return undef;
 	}
 	
@@ -241,9 +240,8 @@ sub set_status {
 Calls scan on this source's converter and returns all datasets 
 which haven't been ingested on a previous pass.
 
-If a true value is passed in for 'test', this will revisit datasets
-which have already been scanned - this is useful for testing, as it
-lets us multiple batches of test metadata files with unique Ids.
+If a true value is passed in for 'test', this will output metadata
+files to the test metadata directory but not touch the history
 
 =cut
 
@@ -255,9 +253,10 @@ sub scan {
         );
 
     my $test = $params{test} || undef;
+    my $id = $params{id} || undef;
 	
     if( $test ) {
-        $self->{log}->info("Running in test mode");
+        return $self->test_scan(%params);
     }
 
    	my @datasets = ();
@@ -266,17 +265,22 @@ sub scan {
 		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
 		return ();
 	}
-	    	
+
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
-		if( $test || $status->{status} eq 'new') {
+        if( $id && $status->{id} eq $id ) {
+            $self->{log}->info("Returning single dataset with id $id");
+            return ( $dataset );
+        }
+
+		if( $status->{status} eq 'new') {
 			my $id = $self->{ids}->create_id();
 			if( $id ) {
 				$dataset->{id} = $id;
-				$self->set_status(
-					dataset => $dataset,
-					status => 'new'
-				);
+                $self->set_status(
+                    dataset => $dataset,
+                    status => 'new'
+                    );
 				push @datasets, $dataset;
 				$self->{log}->info("New id for dataset $dataset->{file}: $id");
 			} else {
@@ -286,8 +290,63 @@ sub scan {
 			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
 		}
 	}
+    if( $id ) {
+        $self->{log}->error("Couldn't find dataset with id $id");
+        return ();
+    }
+
 	return @datasets;
 }
+
+=item test_scan
+
+Test version of scan.  I broke this out into its own subroutine because
+doing both test and live in the same loop was creating code that was too
+complicated around the id incrementation.
+
+=cut
+
+
+sub test_scan {
+    my ( $self, %params ) = @_;
+
+    $self->{log}->info("Running in test mode");
+    my $id = $params{id};
+   	my @datasets = ();
+	
+	if( !$self->{locked} ) {
+		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
+		return ();
+	}
+
+    my $tid = $self->{ids}->create_id;
+
+	for my $dataset ( $self->{converter}->scan ) {
+		my $status = $self->get_status(dataset => $dataset);
+        if( $id && $dataset->{id} eq $id ) {
+            $self->{log}->info("Returning single dataset with id $id");
+            return ( $dataset );
+        }
+
+		if( $status->{status} eq 'new') {
+            $dataset->{id} = $tid;
+            push @datasets, $dataset;
+            $self->{log}->info("New id for dataset $dataset->{file}: $tid");
+            $tid++;
+		} else {
+			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
+		}
+	}
+    if( $id ) {
+        $self->{log}->error("Couldn't find dataset with id $id");
+        return ();
+    }
+
+	return @datasets;
+}
+
+
+
 
 
 =item dataset()
@@ -607,9 +666,6 @@ sub write_header_XML {
 	my $writer = $params{writer};
 	
 	my $header = $dataset->header();
-
-    $self->{log}->debug(Dumper({ header => $header }));
-
 
 	$writer->startTag('header');	
 	for my $field ( qw(source id file access dateconverted) ) {

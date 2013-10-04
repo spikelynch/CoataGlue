@@ -1,5 +1,21 @@
 Data Capture Ingest Adaptor script - notes.
 
+Notes on production version, 3/10/2013
+--------------------------------------
+
+Features which we need in production:
+
+* configurable start index for global IDs.
+* reharvest a single dataset, even if it's in the store already.
+
+
+
+
+
+
+
+
+
 
 
 Input
