@@ -7,5 +7,5 @@ export COATAGLUE_CONFIG=$COATAGLUE_HOME/src/t/Test/Config/CoataGlue.cf
 export COATAGLUE_SOURCES=$COATAGLUE_HOME/src/t/Test/Config/DataSources.cf
 export COATAGLUE_TEMPLATES=$COATAGLUE_HOME/src/t/Test/Config/Templates
 
-./harvest.pl
+./coataglue.pl -g
 

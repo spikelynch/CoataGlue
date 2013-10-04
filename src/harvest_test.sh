@@ -29,5 +29,5 @@ while getopts ":f" opt; do
 done
 
 
-./harvest.pl -t
+./coataglue.pl -t
 

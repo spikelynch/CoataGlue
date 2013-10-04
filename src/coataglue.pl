@@ -2,18 +2,19 @@
 
 =head1 NAME
 
-harvest.pl
+coataglue.pl
 
 =cut
 
 =head1 SYNOPSIS
 
-    ./harvest.pl
-    ./harvest.pl -t
-    ./harvest.pl -s 
-    ./harvest.pl -s SOURCE_NAME
-    ./harvest.pl -l datasets
-    ./harvest.pl -d DATASET_ID
+    ./coataglue.pl -g
+    ./coataglue.pl -t
+    ./coataglue.pl -s 
+    ./coataglue.pl -s SOURCE_NAME
+    ./coataglue.pl -l datasets | sources
+    ./coataglue.pl -d DATASET_ID -s SOURCE_NAME
+    ./coataglue.pl -d METADATA_FILE
 
 =head1 DESCRIPTION
 
@@ -24,6 +25,10 @@ folders
 =head1 COMMAND LINE OPTIONS
 
 =over 4
+
+=item -g
+
+Run a complete harvest
 
 =item -t 
 
@@ -41,9 +46,11 @@ Only scan a single data source.  Can be used with -t
 
 =item -d DATASET_ID
 
-Force a re-scan of a single dataset, identified by its global ID, regardless
-of its status in the history.  Can be used with -t: if it is, the dataset's
-status will be reset to 'new'.
+Force a scan of a single dataset, identified by its file or source and
+id, regardless of its status in the history.  Can be used with -t: if
+it is, the dataset's status will be reset to 'new'.
+
+If using id, also needs the -s SOURCE argument
 
 =head1 CONFIGURATION
 
@@ -94,6 +101,7 @@ use Data::Dumper;
 use Getopt::Std;
 use Config::Std;
 use Log::Log4perl;
+use POSIX qw(strftime);
 
 
 use CoataGlue;
@@ -120,17 +128,18 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 my %opts;
 
-getopts('htl:s:d:', \%opts) || do {
+getopts('htgl:s:d:', \%opts) || do {
     $log->error("Invalid command line option");
     usage();
     exit;
 };
         
 
-if( $opts{h} ) {
+if( $opts{h} || ! keys %opts ) {
     usage();
     exit;
 }
+
 
 my $CoataGlue = CoataGlue->new(
     home => $ENV{COATAGLUE_HOME},
@@ -164,19 +173,21 @@ if( $opts{l} ) {
         list_sources();
     } elsif ( lc($opts{l}) eq 'datasets' ) {
         if( !$opts{s} ) {
-            $log->error("Must have -s SOURCE to list datasets");
-            list_sources();
-            exit;
+            $log->info("Listing datasets for all sources");
+            list_datasets();
         } else {
+            $log->info("Listing datasets for $opts{s}");
             list_datasets(source => $opts{s});
         }
     }
+} elsif( $opts{d} ) {
+    harvest_one_dataset(source => $opts{s}, dataset => $opts{d});
 } elsif( $opts{s} ) {
     harvest_one_source(source => $opts{s});
-} elsif( $opts{d} ) {
-    harvest_one_dataset(dataset => $opts{d});
-} else {
+} elsif( $opts{g} || $opts{t} ) {
     harvest_all_sources();
+} else {
+    print "Nothing to do.\n";
 }
 
 
@@ -205,8 +216,47 @@ sub harvest_one_source {
 sub harvest_one_dataset {
     my %params = @_;
 
-    # todo
+    my $sname = $params{source};
+    my $ds = $params{dataset};
+    my $id = undef;
+    my $source;
 
+    if( $ds =~ /^\d+$/ ) {
+        if ( !$sname ) {
+            $log->error("You need to specify a source to scan a dataset by its id");
+            return undef;
+        }
+        if( !$sources{$sname} ) {
+            $log->error("Source '$source' not found.");
+            list_sources();
+            exit;
+        } 
+        $source = $sources{$sname};
+        $source->open;
+        $id = $ds;
+    } else {
+        SOURCE: for my $source ( $CoataGlue->sources ) {
+            my $history = $source->open;
+            if( $history->{$ds} ) {
+                $id = $history->{$ds}{id};
+                last SOURCE;
+            }
+        }
+        if( !$id ) {
+            $log->error("Couldn't match $ds to a scanned dataset in any source");
+            return undef;
+        }
+    }
+        
+    $log->warn("FIXME - this doesn't work yet.");
+
+
+
+#    return 
+
+
+#harvest_source(source => $source, id => $ds);
+        
 
 }
 
@@ -224,14 +274,46 @@ sub list_sources {
 sub list_datasets {
     my %params = @_;
 
-    if( my $source = $sources{$opts{s}} ) {
-        if( my $history = $source->open ) {
-            print Dumper({history => $history});
+    my $tf = $CoataGlue->conf('General', 'timeformat');
+
+    my $source = $params{source};
+    my @sources;
+    
+    if( $source ) {
+        if( $sources{$source} ) {
+            @sources = ( $sources{$source} );
+        } else {
+            $log->error("Source '$source' not found.");
+            list_sources();
+            return;
         }
     } else {
-        $log->error("Source '$opts{s}' not found.");
-        list_sources();
-        die;
+        @sources = $CoataGlue->sources;
+    }
+    my $any = 0;
+
+    for my $source ( @sources ) {
+        if( my $history = $source->open ) {
+            # order them by ID
+            my @files = sort {
+                $history->{$a}{id} <=> $history->{$a}{id}
+            } keys %$history;
+            for my $file ( @files ) {
+                my $ds = $history->{$file};
+                my @t = localtime($ds->{details}{timestamp});
+                my $time = strftime($tf, @t);
+                print join(',',
+                           $source->{name}, $ds->{id},
+                           $ds->{status}, $time, $file
+                    ) . "\n";
+                $any = 1;
+            }
+        } else {
+            $log->error("Couldn't open source $source->{name}");
+        }
+    }
+    if( !$any ) {
+        print "No datasets found.\n";
     }
 }
 
@@ -243,26 +325,42 @@ sub harvest_source {
 
 	$log->debug("Scanning source $source->{name}");
 	if( $source->open ) {
-		for my $dataset ( $source->scan(test => $opts{t}) ) {
+        my @datasets;
+        if( $params{id} ) {
+            @datasets = $source->scan(test => $opts{t}, id => $params{id});
+            if( !@datasets ) {
+                $log->error("Nothing to scan");
+                return undef;
+            }
+        } else {
+            @datasets = $source->scan(test => $opts{t});
+        }
+
+		DATASET: for my $dataset ( @datasets ) {
 			$log->debug("Dataset: $dataset->{global_id}");
 			
-			if( $dataset->add_to_repository ) {
-				$log->info("Added $dataset->{global_id} to repository: $dataset->{repository_id}");
-                if( $dataset->publish ) {
-                    $log->info("Published to " . $dataset->access);
+            if( ! $opts{t} ) {
+                if( $dataset->add_to_repository ) {
+                    $log->info("Added $dataset->{global_id} to repository: $dataset->{repository_id}");
+                    if( $dataset->publish ) {
+                        $log->info("Published to " . $dataset->access);
+                    } else {
+                        $log->warn("Dataset not published to " . $dataset->access);
+                    }
                 } else {
-                    $log->warn("Dataset not published to " . $dataset->access);
+                    $log->error("Couldn't add $dataset->{global_id} to repository");
+                    next DATASET;
                 }
-
-			} else {
-				$log->error("Couldn't add $dataset->{global_id} to repository");
+            } else {
+                $log->info("Test mode, not adding to repository");
 			}
-			
-			my $file = $dataset->write_redbox;
+			my $file = $dataset->write_redbox(test => $opts{t});
 			
 			if( $file ) {
 				$log->info("Wrote $dataset->{global_id} as ReDBox alert $file");
-				$dataset->set_status_ingested;
+                if( !$opts{t} ) {
+                    $dataset->set_status_ingested;
+                }
 			} else {
 				$log->error("Coudn't write $dataset->{global_id} to ReDBox");
 				$dataset->set_status_error;
@@ -277,16 +375,15 @@ sub harvest_source {
 
 sub usage {
     print<<EOTXT;
-harvest.pl [-t -l -s SOURCE d DATASET]
+coataglue.pl [-t -l WHAT -s SOURCE -d DATASET -g]
         
--t      Test mode: doesn't update history store and writes metadata
-        to the test Redbox directory
--l      List available sources
--s      Only scan a single source.  Can be used with -t
--d      Only scan a single dataset.  Can be used with -t.  Will
-        reharvest even if the dataset has already been processed.
-
-
+-t            Test mode: doesn't update history store and writes metadata
+              to the test Redbox directory
+-l sources    List all sources
+-l datasets   List all datasets (you have to specify the source)
+-s SOURCE     Only scan a single source.  Can be used with -t
+-d DATASET    Only scan a single dataset.  Can be used with -t.  Will
+              reharvest even if the dataset has already been processed.
 EOTXT
 }
 
