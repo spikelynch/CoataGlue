@@ -5,12 +5,12 @@ use strict;
 use Apache::Solr;
 use Data::Dumper;
 
-my $SERVER = 'http://mint.research.uts.edu.au/solr';
+my $SERVER = 'https://mint.research.uts.edu.au/solr';
 my $CORE = 'fascinator';
 
 my $FIELD = 'dc_identifier';
 
-my $ID = 'b14e8cdc';  #   'http://hdl.handle.net/11057/idb14e8cdc';
+my $ID = 'http://hdl.handle.net/11057/59416f87';
 
 
 mint_lookup();
@@ -61,7 +61,7 @@ sub mint_lookup {
             print "$field: " . $doc->content($field) . "\n";
         }
 
-        print "\n---\n\n";j
+        print "\n---\n\n";
 	
 	}	
 }
