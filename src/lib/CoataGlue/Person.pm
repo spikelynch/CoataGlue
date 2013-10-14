@@ -110,7 +110,8 @@ sub lookup {
     };
 
     if( $@ ) {
-        $self->{log}->error("Apache::Solr lookup failed: check that Mint is running.");
+        $self->{log}->error("Apache::Solr lookup failed: $@");
+        $self->{log}->error("Check that Mint is running and/or the URL is correct");
         return undef;
     };
     	
