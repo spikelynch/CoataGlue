@@ -445,8 +445,7 @@ sub write_redbox {
         if( $params{test} ) {
             $self->{log}->warn("Overwriting test file $file");
         } else {
-            $self->{log}->warn("Ingest $file already exists");
-            return undef;
+            $self->{log}->warn("Ingest $file already exists - overwriting");
         }
 	}
 
