@@ -10,10 +10,10 @@ coataglue.pl
 
     ./coataglue.pl -g
     ./coataglue.pl -t
-    ./coataglue.pl -s 
-    ./coataglue.pl -s SOURCE_NAME
-    ./coataglue.pl -l datasets | sources
-    ./coataglue.pl -d DATASET_ID -s SOURCE_NAME
+    ./coataglue.pl -s Labshare
+    ./coataglue.pl -l
+    ./coataglue.pl -l SOURCE
+    ./coataglue.pl -d DATASET_ID -s SOURCE
     ./coataglue.pl -d METADATA_FILE
 
 =head1 DESCRIPTION
@@ -36,9 +36,10 @@ Run in test mode.  Doesn't flag any of the datasets as 'scanned' in the
 history, and writes the harvest file to Redbox.testdirectory rather than
 Redbox.directory (as configured)
 
-=item -l OBJECTS
+=item -l [SOURCE]
 
-List all OBJECTS, where OBJECTS = 'sources' or 'datasets'
+If a source name is given, list all datasets for that sourcename.
+Otherwise, lists all sources by name.
 
 =item -s SOURCE_NAME
 
@@ -128,7 +129,7 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 my %opts;
 
-getopts('htgl:s:d:', \%opts) || do {
+getopts('htgls:d:', \%opts) || do {
     $log->error("Invalid command line option");
     usage();
     exit;
@@ -169,18 +170,14 @@ if( $opts{t} ) {
 my %sources = map { $_->{name} =>  $_ } $CoataGlue->sources;
 
 if( $opts{l} ) {
-    if( lc($opts{l}) eq 'sources' ) {
-        list_sources();
-    } elsif ( lc($opts{l}) eq 'datasets' ) {
-        if( !$opts{s} ) {
-            $log->info("Listing datasets for all sources");
-            list_datasets();
-        } else {
-            $log->info("Listing datasets for $opts{s}");
-            list_datasets(source => $opts{s});
-        }
+    if( $opts{s} ) {
+        $log->info("Listing datasets for $opts{s}");
+        list_datasets(source => $opts{s});
+    } else {
+        $log->info("Listing datasets for all sources");
+        list_datasets();
     }
-} elsif( $opts{d} ) {
+} elsif( $opts{d} && $opts{s} ) {
     harvest_one_dataset(source => $opts{s}, dataset => $opts{d});
 } elsif( $opts{s} ) {
     harvest_one_source(source => $opts{s});
@@ -248,15 +245,7 @@ sub harvest_one_dataset {
         }
     }
         
-    $log->warn("FIXME - this doesn't work yet.");
-
-
-
-#    return 
-
-
-#harvest_source(source => $source, id => $ds);
-        
+    harvest_source(source => $source, id => $id);
 
 }
 
@@ -329,7 +318,7 @@ sub harvest_source {
         if( $params{id} ) {
             @datasets = $source->scan(test => $opts{t}, id => $params{id});
             if( !@datasets ) {
-                $log->error("Nothing to scan");
+                $log->error("Couldn't find any datasets to scan");
                 return undef;
             }
         } else {
@@ -379,8 +368,8 @@ coataglue.pl [-t -l WHAT -s SOURCE -d DATASET -g]
         
 -t            Test mode: doesn't update history store and writes metadata
               to the test Redbox directory
--l sources    List all sources
--l datasets   List all datasets (you have to specify the source)
+-l            List all sources
+-l -s SOURCE  List all datasets (you have to specify the source)
 -s SOURCE     Only scan a single source.  Can be used with -t
 -d DATASET    Only scan a single dataset.  Can be used with -t.  Will
               reharvest even if the dataset has already been processed.
