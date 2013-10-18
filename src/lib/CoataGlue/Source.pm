@@ -669,25 +669,14 @@ sub write_header_XML {
 	my $header = $dataset->header();
 
 	$writer->startTag('header');	
-	for my $field ( qw(source id file access dateconverted) ) {
+	for my $field ( qw(
+        source id file access dateconverted repositoryURL location
+    ) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
 		$writer->endTag;
 	}
     
-    $writer->startTag('links');
-
-    # The order of these is important: we put the repository URL
-    # first so that we can look the ReDBox record up using
-    # 'bibo:Website.1.dc:identifier'
-
-    for my $uri ( qw(repositoryURL location) ) {
-        $writer->startTag('link',
-                          'type' => $uri,
-                          'uri' => $header->{$uri} );
-        $writer->endTag;
-    }
-    $writer->endTag;
 	$writer->endTag;
 }
 

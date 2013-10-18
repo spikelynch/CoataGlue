@@ -70,27 +70,24 @@ for my $source ( @sources ) {
 
         ok($xml, "Generated some XML");
 
-        my ( $title, $project, $creator, $links, $description, $service );
+        my ( $title, $project, $creator,
+             $repositoryURL, $location,
+             $description, $service );
 
         my $twig = XML::Twig->new(
             twig_handlers => {
-                title => 		sub { $title       = $_->text },
-                project     =>  sub { $project     = $_->text },
-                description => 	sub { $description = $_->text },
-                service => 		sub { $service     = $_->text },
-                creator =>		sub {
+                title => 		 sub { $title         = $_->text },
+                project     =>   sub { $project       = $_->text },
+                description => 	 sub { $description   = $_->text },
+                service => 		 sub { $service       = $_->text },
+                repositoryURL => sub { $repositoryURL = $_->text },
+                location => 	 sub { $location      = $_->text },
+                creator =>		 sub {
                     $creator = {};
                     for my $f ( @CREATOR_FIELDS ) {
                         $creator->{$f} = $_->first_child_text($f);
                     }
-                },
-                links => sub {
-                    $links = {};
-                    for my $link ( $_->children('link') ) {
-                        $links->{$link->atts->{type}} = $link->atts->{uri}
-                    }
-                },
-
+                }
             }
             ); 
         eval {
@@ -146,11 +143,10 @@ for my $source ( @sources ) {
             };
 
             cmp_ok(
-                $links->{location}, 'eq', $ds->{location},
+                $location, 'eq', $ds->{location},
                 "Location link = $ds->{location}"
                 );
-
-
+            
         }
     }
 }

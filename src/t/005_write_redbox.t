@@ -77,14 +77,15 @@ for my $source ( @sources ) {
 				$description, $service
 			) = ( '', '', '', '', '' );
             
-            my ( $header, $creator, $links );
+            my ( $header, $creator, $repositoryURL, $location );
 
 			my $twig = XML::Twig->new(
 				twig_handlers => {
                     header =>       sub {
                         $header = {};
                         for my $f ( qw(id source file  access
-                                       dateconverted) ) {
+                                       dateconverted
+                                       repositoryURL location ) ) {
                             $header->{$f} = $_->first_child_text($f);
                         }
                     },
@@ -97,14 +98,7 @@ for my $source ( @sources ) {
                         for my $f ( @CREATOR_FIELDS ) {
                             $creator->{$f} = $_->first_child_text($f);
                         }
-                    },
-                    links => sub {
-                        $links = {};
-                        for my $link ( $_->children('link') ) {
-                            $links->{$link->atts->{type}} = $link->atts->{uri}
-                        }
-                    },
-				}
+                    }				}
 			); 
 
 			eval {
@@ -147,13 +141,13 @@ for my $source ( @sources ) {
                     );
 
                 cmp_ok(
-                    $links->{location}, 'eq', $ds->{location},
-                    "Header <links type=\"location\"> = $ds->{location}"
+                    $header->{location}, 'eq', $ds->{location},
+                    "Header <location> = $ds->{location}"
                     );
 
                 cmp_ok(
-                    $links->{repositoryURL}, 'eq', $ds->url,
-                    "Header <links type=\"repositoryURL\" > = " . $ds->url
+                    $header->{repositoryURL}, 'eq', $ds->url,
+                    "Header <repositoryURL> = " . $ds->url
                     );
 
                 cmp_ok(
