@@ -38,6 +38,7 @@ my $fixtures = setup_tests(log => $log);
 
 my @CREATOR_FIELDS = qw(mintid staffid givenname familyname
                         honorific jobtitle groupid name);
+my @SERVICE_FIELDS = qw(serviceid servicename relation relationlabel);
 
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
@@ -87,6 +88,12 @@ for my $source ( @sources ) {
                     for my $f ( @CREATOR_FIELDS ) {
                         $creator->{$f} = $_->first_child_text($f);
                     }
+                },
+                service =>       sub {
+                    $service = {};
+                    for my $f ( @SERVICE_FIELDS ) {
+                        $service->{$f} = $_->first_child_text($f);
+                    }
                 }
             }
             ); 
@@ -127,6 +134,19 @@ for my $source ( @sources ) {
                         );
                 }
             }
+
+
+            # FIXME: see Issue #8 in GitHub
+            # if( ok(my $serviceid = $creator->{serviceid}, "Got service id") ) {
+            #     my $fixture = $fixtures->{SERVICE}{$serviceid};
+            #     for my $f ( @SERVICE_FIELDS ) {
+            #         cmp_ok(
+            #             $service->{$f}, 'eq', $service->{$f},
+            #             "service/$f = '$fixture->{$f}'"
+            #             );
+            #     }
+            # }
+
 
             my $fdesc = $fixtures->{$sname}{$file}{description};
             

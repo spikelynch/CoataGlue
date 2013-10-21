@@ -109,3 +109,12 @@ The transactionManager log is giving this error:
     "target": "local",
     "oid": "f64d0f4ac703ac56b4d59af95ac70346",
     "config": {
+
+
+-------------
+
+Services.
+
+Relations: Labshare => created
+Osiris => transform
+MIF => created

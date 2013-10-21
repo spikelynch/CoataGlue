@@ -417,20 +417,30 @@ sub load_templates {
 		for my $field ( keys %$crosswalk ) {
 			# generate code snippets for converting dates etc
 			my ( $mdf, @expr ) = split(/\s+/, $crosswalk->{$field});
+            
 			if( @expr ) {
-				my $handler = $self->make_handler(
-                    field => $field,
-					expr => \@expr
-				);
-				if( $handler ) {
- 					$self->{template_handlers}{$view}{$field} = $handler; 
-					$self->{log}->debug("Added $view.$field handler: $handler to source $self");
-				} else {
-					$self->{log}->error("Handler init failed for $view.$field: check config");
-				}
-				# Take the converter fields out of the metadata field
-				$crosswalk->{$field} = $mdf;
-			}
+
+                # If the mdf ends in .tt, the @expr are arguments controlling
+                # the subtemplate expansion
+
+                if( $mdf =~ /\.tt$/ ) {
+                    $self->{template_args}{$view}{$field} = \@expr;
+                    $self->{log}->debug("Template args: $view $field " . join(', ', @expr));
+                } else {                
+                    my $handler = $self->make_handler(
+                        field => $field,
+                        expr => \@expr
+                        );
+                    if( $handler ) {
+                        $self->{template_handlers}{$view}{$field} = $handler; 
+                        $self->{log}->debug("Added $view.$field handler: $handler to source $self");
+                    } else {
+                        $self->{log}->error("Handler init failed for $view.$field: check config");
+                    }
+                }
+                # Take the converter fields out of the metadata field
+                $crosswalk->{$field} = $mdf;
+            }
 		}
 	}
 	
@@ -611,6 +621,10 @@ sub render_view {
 	
 	my $view = $params{view} || 'metadata';
 	my $dataset = $params{dataset};
+    my $subtt_args = $self->{template_args}{$view} || undef;
+
+    $self->{log}->debug("render_view $view");
+    $self->{log}->debug(Dumper( { subtt_arg => $subtt_args }));
 	
 	if( !$dataset ) {
 		$self->{log}->error("render_view needs a dataset");
@@ -627,9 +641,10 @@ sub render_view {
 	my $writer = XML::Writer->new(
         OUTPUT => \$output,
         DATA_MODE => 1,
-        DATA_INDENT => 4
+        DATA_INDENT => 4,
+        UNSAFE => 1       # required for passing raw XML through
         
-);
+        );
 	$writer->startTag($view);
 	$self->write_header_XML(
 		writer => $writer,
@@ -642,10 +657,17 @@ sub render_view {
             );
     }
 
+    # CREATEXML
+    
+
 	for my $tag ( sort keys %$elements ) {
         next if( $view eq 'metadata' && $tag =~ /access|creator/ );
 		$writer->startTag($tag);
-		$writer->characters($elements->{$tag});
+        if( $subtt_args && $subtt_args->{$tag} && $subtt_args->{$tag}[0] eq 'raw' ) {
+            $writer->raw($elements->{$tag});
+        } else {
+            $writer->characters($elements->{$tag});
+        }
 		$writer->endTag();
 	}
 	$writer->endTag();
@@ -720,9 +742,10 @@ sub expand_template {
 
 	my $output = '';
 
-	$self->{log}->debug("Expanding temlate $params{template}");
+	$self->{log}->debug("Expanding template $params{template}");
 
 	if( $self->{tt}->process($params{template}, $metadata, \$output) ) {
+        $self->{log}->debug("Template results \n$output \n");
 		return $output;
 	}
 	$self->{log}->error("Template error ($template) " . $self->{tt}->error);

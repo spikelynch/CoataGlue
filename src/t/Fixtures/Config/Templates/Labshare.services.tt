@@ -1,0 +1,15 @@
+[% IF service == "Labshare.service.1" %]
+   [% SET svcid = "Labshare.service.1" %]
+   [% SET svctitle = "University of Technology Sydney - Wave Tank" %] 
+
+<serviceid>[% svcid %]</serviceid>
+<servicename>[% svctitle %]</servicename>
+<relation>isProducedBy</relation>
+<relationlabel>Is produced by:</relationlabel>
+
+[% ELSE %]
+
+<!-- service [% service %] not matched -->
+
+[% END %]
+

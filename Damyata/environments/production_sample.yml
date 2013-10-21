@@ -23,7 +23,7 @@ urls:
 solr:
   server: http://localhost:9000/solr
   core:   fascinator
-  search: bibo:Website.1.dc:identifier
+  search: vivo:Location.vivo:webaddress
   
 fedora:
   url:       http://localhost:8080/fedora

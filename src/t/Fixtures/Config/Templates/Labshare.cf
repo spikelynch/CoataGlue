@@ -13,7 +13,7 @@ creator: 		creator
 supervisor:     supervisor
 datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
 description:	description
-service:		service
+service:		Labshare.services.tt raw
 access:         access map _mapaccess
 share:          share
 datastreams:    location
@@ -26,3 +26,4 @@ open access:    public
 uts:            uts
 email:          email
 closed:         closed
+

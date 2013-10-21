@@ -11,17 +11,17 @@
 
         "//source":       "workflow_source",
 
-        "//creator/id":         "dc:creator.foaf:Person.0.dc:identifier",
-	"//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
-	"//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
+        "//creator/mintid":         "dc:creator.foaf:Person.0.dc:identifier",
+	    "//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
+	    "//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
         "//creator/honorific":  "dc:creator.foaf:Person.0.foaf:title",
-
+        
         "//header/repositoryURL": "vivo:Location.vivo:webaddress",
-	"//header/location":      "skos:note",
-
-	"//header/access":       "dc:accessRights.skos:prefLabel",
+	    "//header/location":      "skos:note",
+        
+	    "//header/access":       "dc:accessRights.skos:prefLabel",
         "//project":         "swrc:ResearchProject.dc:title"
-
+        
 
     },
     "exceptions": {
