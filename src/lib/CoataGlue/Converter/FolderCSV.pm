@@ -8,6 +8,10 @@ use Data::Dumper;
 use Text::CSV;
 use MIME::Types qw(by_suffix);
 
+# MIME type to use when MIME::Types can't deduce it
+
+my $FALLBACKMIME = 'application/octet-stream';
+
 =head1 NAME
 
 CoataGlue::Converter::FolderCSV
@@ -138,7 +142,13 @@ sub get_metadata {
 		} elsif( $item !~ /^\./ ) {
 			$self->{log}->debug("Adding datastream $shortpath/$item");
             my ( $mimetype, $encoding ) = by_suffix($item);
-			$datastreams->{$item} = {
+            $self->{log}->debug("MIME type = $mimetype");
+            if( !$mimetype ) {
+                $self->{log}->info("No MIME type, defaulting to $FALLBACKMIME");
+                $mimetype = $FALLBACKMIME;
+            }
+            
+            $datastreams->{$item} = {
 				id => $item,
 				original => "$path/$item",
 				mimetype => $mimetype
