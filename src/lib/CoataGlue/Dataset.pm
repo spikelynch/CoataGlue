@@ -77,6 +77,9 @@ use Catmandu::Store::FedoraCommons;
 
 use CoataGlue::Datastream;
 use CoataGlue::IDset;
+use Number::Bytes::Human qw(format_bytes);
+
+
 
 =head1 METHODS
 
@@ -130,7 +133,6 @@ sub new {
 	$self->{raw_metadata} = $params{raw_metadata};
 	$self->{source}   = $params{source};
 	$self->{dateconverted} = $self->{raw_metadata}{dateconverted};
-	
 	
 	if( $params{datastreams} ) {
 		$self->create_datastreams(raw => $params{datastreams}) || do {
@@ -190,6 +192,64 @@ sub global_id {
 	return $self->{global_id};
 }
 
+
+=item manifest()
+
+Manifest - returns a summary of the file contents which can be used in 
+the extent-or-quantity field of ReDBox
+
+=cut
+
+sub manifest {
+    my ( $self ) = @_;
+
+    if( !$self->{datastreams} ) {
+        $self->{log}->warn("Dataset has no datastreams - empty manifest");
+        return '';
+    }
+
+    my $formats = {};
+    my $nfiles = 0;
+    my $size = 0;
+
+    for my $dsid ( keys %{$self->{datastreams}} ) {
+        my $ds = $self->{datastreams}{$dsid}; 
+        my $fmt = $ds->format;
+        $size += $ds->size;
+        $formats->{$fmt}++;
+        $nfiles++;
+        $self->{log}->debug("$dsid: $ds->{mimetype} $ds->{file} $ds->{url}");
+    }
+
+    if( !$nfiles ) {
+        $self->{log}->warn("Dataset has no datastreams - empty manifest");
+        return '';
+    }
+
+    my $bytes = format_bytes($size);
+
+    my @f = sort keys %$formats;
+
+    if( scalar(@f) == 1 ) {
+        my ( $fmt ) = $f[0];
+        if( $nfiles == 1 ) {
+            $self->{manifest} = "$fmt file, $bytes";
+        } else {
+            $self->{manifest} = "$nfiles $fmt files, total $bytes";
+        }
+    } else {
+        my @f = ();
+        for my $fmt ( sort keys %$formats ) {
+            my $n = $formats->{$fmt};
+            push @f, "$n $fmt";
+        }
+        $self->{manifest} = "$nfiles files: " . join(', ', @f);
+        $self->{manifest} .= ", total $bytes";
+    }
+
+    return $self->{manifest};
+
+}
 
 
 
@@ -337,6 +397,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
+        manifest => $self->manifest,
 		access => $self->access,
 		dateconverted => $self->{dateconverted}
 	};
@@ -712,8 +773,6 @@ sub create_datastreams {
 	my $raw = $params{raw} || return undef;
 	
 	$self->{datastreams} = {};
-
-    $self->{log}->debug(Dumper({ raw => $raw }));
 
     my $idset = CoataGlue::IDset->new(raw => $raw);
 

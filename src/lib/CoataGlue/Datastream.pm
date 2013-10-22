@@ -1,5 +1,7 @@
 package CoataGlue::Datastream;
 
+
+
 =head1 NAME
 
 CoataGlue::Datastream
@@ -38,7 +40,6 @@ use Carp qw(cluck);
 use Data::Dumper;
 use File::Path qw(make_path);
 use File::Copy;
-use Number::Bytes::Human;
 
 
 =head1 METHODS
@@ -234,6 +235,48 @@ sub write {
 
 	return $repo->set_datastream(%p);
 }
+
+=item size()
+
+Return the size of this datastream in raw bytes.  Use
+Number::Bytes::Human::format_bytes downstream if you need to - it's
+not used here so that the sizes can be added for the Dataset manifest
+
+=cut
+
+sub size {
+    my ( $self ) = @_;
+    
+    my $ofile = $self->{original};
+
+    if( ! -f $ofile ) {
+        $self->{log}->warn("Couldn't find original file $ofile");
+        return 0;
+    }
+
+    return -s $ofile;
+
+}
+
+
+=item format
+
+Returns the file extension (not the MIME-type, which is less useful for
+human-readability purposes
+
+=cut
+
+sub format {
+    my ( $self ) = @_;
+
+    if( $self->{original} =~ /\.([A-Za-z]+)$/ ) {
+        my $format = lc($1);
+        return $format;
+    } else {
+        return 'unknown';
+    }
+}
+
 
 
 1;

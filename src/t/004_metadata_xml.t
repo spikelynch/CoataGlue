@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 81;
+use Test::More tests => 86;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -72,7 +72,7 @@ for my $source ( @sources ) {
         ok($xml, "Generated some XML");
 
         my ( $title, $project, $creator,
-             $repositoryURL, $location,
+             $repositoryURL, $location, $manifest,
              $description, $service );
 
         my $twig = XML::Twig->new(
@@ -83,6 +83,7 @@ for my $source ( @sources ) {
                 service => 		 sub { $service       = $_->text },
                 repositoryURL => sub { $repositoryURL = $_->text },
                 location => 	 sub { $location      = $_->text },
+                manifest =>      sub { $manifest      = $_->text },
                 creator =>		 sub {
                     $creator = {};
                     for my $f ( @CREATOR_FIELDS ) {
@@ -166,7 +167,9 @@ for my $source ( @sources ) {
                 $location, 'eq', $ds->{location},
                 "Location link = $ds->{location}"
                 );
-            
+      
+            ok($manifest, "Got something for manifest: $manifest");
+      
         }
     }
 }

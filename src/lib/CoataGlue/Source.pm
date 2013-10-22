@@ -692,7 +692,7 @@ sub write_header_XML {
 
 	$writer->startTag('header');	
 	for my $field ( qw(
-        source id file access dateconverted repositoryURL location
+        source id file access dateconverted repositoryURL manifest location
     ) ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
