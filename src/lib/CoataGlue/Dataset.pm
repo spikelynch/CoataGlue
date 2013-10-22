@@ -60,6 +60,8 @@ The standard metadata fields are as follows.
 =item spatial
 =item temporal
 =item location
+=item keywords
+=item manifest
 
 =back
 
@@ -397,6 +399,7 @@ sub header {
 		file => $self->{file},
 		location => $self->{location},
 		repositoryURL => $self->url,
+        keywords => $self->{keywords},
         manifest => $self->manifest,
 		access => $self->access,
 		dateconverted => $self->{dateconverted}

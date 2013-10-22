@@ -412,9 +412,15 @@ sub load_templates {
     # sections starting with _ are not views but handler maps etc
 
 	VIEW: for my $view ( keys %{$self->{template_cf}} ) {
+
         next VIEW if $view =~ /^_/;
+
 		my $crosswalk = $self->{template_cf}{$view};
-		for my $field ( keys %$crosswalk ) {
+		FIELD: for my $field ( keys %$crosswalk ) {
+
+            # If it's a string literal, don't test for handlers
+            next FIELD if( $crosswalk->{$field} =~ /^"(.*)"$/ );
+                
 			# generate code snippets for converting dates etc
 			my ( $mdf, @expr ) = split(/\s+/, $crosswalk->{$field});
             
@@ -508,7 +514,9 @@ sub crosswalk {
 			);
 		} else {
 			my $mdfield = $view->{$field};
+            $self->{log}->debug("mdfield = $mdfield");
             if( $mdfield =~ /^"(.*)"$/ ) {
+                $self->{log}->debug("Expanding literal $field = $1");
                 $new->{$field} = $1;
             } elsif( !defined $original->{$mdfield} ) {
 				$new->{$field} = '';
@@ -623,8 +631,6 @@ sub render_view {
 	my $dataset = $params{dataset};
     my $subtt_args = $self->{template_args}{$view} || undef;
 
-    $self->{log}->debug("render_view $view");
-    $self->{log}->debug(Dumper( { subtt_arg => $subtt_args }));
 	
 	if( !$dataset ) {
 		$self->{log}->error("render_view needs a dataset");

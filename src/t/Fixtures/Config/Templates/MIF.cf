@@ -16,3 +16,4 @@ datecreated:    Experiment_Date date (\d+)\/(\d+)\/(\d+) DAY MON YEAR
 description:	MIF.description.tt
 service:		MIF.instruments.tt
 access:         "public"
+keywords:       "biology microscopy"

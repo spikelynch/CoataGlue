@@ -17,6 +17,7 @@ service:		Labshare.services.tt raw
 access:         access map _mapaccess
 share:          share
 datastreams:    location
+keywords:       "wavetank remote"
 
 # value map for access rights. Values on the left are converted to
 # values on the right - ie 'open access' => 'public'
