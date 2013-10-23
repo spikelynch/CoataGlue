@@ -331,6 +331,13 @@ sub harvest_source {
                 if( $dataset->add_to_repository ) {
                     $log->info("Added $dataset->{id} to repository: $dataset->{repository_id}");
                     
+                    if( my $hdl = $dataset->handle_request ) {
+                        $log->info("Wrote handle request: $hdl");
+                    } else {
+                        $log->warn("Couldn't write handle request");
+                    }
+
+
                     if( $dataset->publish ) {
                         $log->info("Published to " . $dataset->access);
                     } else {

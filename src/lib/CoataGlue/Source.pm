@@ -87,6 +87,10 @@ our @MANDATORY_PARAMS = qw(coataglue name converter ids settings store);
 
 our @MANDATORY_SETTINGS = qw(templates);
 
+our @HEADER_FIELDS = qw( 
+    source id handle file access dateconverted
+    repositoryURL manifest location
+);
 
 sub new {
 	my ( $class, %params ) = @_;
@@ -459,6 +463,8 @@ sub load_templates {
 }
 
 
+
+
 =item crosswalk(dataset => $ds, view => $view)
 
 Applies a crosswalk from this view's template file.  If
@@ -697,9 +703,7 @@ sub write_header_XML {
 	my $header = $dataset->header();
 
 	$writer->startTag('header');	
-	for my $field ( qw(
-        source id file access dateconverted repositoryURL manifest location
-    ) ) {
+	for my $field (  @HEADER_FIELDS ) {
 		$writer->startTag($field);
 		$writer->characters($header->{$field});
 		$writer->endTag;

@@ -77,7 +77,8 @@ use File::Copy;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
 use Number::Bytes::Human qw(format_bytes);
-use Digest::SHA;
+use Digest::SHA qw(sha1_hex);
+use Template;
 
 use CoataGlue::Datastream;
 use CoataGlue::IDset;
@@ -200,19 +201,76 @@ sub global_id {
 
 =item handle() 
 
-Makes a SHA hash from the dataset's metadata location (which is by
-definition unique) and prepends it to our handle URL.
+Makes a SHA hash from the dataset's source name + metadata location
+and prepends it to our handle URL.
 
 =cut
 
 sub handle {
     my ( $self ) = @_;
 
+    if( !$self->global_id ) {
+        $self->{log}->warn("Can't create handle without global id");
+        return undef;
+    }
+
     my $prefix = $self->{source}->conf('General', 'handles');
-
-
-
+    $prefix .= $self->{source}->conf('Redbox', 'datasethandle');
+    
+    my $hash = sha1_hex($self->{global_id});
+    $self->{handle_hash} = $hash;
+    $self->{handle} = $prefix . $hash;
+    $self->{log}->debug("Created handle: $self->{handle}");
+    return $self->{handle};
 }
+
+
+=item handle_request()
+
+Write out a batch file for creating a handle which points to this 
+dataset's URL
+
+=cut
+
+sub handle_request {
+    my ( $self ) = @_;
+
+    my $handle = $self->handle || return undef;
+    my $url = $self->url || return undef;
+
+    my $tt = $self->{source}{tt} || do {
+        $self->{log}->error("No template object in source!");
+        return undef;
+    };
+
+    my $handle_t = $self->{source}->conf('Redbox', 'handlerequest');
+
+    my $values = {
+        url => $self->url, 
+        id => $self->{handle_hash}
+    };
+
+    my $output = '';
+    
+    if( $tt->process($handle_t, $values, \$output) ) {
+        my $file = join(
+            '/',
+            $self->{source}->conf('Redbox', 'handledir'),
+            $self->{handle_hash}
+            );
+        open(BATCH, ">$file") || do {
+            $self->{log}->error("Couldn't write handle request $file $!");
+            return undef;
+        };
+        print BATCH $output;
+        close(BATCH);
+        return $file;
+    } else {
+        $self->{log}->error("Template error ($handle_t) " . $tt->error);
+        return undef;
+    }
+}
+
 
 =item manifest()
 
@@ -420,6 +478,7 @@ sub header {
 		repositoryURL => $self->url,
         keywords => $self->{keywords},
         manifest => $self->manifest,
+        handle => $self->handle,
 		access => $self->access,
 		dateconverted => $self->{dateconverted}
 	};

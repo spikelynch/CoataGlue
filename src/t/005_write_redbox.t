@@ -195,6 +195,9 @@ for my $source ( @sources ) {
 				diag("XML parse error: $@");
 			}
 		}
+        if( my $hfile = $ds->handle_request ) {
+            ok($hfile, "Wrote handle file $hfile");
+        }
 	}
 }
 	

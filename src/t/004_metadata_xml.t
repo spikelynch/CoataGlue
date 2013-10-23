@@ -73,7 +73,7 @@ for my $source ( @sources ) {
 
         my ( $title, $project, $creator,
              $repositoryURL, $location, $manifest, $keywords,
-             $description, $service );
+             $description, $service  );
 
         my $twig = XML::Twig->new(
             twig_handlers => {
@@ -171,6 +171,7 @@ for my $source ( @sources ) {
       
             ok($manifest, "Got something for manifest: $manifest");
             ok($keywords, "Got some keywords: $keywords");
+
       
         }
     }

@@ -1,0 +1,3 @@
+This file is here so that the empty Handles directory in the test
+fixtures gets picked up by git (which doesn't track empty
+directories).
