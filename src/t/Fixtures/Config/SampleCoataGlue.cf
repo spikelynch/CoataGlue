@@ -3,6 +3,7 @@
 [General]
 timeformat: %FT%T%z
 store:		$COATAGLUE/src/t/Test/Store/
+handles:    http://hdl.handle.net/11057/
 
 [Repository]
 baseurl:		http://localhost:8080/fedora
@@ -41,7 +42,8 @@ groupid:        GroupID_1
 directory:      $COATAGLUE/src/t/Test/ReDBox
 testdirectory:  $COATAGLUE/src/t/Testier/ReDBox
 extension:		dc
-handleprefix:   http://hdl.handle.net/11057/id
+staffhandle:    id
+datasethandle:  ds
 cryptkey:       ############################# 
 jsonmap:        Config/DCXMLmap.json
 

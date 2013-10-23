@@ -67,7 +67,8 @@ sub new {
     my $cg = $self->{source}{coataglue};
 
     $self->{key} = $cg->conf('Redbox', 'cryptkey');
-    $self->{prefix} = $cg->conf('Redbox', 'handleprefix');
+    $self->{prefix} = $cg->conf('General', 'handles' )
+        . $cg->conf('Redbox', 'staffhandle');
     $self->{crosswalk} = $cg->conf('PersonCrosswalk');
 
 	return $self;

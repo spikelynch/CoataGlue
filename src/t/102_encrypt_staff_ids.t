@@ -57,12 +57,14 @@ ok(@sources, "Got source");
 
 my $source = $sources[0];
 
-my $prefix = $cg->conf('Redbox', 'handleprefix');
+my $prefix;
 
-if( $prefix eq 'none' ) {
+if( $cg->conf('Redbox', 'staffhandle') eq 'none' ) {
     $prefix = '';
+} else {
+    $prefix = $cg->conf('General', 'handles' ) 
+        . $cg->conf('Redbox', 'staffhandle');
 }
-
 for my $id ( keys %STAFF_IDS ) {
 	my $expect = $prefix . $STAFF_IDS{$id};
 	my $got = $source->staff_id_to_handle(id => $id);

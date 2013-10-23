@@ -44,13 +44,13 @@ use CoataGlue::Repository;
 my @MANDATORY_PARAMS = qw(home global sources templates);
 
 my %MANDATORY_CONFIG = (
-	General => [ 'timeformat', 'store' ],
+	General => [ 'timeformat', 'store', 'handles' ],
 	Repository => [ 'baseurl', 'username', 'password' ],
 	RepositoryCrosswalk => [ 'title', 'description', 'creator', 'date' ],
     Publish => [ 'datastreams',
                  'directory', 'targets',
                  'datastreamurl', 'dataseturl' ],
-	Redbox => [ 'directory', 'extension', 'handleprefix' ],
+	Redbox => [ 'directory', 'extension', 'staffhandle', 'datasethandle' ],
     Mint => [ 'solr', 'core' ]
 );
 

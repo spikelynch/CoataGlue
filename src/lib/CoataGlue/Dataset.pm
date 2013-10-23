@@ -76,10 +76,11 @@ use File::Path qw(make_path remove_tree);
 use File::Copy;
 use Catmandu;
 use Catmandu::Store::FedoraCommons;
+use Number::Bytes::Human qw(format_bytes);
+use Digest::SHA;
 
 use CoataGlue::Datastream;
 use CoataGlue::IDset;
-use Number::Bytes::Human qw(format_bytes);
 
 
 
@@ -174,6 +175,8 @@ $SOURCE->{name}:$self->{id}
 sub global_id {
 	my ( $self ) = @_;
 
+    $self->{log}->debug("global_id called for $self->{id} $self->{source}{name}");
+
 	if( ! $self->{id} ) {
 		$self->{log}->error("Can't generate global_id without id");
 		return undef;
@@ -194,6 +197,22 @@ sub global_id {
 	return $self->{global_id};
 }
 
+
+=item handle() 
+
+Makes a SHA hash from the dataset's metadata location (which is by
+definition unique) and prepends it to our handle URL.
+
+=cut
+
+sub handle {
+    my ( $self ) = @_;
+
+    my $prefix = $self->{source}->conf('General', 'handles');
+
+
+
+}
 
 =item manifest()
 
@@ -498,6 +517,7 @@ sub write_redbox {
 	}
 	
 	my $global_id = $self->global_id;
+
 	if( !$global_id ) {
 		$self->{log}->error("Dataset $self->{file} doesn't have a global_id");
 		return undef;	
