@@ -111,7 +111,7 @@ use CoataGlue::Converter;
 use CoataGlue::Dataset;
 
 
-my $LOGGER = 'CoataGlue.harvest';
+my $LOGGER = 'CoataGlue.coataglue_pl';
 
 if( !$ENV{COATAGLUE_LOG4J} ) {
 	die("Need to set COATAGLUE_LOG4J to point at a Log4j config file");
@@ -326,11 +326,11 @@ sub harvest_source {
         }
 
 		DATASET: for my $dataset ( @datasets ) {
-			$log->debug("Dataset: $dataset->{global_id}");
-			
+			$log->info("Dataset: $source->{name}/$dataset->{id}");
             if( ! $opts{t} ) {
                 if( $dataset->add_to_repository ) {
-                    $log->info("Added $dataset->{global_id} to repository: $dataset->{repository_id}");
+                    $log->info("Added $dataset->{id} to repository: $dataset->{repository_id}");
+                    
                     if( $dataset->publish ) {
                         $log->info("Published to " . $dataset->access);
                     } else {
