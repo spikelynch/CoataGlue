@@ -1,0 +1,22 @@
+Object = thm2isis
+  IsisVersion       = "3.4.2.4976 stable | 2012-12-11"
+  ProgramVersion    = 2012-05-08
+  ProgramPath       = /home/mike/Isis/isis/bin
+  ExecutionDateTime = 2013-10-11T11:06:52
+  HostName          = Unknown
+  UserName          = mike
+  Description       = "Import a Themis IR/VIS RDR or EDR"
+
+  Group = UserParameters
+    FROM       = V03537002EDR.QUB
+    TO         = dasdasd.cub
+    TIMEOFFSET = 0.0
+  End_Group
+
+  Group = Accounting
+    ConnectTime = 00:00:00.0
+    CpuTime     = 00:00:00.3
+  End_Group
+End_Object
+
+

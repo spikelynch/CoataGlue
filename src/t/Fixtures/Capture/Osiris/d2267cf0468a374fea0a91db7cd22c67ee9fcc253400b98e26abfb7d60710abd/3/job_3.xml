@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job app="thm2isis">
+    <metadata>
+        <user>d2267cf0468a374fea0a91db7cd22c67ee9fcc253400b98e26abfb7d60710abd</user>
+        <id>3</id>
+        <app>thm2isis</app>
+        <from>V03537002EDR.QUB</from>
+        <to>dasdasd.odd.cub dasdasd.even.cub</to>
+        <status>done</status>
+        <created>11 Oct 2013 11:06:17 AM</created>
+        <started>11 Oct 2013 11:06:51 AM</started>
+        <finished>11 Oct 2013 11:06:52 AM</finished>
+        <harvest />
+        <coverage>From here to eternity</coverage>
+        <description>The description of this dataset</description>
+        <project>DC18C</project>
+        <public>true</public>
+        <supervisor></supervisor>
+        <title>Test dataset for Osiris</title>
+    </metadata>
+
+    <parameters>
+        <parameter name="FROM">V03537002EDR.QUB</parameter>
+        <parameter name="TO">dasdasd.cub</parameter>
+        <parameter name="TIMEOFFSET">0.0</parameter>
+    </parameters>
+</job>
