@@ -1,0 +1,19 @@
+# Crosswalk config file for Osiris metadata
+
+# metadata maps: standard_field: local_field
+
+[metadata]
+title: 			title
+project: 	    activity
+creator: 		creator
+supervisor:     supervisor
+datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
+description:	description
+service:		"Osiris"
+access:         access
+share:          share
+datastreams:    location
+keywords:       "space mars"
+
+
+
