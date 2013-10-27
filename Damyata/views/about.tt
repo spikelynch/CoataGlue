@@ -1,0 +1,40 @@
+
+
+   <div class="page-header">
+      <h2>UTS Research Data</h2>
+   </div>
+   
+
+   <div class="row">
+      <div class="field_label col-md-2">About</div>
+      <div class="col-md-8">
+
+      <p>This repository provides a public interface to data
+      collections created by researchers at the Unversity of
+      Technology, Sydney, and their collaborators.</p>
+
+      <p>Check the pages of individual datasets for information on
+      access and IP, and for contact details of individual
+      researchers.</p>
+
+      <p>This repository is maintained and supported by the <a
+      href="http://eresearch.uts.edu.au/">Research Support Group</a>
+      of the Information Technology Division of UTS.</p>
+
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="field_label col-md-2">Contact us</div>
+      <div class="col-md-8">
+      <a href="mailto:eResearch-it@uts.edu.au">eResearch-it@uts.edu.au</a>
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="field_label col-md-2">Credits</div>
+      <div class="col-md-8">
+      This data repository was created with funds from the <a href="http://www.ands.org.au">Australian National Data Service</a>
+      </div>
+   </div>
+

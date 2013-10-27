@@ -114,6 +114,18 @@ get '/' => sub {
     template 'index', { test_page => $conf->{test_page} };
 };
 
+
+=item get about
+
+About, contact, credits
+
+=cut
+
+get '/about' => sub { title => 'About', template 'about' };
+
+
+
+
 =item get /:id
 
 The landing page for a dataset
@@ -163,6 +175,7 @@ get '/:id' => sub {
 		}
 	}
 };
+
 
 
 
