@@ -11,6 +11,12 @@
         <started>11 Oct 2013 11:01:58 AM</started>
         <finished>11 Oct 2013 11:02:01 AM</finished>
         <harvest />
+        <public>true</public>
+        <project>Project name</project>
+        <description>A test fixture for Osiris records</description>
+        <supervisor>Supervisor</supervisor>
+        <title>Dataset title</title>
+        <creator>105465</creator>
     </metadata>
 
     <parameters>

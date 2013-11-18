@@ -16,7 +16,8 @@
         <project>DC18C</project>
         <public>true</public>
         <supervisor></supervisor>
-        <title>Test dataset for Osiris</title>
+        <creator>890007</creator>
+
     </metadata>
 
     <parameters>
