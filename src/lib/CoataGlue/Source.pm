@@ -92,6 +92,22 @@ our @HEADER_FIELDS = qw(
     repositoryURL manifest location
 );
 
+our %MONTHS = (
+    jan => 0,
+    feb => 1,
+    mar => 2,
+    apr => 3,
+    may => 4,
+    jun => 5,
+    jul => 6,
+    aug => 7,
+    sep => 8,
+    oct => 9,
+    nov => 10,
+    dec => 11
+    );
+
+
 sub new {
 	my ( $class, %params ) = @_;
 	
@@ -277,7 +293,6 @@ sub scan {
             $self->{log}->info("Returning single dataset with id $id");
             return ( $dataset );
         }
-
 		if( $status->{status} eq 'new') {
 			my $id = $self->{ids}->create_id();
 			if( $id ) {
@@ -287,7 +302,7 @@ sub scan {
                     status => 'new'
                     );
 				push @datasets, $dataset;
-				$self->{log}->info("New id for dataset $dataset->{file}: $id");
+				$self->{log}->info("New id for dataset: $id");
 			} else {
 				$self->{log}->error("New id for dataset $dataset->{file} failed");
 			}
@@ -299,7 +314,6 @@ sub scan {
         $self->{log}->error("Couldn't find dataset with id $id");
         return ();
     }
-
 	return @datasets;
 }
 
@@ -882,11 +896,16 @@ sub date_handler {
 			$val->{$fields[$i]} = $v;
 			$i++;
 		}
+
 		if( $val->{YEAR} && $val->{MON} && $val->{DAY} ) {
 			if( $val->{YEAR} !~ /^\d\d\d\d$/ ) {
 				$self->{log}->error("Invalid date '$value' in $field (year must be four digits)");
 				return undef;
 			}
+            my $month = $self->parse_month(month => $val->{MON});
+            if( !defined $month ) {
+                return undef;
+            }
 			return strftime(
 				$timefmt, $val->{SEC}, $val->{MIN}, $val->{HOUR},
 				$val->{DAY}, $val->{MON} - 1, $val->{YEAR} - 1900
@@ -902,6 +921,38 @@ sub date_handler {
 	$self->{log}->debug("Built date handler $handler");
 	return $handler;
 	
+}
+
+
+
+=item parse_month(month => $month)
+
+Takes months either as 1-12 or names (Jan, January) and returns a value
+0-11 to pass to strftime
+
+=cut
+
+sub parse_month {
+    my ( $self, %params ) = @_;
+
+    my $m = $params{month};
+    
+    if( $m =~ /^\d+$/ ) {
+        if( $m > 0 || $m < 13 ) {
+            return $m - 1;
+        } else {
+            $self->{log}->error("Integer month $m out of range");
+            return undef;
+        }
+    }
+
+    my $m3 = lc(substr($m, 0, 3));
+    if( defined $MONTHS{$m3} ) {
+        return $MONTHS{$m3};
+    } else {
+        $self->{log}->error("Unknown month name '$m'");
+        return undef;
+    }
 }
 
 
