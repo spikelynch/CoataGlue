@@ -8,6 +8,8 @@ use Data::Dumper;
 use XML::Twig;
 use MIME::Types qw(by_suffix);
 
+my @MANDATORY_FIELDS =  qw(basedir metadatafile datastreams);
+
 =head1 NAME
 
 CoataGlue::Converter::XML
@@ -25,16 +27,19 @@ sub init {
 	
 	$self->{twig} = XML::Twig->new();	
 	
-	my $missing = 0;
-	for my $field ( qw(basedir metadatafile datastreams) ) {
-		if( !$params{$field} ) {
-			$missing = 1;
-			$self->{log}->error("$self->{name} missing config $field");
-		} else {
-			$self->{$field} = $params{$field};
-		}
+	for my $field ( keys %params ) {
+        $self->{$field} = $params{$field};
 	}
-	
+
+	my $missing = 0;
+
+    for my $field ( @MANDATORY_FIELDS ) {
+        if( !$self->{$field} ) {
+            $self->{log}->error("Missing field $field");
+            $missing = 1;
+        }
+	}
+
 	if( $missing ) {
 		return undef;
 	} else {
@@ -68,6 +73,7 @@ sub scan {
 		next ITEM unless $item =~ /$self->{metadatafile}/;
 		my $path = "$basedir/$item";
 		next ITEM unless -f $path;
+
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
@@ -96,7 +102,8 @@ sub parse_metadata {
 	
 	my $path = $params{path};
 	my $shortpath = $params{shortpath};
-	
+    my $basedir = $params{basedir} || $self->{basedir};
+
 	my $tw;
 	
 	eval {
@@ -112,8 +119,22 @@ sub parse_metadata {
 	# If there are more than one, store as an arrayref
 	
 	my $md = {};
-	
-	for my $elt ( $tw->root->children ) {
+
+    my $md_elt;
+
+    $self->{log}->trace("metadata tag = $self->{metadatatag}");
+
+    if( $self->{metadatatag} ) {
+        ( $md_elt ) = $tw->root->descendants($self->{metadatatag});
+        if( !$md_elt ) {
+            $self->{log}->error("Tag $self->{metadatatag} not found");
+            return undef;
+        }
+    } else {
+        $md_elt = $tw->root;
+    }
+    
+	for my $elt ( $md_elt->children ) {
 		my $tag = $elt->tag;
 		if( $md->{$tag} ) {
 			if( !ref($md->{$tag}) ) {
@@ -131,13 +152,27 @@ sub parse_metadata {
 		$self->{log}->error("No datastreams found in <$self->{datastreams}>");
 	} else {
 		my $ds = $md->{$self->{datastreams}};
+        $self->{log}->trace("Datastreams = $ds");
 		if( !ref($ds) ) {
-			$ds = [ $ds ];
+            if( $self->{datastream_delimiter} ) {
+                $ds = [ split(/$self->{datastream_delimiter}/, $ds) ];
+            } else {
+                $ds = [ $ds ];
+            }
 		}
 
+        # for now, we treat file://  and /sdsda/asdas as though they
+        # were relative to basedir.  For this class, basedir is a global
+        # class setting, but subclasses can override it on a dataset-by-
+        # dataset basis (ie a user/job directory for Osiris)
+
 		for my $file ( @$ds ) {
-			if( $file =~ /^file:\/\/(.*)$/ ) {
-				$file = $self->{basedir} . $1;
+            if( $file =~ /^http/ ) {
+                $self->{log}->warn("$self can only handle files, not http");
+            } else {
+                $file =~ s#^file://##;   # remove file://
+				$file = $basedir . $file;
+                $self->{log}->trace("Datastream file = $file");
 				if( -f $file ) {
                     my ( $mimetype, $encoding ) = by_suffix($file);
 					$datastreams->{$file} = {
@@ -148,13 +183,13 @@ sub parse_metadata {
 				} else {
 					$self->{log}->error("Datastream $file not found");
 				}
-			} else {
-				$self->{log}->warn("XML converter can only handle local files");
 			}
 		}
 	}
 
 	$md->{dateconverted} = $self->timestamp;
+
+    $self->{log}->trace(Dumper({ datastreams => $datastreams }));
 	
 	return {
 		file => $path,
