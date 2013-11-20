@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 91;
+use Test::More tests => 144;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -49,7 +49,10 @@ my @sources = $CoataGlue->sources;
 ok(@sources, "Got sources");
 
 for my $source ( @sources ) {
-	my $sname = $source->{name};	
+	my $sname = $source->{name};
+
+  SKIP: {
+      skip "Source $sname inactive", 53 if $source->skip;
 
 	ok($source->open, "Opened source $sname") || die;
 
@@ -155,6 +158,7 @@ for my $source ( @sources ) {
             $description =~ s/\s*$//g;
             $fdesc =~ s/\s*$//g;
 
+            $log->debug(Dumper({"fixtures $sname $file" => $fixtures->{$sname}{$file} }));
             
             cmp_ok(
                 $description, 'eq', $fdesc,
@@ -174,6 +178,7 @@ for my $source ( @sources ) {
 
       
         }
+    }
     }
 }
 

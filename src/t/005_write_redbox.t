@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 126;
+use Test::More tests => 208;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -48,6 +48,9 @@ ok(@sources, "Got sources");
 
 for my $source ( @sources ) {
 	my $sname = $source->{name};
+
+  SKIP: {
+      skip "Source $sname inactive", 77 if $source->skip;
 	
 	ok($source->open, "Opened source '$sname'");
 
@@ -199,6 +202,7 @@ for my $source ( @sources ) {
             ok($hfile, "Wrote handle file $hfile");
         }
 	}
+    }
 }
 	
 

@@ -141,6 +141,8 @@ sub new {
 
 	$self->{converter}{source} = $self;
 
+    $self->{log}->debug("### converter skip $self->{name} = $self->{converter}{skip} ###");
+
 	$self->{ids} = $self->{ids}->new(source => $self);
 	
 	$self->{storefile} = join('/', $self->{store}, $self->{name});
@@ -250,6 +252,25 @@ sub set_status {
 }
 
 
+=item skip()
+
+Returns true if the 'skip' flag in the datasource config is set.
+Used to skip broken converters when testing.
+
+=cut
+
+sub skip {
+    my ( $self ) = @_;
+
+
+    if( $self->{converter}{skip} ) {
+        $self->{log}->debug("Source $self->{name}: skipping");
+        return 1;
+    } else {
+        $self->{log}->debug("Source $self->{name}: no skip");
+        return 0;
+    }
+}
 
 
 
@@ -534,9 +555,9 @@ sub crosswalk {
 			);
 		} else {
 			my $mdfield = $view->{$field};
-            $self->{log}->debug("mdfield = $mdfield");
+            $self->{log}->trace("mdfield = $mdfield");
             if( $mdfield =~ /^"(.*)"$/ ) {
-                $self->{log}->debug("Expanding literal $field = $1");
+                $self->{log}->trace("Expanding literal $field = $1");
                 $new->{$field} = $1;
             } elsif( !defined $original->{$mdfield} ) {
 				$new->{$field} = '';

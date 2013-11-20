@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 46;
+use Test::More tests => 72;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -51,6 +51,11 @@ ok(@sources, "Got sources");
 
 for my $source ( @sources ) {
  	my $sname = $source->{name};
+
+  SKIP: {
+      skip "Source $sname inactive", 26 if $source->skip;
+
+
 	ok($source->open, "Opened source '$sname'");
 
 	my @datasets = $source->scan;
@@ -97,5 +102,5 @@ for my $source ( @sources ) {
 
 	}
 
-    
+    }
 }
