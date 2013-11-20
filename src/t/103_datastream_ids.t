@@ -34,14 +34,14 @@ use CoataGlue::Test qw(setup_tests);
 my $DATASET_RE = 'P1_E1';
 
 my %BAD_IDS = (
-	'000' => 'D000',
-	'200x900_photo.jpg' => 'D200x900_photo.jpg',
+	'000' => 'D00',
+	'200x900_photo.jpg' => 'D00x900_photo.jpg',
 	'Warning:contains:colons' => 'Warning_contains_colons',
 	'Has spaces?' => 'Has_spaces_',
 	'Has spaces also.txt' => 'Has_spaces_also.txt',
 	'this name is full of spaces and is also quite long. The algorithm needs to truncate it and replace the spaces with underscores.png' =>
         'needs_to_truncate_it_and_replace_the_spaces_with_underscores.png',
-    'A name which                                                  will certainly break now that I have changed the algorithm.gif' => 'D__will_certainly_break_now_that_I_have_changed_the_algorithm.gif'
+    'A name which                                                  will certainly break now that I have changed the algorithm.gif' => 'D_will_certainly_break_now_that_I_have_changed_the_algorithm.gif'
 );
 
 
@@ -51,7 +51,7 @@ my @EXTENSIONS = ('', '.txt', '.png', '.tiff', '.csv' );
 my $NMANY = 1000;
 
 
-plan tests => $NMANY * 2 + 21;
+plan tests => $NMANY * 3 + 21;
 
 my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.103_datastream_ids";
@@ -152,6 +152,8 @@ if( ok($manyfixed, "Got fixed keys") ) {
 		
 		ok($new_file && $old_file, "Got new and old IDs ($new_file, $old_file)");
 		cmp_ok($new_file, 'eq', $old_file, "Match for $new_id");
+        my $l = length($new_id);
+        cmp_ok($l, '<', 65, "Length $l < 65");
 	}
 
 }

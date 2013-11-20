@@ -112,7 +112,7 @@ sub add_id {
 	# make sure first character is alphabetical
 
 	if( $id !~ /^[A-Za-z]/ ) {
-		$id = 'D' . $id;
+		$id = 'D' . substr($id, 1);
 	}
 
     # make sure that it's an NCName

@@ -864,7 +864,7 @@ sub create_datastreams {
         $self->{log}->debug("Couldn't create unique datastream IDs");
         return undef;
     }
-	
+
     for my $dsid ( sort keys %$cooked ) {
         my $oid = $cooked->{$dsid};
         $self->{datastreams}{$dsid} = CoataGlue::Datastream->new(
