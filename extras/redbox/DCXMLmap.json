@@ -11,17 +11,22 @@
 
         "//source":       "workflow_source",
 
-        "//creator/mintid":         "dc:creator.foaf:Person.0.dc:identifier",
-	    "//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
-	    "//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
+        "//creator/mintid":     "dc:creator.foaf:Person.0.dc:identifier",
+	"//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
+	"//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
         "//creator/honorific":  "dc:creator.foaf:Person.0.foaf:title",
-        
+
         "//header/repositoryURL": "vivo:Location.vivo:webaddress",
-	    "//header/location":      "skos:note",
-        
-	    "//header/access":       "dc:accessRights.skos:prefLabel",
-        "//project":         "swrc:ResearchProject.dc:title"
-        
+	"//header/location":      "skos:note",
+
+	"//header/access":       "dc:accessRights.skos:prefLabel",
+        "//project":         "swrc:ResearchProject.dc:title",
+	
+	"//service/serviceid":		"dc:relation.vivo:Service.0.dc:identifier",
+	"//service/servicetitle":      "dc:relation.vivo:Service.0.dc:title",
+        "//service/relation":   "dc:relation.vivo:Service.0.vivo:Relationship.rdf:PlainLiteral",
+	"//service/relationlabel": "dc:relation.vivo:Service.0.vivo:Relationship.skos:prefLabel"
+ 
 
     },
     "exceptions": {
