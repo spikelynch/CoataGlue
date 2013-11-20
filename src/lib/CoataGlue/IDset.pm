@@ -98,7 +98,17 @@ sub add_id {
 	# Replace forbidden characters with '_'
 		
 	$id =~ s/[^A-Za-z0-9_.]/_/g;
-		
+				
+	# truncate to the maximum length (allows for extension)
+    # this used to truncate from the right, but I'm changing it to
+    # truncate from the left: if the datastreams are filenames in a 
+    # deep hierarchy or one with very long directory names, truncating
+    # the right leads to boring and unhelpful ids.
+
+	if( length($id) > $length ) {
+		$id = substr($id, -$length);
+	}
+
 	# make sure first character is alphabetical
 
 	if( $id !~ /^[A-Za-z]/ ) {
@@ -111,11 +121,7 @@ sub add_id {
 		$self->{log}->error("Couldn't make NCName from $oid");
 		return undef;
 	}
-		
-	# truncate to the maximum length (allows for extension)
-	if( length($id) > $length ) {
-		$id = substr($id, 0, $length);
-	}
+
 
 	my $id1 = $id;
 	my $inc = 1;

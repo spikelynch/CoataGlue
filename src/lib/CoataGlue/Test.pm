@@ -128,7 +128,7 @@ sub load_datastreams {
     my $log = $params{log};
 
     open(FILE, "<$file") || do {
-        warn("No datastreams.csv in dataset fixtures");
+        $log->error("Couldn't find fixture datastream file: $file");
         return undef;
     };
 

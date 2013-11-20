@@ -9,7 +9,7 @@ creator: 		creator
 supervisor:     supervisor
 datecreated:    finished date (\d+)\s(\w+)\s(\d+) DAY MON YEAR
 description:	description
-service:		"Osiris"
+service:		"au.edu.uts/services/MARSSERVICE00001"
 access:         access
 share:          share
 datastreams:    to

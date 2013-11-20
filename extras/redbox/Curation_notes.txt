@@ -1,120 +1,13 @@
-In system.config.json - "curation" section.
+Attempting to get a collection to curate with the following:
 
+* Linked researcher
+* Linked service
 
-Relations:
-
-field (base field name): eg dc:relation.vivo:Dataset.0.dc:identifier
-
-{
-
-        path = [ dc:relation, vivo:dataset ]
-
-            path to the field in the JSON hierarchy
-
-        identifier = [ dc:identifier ]   
-
-            the lookup for the related dataset
-
-        relationship = [ vivo.Relationship, rdf:PlainLiteral ]
-
-            Where to look for the relationship info
-
-        excludeCondition: {
-            path: [ "redbox.publish" ],
-            value: ""
-        }
-
-            - look in "path", and exclude this relation if it has
-              the specified value - in this case, it is excluded
-              if the record is not published.
-
-        system =  "redbox" (default is "mint");
-
-        optional = if true, don't block curation of this record.
-
-
---------------
-
-Given that, an analysis of the default curation configuration in
-system-config.json
-
-dc:relation.vivo:Dataset.0.dc:identifier
-
- - related datasets in ReDBox.
- - Excludes if the related dataset not published
- - Does not block curation
-
-dc:relation.vivo:Service.0.dc:identifier:
- 
- - Links to services in Mint
- - No exclusion condition
- - Blocks curation
-
-dc:creator.foaf:Person.0.dc:identifier:
-
- - Link to people in mint
- - Excluded if the dc:identifier is an NLA id (?)
- - Blocks curation
-
-locrel:prc.foaf:Person.0.dc:identifier
- - Primary contact link.
- - Excluded if an NLA id
- - Blocks
-
-swrc:supervisor.foaf:Person.0.dc:identifier
- - Supervisor
- - Excluded if an NLA id
- - Blocks
-
-foaf:Organization.dc:identifier
- - isManagedBy
- - no exclusion
- - blocks
-
-foaf:fundedBy.vivo:Grant.0.dc:identifier
- - isOutputOf grant
- - excluded if redbox:internalGrant == "on"
+UTS Labshare iRobot Rig
 
 
 
--------------------------------------
+-- Testing: there's an error in the logs 
 
-Example of the tf-package for a record I created myself and looked up
-the researcher details:
-
-
-"dc:creator.foaf:Person.1.dc:identifier": "http://hdl.handle.net/11057/id59416f87",
-    "dc:creator.foaf:Person.1.foaf:name": "De La Villefromoy, Michel",
-    "dc:creator.foaf:Person.1.foaf:title": "Mr.",
-    "dc:creator.foaf:Person.1.redbox:isCoPrimaryInvestigator": "on",
-    "dc:creator.foaf:Person.1.redbox:isPrimaryInvestigator": "on",
-    "dc:creator.foaf:Person.1.foaf:givenName": "Michel",
-    "dc:creator.foaf:Person.1.foaf:familyName": "De La Villefromoy",
-    "dc:creator.foaf:Person.1.foaf:Organization.dc:identifier": "au.edu.uts/parties/group/927",
-    "dc:creator.foaf:Person.1.foaf:Organization.skos:prefLabel": "FEIT.School of Computing and Communications",
-
-Have curated the Service record - need to get MdV to curate
-
-The transactionManager log is giving this error:
-
-2013-10-18 16:40:11,286 transactionManager DEBUG  CurationManager
-{
-    "task": "curation",
-    "oid": "f64d0f4ac703ac56b4d59af95ac70346"
-}
-2013-10-18 16:40:11,297 transactionManager ERROR  ManagerQueueConsumer Invalid transformation order, 'local' is not a configured transformer!
-2013-10-18 16:40:11,297 transactionManager ERROR  ManagerQueueConsumer Error processing order from Transaction Manager:
-{
-    "type": "TRANSFORMER",
-    "target": "local",
-    "oid": "f64d0f4ac703ac56b4d59af95ac70346",
-    "config": {
-
-
--------------
-
-Services.
-
-Relations: Labshare => created
-Osiris => transform
-MIF => created
+2013-10-23 09:32:04,761 transactionManager ERROR  CurationManager      Error parsing data '282c965bdb7eef78cc9b18854f06893e':
+java.io.IOException: Invalid field structure, 'skos:note' expected to be an array, but incompatible data type already present.

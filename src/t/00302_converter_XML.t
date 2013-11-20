@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-00301_converter_XML.t
+00302_converter_XML.t
 
 =head1 DESCRIPTION
 

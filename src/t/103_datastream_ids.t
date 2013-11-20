@@ -40,15 +40,18 @@ my %BAD_IDS = (
 	'Has spaces?' => 'Has_spaces_',
 	'Has spaces also.txt' => 'Has_spaces_also.txt',
 	'this name is full of spaces and is also quite long. The algorithm needs to truncate it and replace the spaces with underscores.png' =>
-		'this_name_is_full_of_spaces_and_is_also_quite_long._The_algo.png'
+        'needs_to_truncate_it_and_replace_the_spaces_with_underscores.png',
+    'A name which                                                  will certainly break now that I have changed the algorithm.gif' => 'foo.gif'
 );
 
-my $BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+my $BASE = "riverrun, past Eve and Adam's, from swerve of shore to bend of bay, brings us by a commodius vicus of recirculation back to Howth Castle and Environs.";
+
 my @EXTENSIONS = ('', '.txt', '.png', '.tiff', '.csv' );
 my $NMANY = 1000;
 
 
-plan tests => $NMANY * 2 + 19;
+plan tests => $NMANY * 2 + 21;
 
 my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.103_datastream_ids";

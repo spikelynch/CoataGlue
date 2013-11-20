@@ -6,7 +6,6 @@ use parent 'CoataGlue::Converter';
 
 use Data::Dumper;
 use XML::Twig;
-use MIME::Types qw(by_suffix);
 
 my @MANDATORY_FIELDS =  qw(basedir metadatafile datastreams);
 
@@ -174,7 +173,8 @@ sub parse_metadata {
 				$file = $basedir . $file;
                 $self->{log}->trace("Datastream file = $file");
 				if( -f $file ) {
-                    my ( $mimetype, $encoding ) = by_suffix($file);
+                    my ( $mimetype, $encoding ) = $self->mime_type(file => $file);
+
 					$datastreams->{$file} = {
 						id => $file,
 						original => $file,

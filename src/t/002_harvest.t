@@ -20,7 +20,10 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 2 + 2 * 14;
+# Note: count = 2 + $NUMBER_OF_SOURCES * 14;
+
+use Test::More tests => 2 + 3 * 14;
+
 use Data::Dumper;
 
 use CoataGlue;

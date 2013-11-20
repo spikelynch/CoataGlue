@@ -54,14 +54,9 @@ instance.
 =head MIME TYPES
 
 Datastreams need to be assigned a MIME type so that Damyata knows how to
-serve them on the web.  In both Converter::FolderCSV and Converter::XML,
-the by_suffix function provided by MIME::Types is used to guess the 
-MIME type from the file suffix.
+serve them on the web. 
 
-It's easy to imagine a situation where the MIME type doesn't correspond
-to the file suffix.  If that happens, the Converter module can explicitly
-set the MIME type or read it from the data source, but that will need
-some coding work.
+The base class provides m
     
 
 =cut
@@ -75,6 +70,8 @@ use Catmandu::Store::FedoraCommons;
 use Carp qw(cluck);
 use Data::Dumper;
 use POSIX qw(strftime);
+
+use MIME::Types qw(by_suffix);
 
 
 sub new {
@@ -109,6 +106,8 @@ sub scan {
 	$self->{log}->error("All CoataGlue::Converter subclasses need a scan method (" . ref($self) . ")");
 	die;
 }
+
+
 
 
 
@@ -151,6 +150,23 @@ sub timestamp {
 	return strftime($format, localtime);
 }
 
+
+sub mime_type {
+    my ( $self, %params ) = @_;
+
+    my $file = $params{file};
+
+    if( my $overrides = $self->{source}->MIME_overrides ) {
+        if( $file =~ /\.([^.]*)$/ ) {
+            my $ext = $1;
+            if( $overrides->{$ext} ) {
+                $self->{log}->debug("Overriding MIME type $ext = $overrides->{$ext}");
+                return $overrides->{$ext};
+            }
+        }
+    }
+   return by_suffix($file);
+}
 
 
     

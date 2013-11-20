@@ -913,7 +913,7 @@ sub date_handler {
 		} else {
 			$self->{log}->error("Invalid date '$value'");
 			$self->{log}->debug(Dumper(
-			{ value => $value, re => $re, val =>  $val }));
+                                    { value => $value, re => $re, val =>  $val }));
 			return undef;
 		}
 	};
@@ -1006,6 +1006,23 @@ sub timestamp_handler {
         return "$value $ts";
     }
 }
+
+=item MIME_overrides
+
+If there are any _MIME overrides, return them as a hashref
+
+=cut
+
+sub MIME_overrides {
+    my ( $self ) = @_;
+
+    if( $self->{template_cf}{_MIME} ) {
+        return $self->{template_cf}{_MIME};
+    } else {
+        return undef;
+    }
+}
+
 
 
 1;
