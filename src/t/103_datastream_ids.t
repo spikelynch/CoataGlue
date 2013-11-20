@@ -41,7 +41,7 @@ my %BAD_IDS = (
 	'Has spaces also.txt' => 'Has_spaces_also.txt',
 	'this name is full of spaces and is also quite long. The algorithm needs to truncate it and replace the spaces with underscores.png' =>
         'needs_to_truncate_it_and_replace_the_spaces_with_underscores.png',
-    'A name which                                                  will certainly break now that I have changed the algorithm.gif' => 'foo.gif'
+    'A name which                                                  will certainly break now that I have changed the algorithm.gif' => 'D__will_certainly_break_now_that_I_have_changed_the_algorithm.gif'
 );
 
 
