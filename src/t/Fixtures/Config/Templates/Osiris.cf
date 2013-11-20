@@ -7,13 +7,15 @@ title: 			title
 project: 	    activity
 creator: 		creator
 supervisor:     supervisor
-datecreated:    collectiondate date (\d+)-(\d+)-(\d+) YEAR MON DAY
+datecreated:    finished date (\d+)\s(\w+)\s(\d+) DAY MON YEAR
 description:	description
 service:		"Osiris"
 access:         access
 share:          share
-datastreams:    location
+datastreams:    to
 keywords:       "space mars"
 
+# overrides for cub files, which get chemical/x-gaussian-cube
 
-
+[_MIME]
+cub:             application/octet-stream

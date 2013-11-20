@@ -21,14 +21,18 @@ metadatafile: ^.*\.csv$
 [Labshare]
 converter:    CoataGlue::Converter::XML
 ids:          CoataGlue::ID::NaiveSequence
-templates:    Labshare
 basedir:      $COATAGLUE/src/t/Test/Capture/Labshare
+templates:    Labshare
 metadatafile: ^.*\.xml$
 datastreams:  location
 
 [Osiris]
-converter:    CoataGlue::Converter::XML
-ids:          CoataGlue::Converter::NaiveSequence
-basedir:      /home/mike/workspacec/DC18COsiris/working
+converter:    CoataGlue::Converter::RecursiveXML
+ids:          CoataGlue::ID::NaiveSequence
+basedir:      $COATAGLUE/src/t/Test/Capture/Osiris
+templates:    Osiris
 metadatafile: job_(\d+)\.xml$
 datastreams:  to
+datastream_delimiter: \s+
+metadatatag:  metadata
+require:      title
