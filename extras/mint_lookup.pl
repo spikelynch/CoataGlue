@@ -10,7 +10,7 @@ my $CORE = 'fascinator';
 
 my $FIELD = 'dc_identifier';
 
-my $ID = 'http://hdl.handle.net/11057/59416f87';
+my $ID = 'http://hdl.handle.net/11057/idaac499d9';
 
 
 mint_lookup();

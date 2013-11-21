@@ -48,6 +48,8 @@ if( !ok($source, "Got the Osiris RecursiveXML source") ) {
 	die("Can't continue");
 }
 
+SKIP: {
+    skip "Osiris not active", 74 if $source->skip;
 
 ok($source->open, "Opened source $source->{name}") || die;
 
@@ -163,6 +165,6 @@ DATASET: for my $ds ( @datasets ) {
 }
 
 
-
+}
 
 
