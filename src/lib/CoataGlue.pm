@@ -50,7 +50,10 @@ my %MANDATORY_CONFIG = (
     Publish => [ 'datastreams',
                  'directory', 'targets',
                  'datastreamurl', 'dataseturl' ],
-	Redbox => [ 'directory', 'extension', 'staffhandle', 'datasethandle' ],
+	Redbox => [ 
+        'directory', 'extension', 'staffhandle', 'datasethandle',
+        'handlerequest', 'handledir'
+ ],
     Mint => [ 'solr', 'core' ]
 );
 
