@@ -44,6 +44,8 @@ testdirectory:  $COATAGLUE/src/t/Testier/ReDBox
 extension:		dc
 staffhandle:    id
 datasethandle:  ds
+handlerequest:  handle_request.tt
+handledir:      $COATAGLUE/src/t/Test/Handles
 cryptkey:       ############################# 
 jsonmap:        Config/DCXMLmap.json
 
