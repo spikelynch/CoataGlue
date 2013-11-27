@@ -1,16 +1,28 @@
 package CoataGlue::Datastream;
 
 
-
 =head1 NAME
 
 CoataGlue::Datastream
 
 =head1 SYNOPSIS
 
-An object to represent a datastream - an atomic object (file or
-URL).  Datastream is Fedora Core terminology.  A Dataset can
-have many datastreams
+    my $ds = $dataset->datastreams;
+
+    for my $dsid ( sort keys %$ds ) {
+        my $datastream = $ds->{$dsid};
+        my $url = $datastream->url;
+        my $siz = $datastream->size;
+        my $format = $datastream->format
+        $datastream->write(label => "Datastream $dsid $format");
+    }
+
+
+=head1 DESCRIPTION
+
+An object to represent a datastream - an atomic object (file or URL).
+Datastream is Fedora Core terminology.  A Dataset can have many
+datastreams
 
 =over 4
 
@@ -102,9 +114,9 @@ sub new {
 
 
 
-=item conf
+=item conf($section, $field)
 
-Get config values from the Coataglue object
+Get a config value from the Coataglue object
 
 =cut
 
@@ -118,8 +130,8 @@ sub conf {
 
 =item url()
 
-Returns this datastream's public URL.  Datastreams have to be in 
-a 'section' (public/local/etc) which they always inherit from their
+Returns this datastream's public URL.  Datastreams have to be in a
+'section' (public/local/etc) which they always inherit from their
 parent dataset
 
 =cut
@@ -262,7 +274,7 @@ sub size {
 =item format
 
 Returns the file extension (not the MIME-type, which is less useful for
-human-readability purposes
+human-readability purposes - a lot of formats don't have one.)
 
 =cut
 
@@ -277,6 +289,10 @@ sub format {
     }
 }
 
+
+=back
+
+=cut
 
 
 1;

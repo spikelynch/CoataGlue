@@ -6,6 +6,68 @@ CoataGlue::Dataset
 
 =head1 SYNOPSIS
 
+	my $dataset = CoataGlue::Dataset->new(
+		source => $self,
+		file => $file,
+		location => $location,
+		raw_metadata => $metadata,
+		datastreams => $datastreams
+	)|| do {
+		$self->{log}->error("Error creating dataset");
+		return undef;	
+	};
+
+    my $ds = $dataset->datastreams;
+
+    my $id = $dataset->global_id;
+
+    my $handle = $dataset->handle;
+
+    $dataset->handle_request || die("Write handle failed");
+
+    my $manifest = $dataset->manifest;
+
+    my $file = $dataset->short_file;
+
+    my $status = $dataset->get_status;
+
+    $dataset->set_status_ingested;
+
+    $dataset->set_status_error;
+
+    $dataset->clean_metadata_keys;
+
+    my $md = $dataset->metadata;
+
+    my $header = $dataset->header;
+
+    my $url = $dataset->url;
+
+    my $repo_id = $dataset->safe_repository_id 
+
+    my $xml = $dataset->xml(view => $view);
+
+    $dataset->write_redbox || die("couldn't write!");
+
+    if( $dataset->is_publish_target(to => $target) {
+ 
+        $dataset->publish(to => $target);
+
+        my $access = $dataset->access;
+     }
+
+     my $xmlfile = $dataset->xml_filename
+
+     if( $dataset->add_to_repository() ) {
+         my $streams = $dataset->create_datastreams(raw => $raw_ds);
+     }
+
+     my $datastreams = $dataset->datastreams;
+ 
+     my $conf = $dataset->conf($section, $field);
+
+=head1 DESCRIPTION
+
 CoataGlue's main job is creating metadata records in the RDC for
 datasets from a variety of sources (data capture, mostly).  The
 CoataGlue::Dataset class represents a single dataset and its
@@ -14,53 +76,80 @@ metadata, and has methods for the following useful operations:
 =over 4
 
 =item Writing out XML for ReDBox ingest
+
 =item Writing out other XML representations, controlled by a fairly
 flexible templating system
+
 =item Adding an object to Fedora representing the dataset
+
 =item Copying the payload to a Fedora-hosted file system when the
 data object is published
+
 =back 
 
-Variables:
+=head1 VARIABLES
 
 =over 4
 
 =item file           -> the metadata file
+
 =item location       -> dataset location (a directory in a filesystem)
-=item raw_metadata   -> a hashref of the raw metadata from the
-                        Converter
+
+=item raw_metadata   -> a hashref of the raw metadata from the Converter
+
 =item metadata       -> the crosswalked metadata
-=item id             -> a unique ID, unique to this datasource.
-					    No special characters, as it's used to build
-					    filename.
+
+=item id             -> unique in this Source, no weird chars
+
 =item globalid       -> Source name + id
+
 =item repositoryURL  -> The URL in Fedora
+
 =item source         -> the datasource name
+
 =item datecreated    -> experiment date from the source
+
 =item dateconverted  -> date it was converted
+
 =item datastreams    -> an arrayref of payloads (files or URLs)
+
 =item access         -> who can access it / where it's published
 
 =back
+
 
 The standard metadata fields are as follows. 
 
 =over 4
 
 =item title
+
 =item description
+
 =item activity
+
 =item service
+
 =item creationdate
+
 =item collectiondate
+
 =item group
+
 =item creator
+
 =item supervisor
+
 =item access
+
 =item spatial
+
 =item temporal
+
 =item location
+
 =item keywords
+
 =item manifest
 
 =back
@@ -116,7 +205,6 @@ are compulsory.
 =item mimetype - optional
 
 =back
-
 
 =back
 
@@ -351,10 +439,10 @@ sub short_file {
 
 Returns this dataset's status as a hash:
 
-{
-	status => 'new', 'ingested', 'error',
-	err_msg => error message if status = 'error'	
-}
+    {
+	    status => 'new', 'ingested', 'error',
+	    err_msg => error message if status = 'error'	
+    }
 
 =cut
 
@@ -411,10 +499,10 @@ sub set_status_error {
 
 =item clean_metadata_keys()
 
-CLean up the metadata keys so that they can be used as
-variables in Template::Toolkit.  Any non-alphanumeric
-characters at the end are truncated; all other non-alphanumeric
-characters are replaced with underscores.
+CLean up the metadata keys so that they can be used as variables in
+Template::Toolkit.  Any non-alphanumeric characters at the end are
+truncated; all other non-alphanumeric characters are replaced with
+underscores.
 
 Throws an error if two keys convert down to the same string.
 
@@ -444,8 +532,8 @@ sub clean_metadata_keys {
 
 =item metadata()
 
-Crosswalk the raw metadata into the basic metadata fields for FC
-or ReDBox and return a hash.
+Crosswalk the raw metadata into the basic metadata fields for FC or
+ReDBox and return a hash.
 
 =cut
 
@@ -465,6 +553,7 @@ sub metadata {
 
 This returns the source, id, repository_id etc.  Metadata about
 metadata, which is why it's called 'header'
+
 =cut
 
 sub header {
@@ -484,6 +573,11 @@ sub header {
 	};
 }
 
+=item url
+
+Return the URL of this dataset in the repository.
+
+=cut
 
 sub url {
 	my ( $self ) = @_;
@@ -588,7 +682,7 @@ sub write_redbox {
         if( $params{test} ) {
             $self->{log}->warn("Overwriting test file $file");
         } else {
-            $self->{log}->warn("Ingest $file already exists - overwriting");
+            $self->{log}->error("Ingest $file already exists - overwriting");
         }
 	}
 
@@ -608,7 +702,7 @@ sub write_redbox {
 
 
 
-=item publish_urls([to => $audience])
+=item publish([to => $audience])
 
 Version of the publish method where hosted datastreams are stored
 in a filesystem and pushed into Fedora as URLs.  For this to work,
@@ -914,6 +1008,10 @@ sub conf {
 	return $self->{source}{coataglue}->conf($section, $field);
 }
 
+
+=back
+
+=cut
 
 
 

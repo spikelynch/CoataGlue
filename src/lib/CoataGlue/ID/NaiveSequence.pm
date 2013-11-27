@@ -10,6 +10,15 @@ CoataGlue::ID::NaiveSequence
 
 =head1 SYNOPSIS
 
+    my $seq = CoataGlue::ID::NaiveSequence->new(source => $source);
+
+    # $new_id will be > the highest existing id in $source
+
+    my $new_id = $seq->create_id;
+
+
+=head1 DESCRIPTION
+
 Dumb-as-a-box-of-hammers module for generating unique IDs
 by incrementing the highest sequence number in the source
 history.
@@ -21,7 +30,7 @@ getting the same sequence number.
 
 Rough idea:
 
-    my $id = $IDs->new_id([test => 1])
+    my $id = $IDs->create_id([test => 1])
     
     ... add the new ID to the source history while other
         processes wanting IDs wait till you're done...
@@ -30,6 +39,14 @@ Rough idea:
     
     ... now other processes will get IDs
 
+
+=head1 METHODS
+
+=over 4
+
+=item new(source => $source)
+
+Create a new sequencer linked to $source.
 
 
 =cut
@@ -51,6 +68,13 @@ sub new {
 	return $self;
 }
 
+
+=item create_id()
+
+Create a new ID by finding the highest id in the source history and
+adding one.
+
+=cut
 
 sub create_id {
 	my ( $self ) = @_;
@@ -77,8 +101,12 @@ sub create_id {
 }
 
 
+=item release()
 
+Stub method: this class doesn't do locking but if one ever gets written,
+releasing the lock will happen here.
 
+=cut
 
 sub release {
 	
@@ -88,5 +116,8 @@ sub release {
 	
 }
 
+=back
+
+=cut
 
 1;

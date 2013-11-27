@@ -4,7 +4,7 @@ package CoataGlue::Person;
 
 CoataGlue::Person
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Class representing researchers.  Has code to encrypt staff IDs to form
 safe handles, and a method to look up researchers by handle in Mint's solr
@@ -88,6 +88,7 @@ sub lookup {
     my $self = $class->new(%params);
 
     if( !$self ) { 
+
         warn("Need a source and id for lookup");
         return undef;
     }
@@ -222,5 +223,8 @@ sub encrypt_id {
 	return $self->{encrypted_id};
 }	
 
+=back
+
+=cut
 
 1;

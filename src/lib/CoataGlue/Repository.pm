@@ -56,6 +56,13 @@ May one day be used by Damyata to look things up.
 our @MANDATORY_PARAMS = qw(baseurl username password);
 
 
+=head1 METHODS
+
+=item new(baseurl => $url, username => $username, password => $password)
+
+Create a new object; returns undef if any of the parameters are missing.
+
+=cut
 
 
 sub new {
@@ -79,6 +86,15 @@ sub new {
 	
 	return $self;
 }
+
+
+=item add_object(dataset => $dataset)
+
+Creates a new Fedora object for the dataset, populates the dublin core
+metadata and returns the repository id for the new object if succesful.
+
+=cut
+
 
 
 sub add_object {
@@ -134,7 +150,19 @@ sub add_object {
 
 =item set_datastream(%params)
 
-Add or rewrite a datastream on a Fedora object. Parameters:
+Add or rewrite a datastream on a Fedora object. Parameters are
+
+=over 4
+
+=item pid - the dataset's Fedora ID
+
+=item dsid - the datastream ID, which has to conform to Fedora's rules
+
+=back
+
+The CoataGlue::IDset class is a utility for cleaning up sets of ids so that
+they can be used as Fedora ids.
+
 
 =cut
 
@@ -195,6 +223,12 @@ sub set_datastream {
 }
 
 
+=item store
+
+Return a Catmandu::Store object for this repository.
+
+=cut
+
 
 sub store {
 	my ( $self ) = @_;
@@ -215,6 +249,11 @@ sub store {
 }
 
 
+=item repository
+
+Return a Catmandu::FedoraCommons object for the repository
+
+=cut
 
 
 sub repository {
@@ -234,4 +273,8 @@ sub repository {
 	return $self->{repository};
 }
 
+=back
 
+=cut
+
+1;

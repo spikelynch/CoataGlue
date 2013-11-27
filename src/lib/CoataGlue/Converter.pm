@@ -8,23 +8,36 @@ CoataGlue::Converter
 
 =head1 DESCRIPTION
 
-Base class for Converters, which scan files or directories (or
-any other type of digital record) and return CoataGlue::Datasets.
+Converters scan files or directories (or any other type of digital
+record), crosswalk the metadata and return CoataGlue::Datasets (populated
+with CoataGlue::Datastreams).
 
+The base class uses Module::Pluggable to scan and register the
+CoataGlue::Converter::* subclasses, which can be instantiated by
+calling the converter() method on the base class.
 
 =head1 SYNOPSIS
+
+    # Get a singleton 
+    my $cc = CoataGlue::Converter->new();
+
+    my $converter = $cc->converter(
+		converter => "CoataGlue::Converter::XML,
+		settings => \%settings
+	);
 
     for my $dataset ( $converter->scan ) {
     	...
     }
     
+
 The converters are not called directly, but by calling ->scan on 
 a CoataGlue::Source instance.
 
 =head1 PLUGINS
 
 The main CoataGlue object creates a single CoataGlue::Converter.
-This then uses Module::Pluggable to read in all thhe subclasses.
+This then uses Module::Pluggable to read in all the subclasses.
 
 =head1 INTERFACE
 
@@ -47,17 +60,26 @@ them.  The converter does not worry about whether the datasets
 have been seen before - this is handled by the CoataGlue::Source
 instance.
 
-
-
 =back
 
-=head MIME TYPES
+=head1 MIME TYPES
 
 Datastreams need to be assigned a MIME type so that Damyata knows how to
 serve them on the web. 
 
-The base class provides m
-    
+The base class provides a mime_type method which uses the MIME::Types
+module to guess the type.  In cases where this gives the wrong answer,
+you can override it by putting a _MIME section in the Templates/DataSource.cf
+file, which maps file extensions to the correct types.
+
+    [_MIME]
+    cub:             application/octet-stream
+    qub:             application/octet-stream
+
+Or, if this is not enough, you can override the mime_type method in
+your converter class.
+
+
 
 =cut
 
@@ -72,6 +94,21 @@ use Data::Dumper;
 use POSIX qw(strftime);
 
 use MIME::Types qw(by_suffix);
+
+=head1 METHODS
+
+=over 4
+
+
+=item new(%params)
+
+If called on CoataGlue::Converter, returns a factory class which can be
+used to create new subclass with the converter method.
+
+If called on a subclass, passes the parameters in and returns a subclass
+instance.
+
+=cut
 
 
 sub new {
@@ -92,6 +129,13 @@ sub new {
 }
 
 
+=item init()
+
+Stub method, needs to be provided by the subclass. The init method needs
+to check that all the required settings have been passed in and return
+undef if any are missing.
+
+=cut
 
 sub init {
 	my ( $self ) = @_;
@@ -99,6 +143,16 @@ sub init {
 	$self->{log}->error("All CoataGlue::Converter subclasses need an init method (" . ref($self) . ")");
 	die;
 }
+
+=item scan()
+
+Stub method, needs to be provided by the subclass.
+
+Scan should return an array of CoataGlue::Datasets representing new
+collections.
+
+=cut
+
 
 sub scan {
 	my ( $self ) = @_;
@@ -108,6 +162,15 @@ sub scan {
 }
 
 
+
+=item register_plugins()
+
+Calls the Module::Pluggable::plugins method, which scans the file system
+for subclasses. Populates the {plugin} hashref with them.
+
+Only called on the base class CoataGlue::Converter.
+
+=cut
 
 
 
@@ -123,7 +186,17 @@ sub register_plugins {
 }
 
 
-# $converter->converter(converter => $plugin_class, settings => $settings)
+=item converter(converter => $plugin_class, settings => $settings)
+
+Creates an instance of the Converter of class $plugin_class with the 
+settings in $settings.  These are taken from the data sources' section of
+the DataSources.cf file and will vary between different types of 
+Converter.
+
+Returns undef if the plugin class was not found, or if the plugin was
+not initialised (most likely because of missing or out-of-range settings).
+
+=cut
 
 
 sub converter {
@@ -140,7 +213,11 @@ sub converter {
 	}
 }
 
-# Returns the current time in a standard format for all converters
+=item timestamp()
+
+Returns the current time in a standard format for all converters
+
+=cut
 
 sub timestamp {
 	my ( $self ) = @_;
@@ -150,6 +227,13 @@ sub timestamp {
 	return strftime($format, localtime);
 }
 
+=item mime_type(file => $file)
+
+Deduces the MIME type of $file.  Uses the _MIME override section in the
+data source's template.cf file: if this doesn't match, uses the MIME::Types
+module.
+
+=cut
 
 sub mime_type {
     my ( $self, %params ) = @_;
@@ -170,7 +254,9 @@ sub mime_type {
 
 
     
+=back
 
+=cut
 
 
 1;

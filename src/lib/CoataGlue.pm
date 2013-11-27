@@ -27,6 +27,10 @@ Object representing a CoataGlue installation.
 
 See the Wiki: https://github.com/spikelynch/CoataGlue/wiki/Configuration
 
+
+
+
+
 =cut
 
 
@@ -53,10 +57,14 @@ my %MANDATORY_CONFIG = (
 	Redbox => [ 
         'directory', 'extension', 'staffhandle', 'datasethandle',
         'handlerequest', 'handledir'
- ],
+    ],
     Mint => [ 'solr', 'core' ]
 );
 
+
+=head1 METHODS
+
+=over 4
 
 =item new(%params)
 
@@ -190,12 +198,26 @@ sub new {
 }
 
 
+=item sources()
+
+Return an array of all data sources
+
+=cut
+
 
 sub sources {
 	my ( $self ) = @_;
 	
 	return map { $self->{sources}{$_} } sort keys %{$self->{sources}};
 }
+
+
+=item conf($section, $field)
+
+Return a configuration values
+
+=cut
+
 
 sub conf {
 	my ( $self, $section, $field ) = @_;
@@ -217,8 +239,12 @@ sub conf {
     return undef;
 }
 
-# expand_conf goes through all the config values and expands
-# $COATAGLUE to the value of $self->{home}
+=item expand_conf()
+
+Goes through all the config values and expands $COATAGLUE to the value
+of $self->{home}
+
+=cut
 
 sub expand_conf {
     my ( $self ) = @_;
@@ -235,6 +261,11 @@ sub expand_conf {
     }
 }
 
+=item template
+
+Obsolete method: template expansion now in CoataGlue::Source
+
+=cut
 
 sub template {
 	my ( $self, %params ) = @_;
@@ -246,6 +277,13 @@ sub template {
 	
 	$self->{tt} = Template->new();
 }
+
+=item repository()
+
+Returns a CoataGlue::Repository object connected to the repository, or
+undef if connection fails.
+
+=cut
 
 
 sub repository {
@@ -269,6 +307,14 @@ sub repository {
 }
 
 
+=item repository_crosswalk(metadata => $metadata)
+
+Crosswalks a dataset's metadata into the fields expected by the repository,
+based on the RepositoryCrosswalk config section.
+
+=cut
+
+
 sub repository_crosswalk {
 	my ( $self, %params ) = @_;
 	
@@ -288,7 +334,8 @@ sub repository_crosswalk {
 	return $dc;
 }
 
-=item mint
+
+=item mint()
 
 Returns an Apache::Solr object for doing lookups in Mint for 
 researcher details
@@ -319,7 +366,11 @@ sub mint {
     return $self->{mint};
 }
 
-    
+
+=back
+
+
+=cut    
 
 
 

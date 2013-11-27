@@ -12,11 +12,15 @@ use MIME::Types qw(by_suffix);
 
 CoataGlue::Converter::RecursiveXML
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Extension of CoataGlue::Converter::XML which does a recursive descent
 into a directory structure and gets all files which match the metadata
 file pattern.
+
+The metadata parsing code is unchanged - all this module does is provide
+a recursive_scan method, and slightly tweak scan() so that it can 
+provide a different base_dir for each metadata file.
 
 =head1 CONFIGURATION
 
@@ -28,8 +32,16 @@ require -      if this tag is empty, ignore this record
 
 the 'shortfile' for these is problematic as it is not necessarily unique.
 
-I'm bodging it for now to get the ANDS deliverables finished but it
-needs a bit of a rethink.
+I'm bodging it for now (Nov 2013) but it needs a bit of a rethink.
+
+=head1 METHODS
+
+=over 4
+
+=item scan()
+
+Scans a directory tree for matching metadata files, returns a list
+of datasets.
 
 =cut
 
@@ -91,6 +103,14 @@ sub scan {
 }
 
 
+=item recursive_scan(dir => $dir)
+
+Scans $dir, pushing all files matching the {metadatafile} pattern onto an
+array {xmlfiles}, and recursing into any child directories.
+
+=cut
+
+
 sub recursive_scan {
     my ( $self, %params ) = @_;
 
@@ -121,6 +141,9 @@ sub recursive_scan {
 }
 
 
+=back
+
+=cut
 
 
 1;

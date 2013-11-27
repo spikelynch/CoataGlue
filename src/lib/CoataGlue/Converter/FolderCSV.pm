@@ -16,7 +16,7 @@ my $FALLBACKMIME = 'application/octet-stream';
 
 CoataGlue::Converter::FolderCSV
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Generic converter for data like this:
 
@@ -32,6 +32,24 @@ If the CSV file does not specify a location (in a column headed
 TODO: scan the directory with the .csv file for other files
 and add them to a 'payload' arrayref.  These can then be 
 imported into Fedora if required.
+
+=head1 METHODS
+
+
+=over 4
+
+=item init(basedir => $base, datadir => $datadir, metadatafile => $file)
+
+Initialise with the following params:
+
+=over 4
+
+=item basedir - Base directory to scan
+=item datadir - Regexp matching data directories
+=item metadatafile - Fileglob pattern matching the metadata csv files
+
+=back
+
 
 =cut
 
@@ -63,10 +81,14 @@ sub init {
 }
 
 
+=item scan()
 
+Scans directory and returns a list of datasets
+
+=cut
 
 sub scan {
-	my ( $self, %params ) = @_;
+	my ( $self ) = @_;
 	
 	my $basedir = $self->{basedir};
 	my $datadir = $self->{datadir};
@@ -108,6 +130,11 @@ sub scan {
 }
 
 
+=item get_metadata(path => $path, shortpath => $shortpath)
+
+Look for the metadata file in a data directory
+
+=cut
 
 
 sub get_metadata {
@@ -178,6 +205,13 @@ sub get_metadata {
 
 }
 
+=item parse_metadata_file(file => $file)
+
+Parses the csv metadata file
+
+=cut
+
+
 sub parse_metadata_file {
 	my ( $self, %params ) = @_;
 	
@@ -224,6 +258,10 @@ sub parse_metadata_file {
 	return $metadata;	
 }
 
+
+=back
+
+=cut
 
 
 1;

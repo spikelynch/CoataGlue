@@ -1,11 +1,23 @@
 package CoataGlue::IDset;
 
-=head NAME
+=head1 NAME
 
 CoataGlue::IDset
 
-=head DESCRIPTION
+=head1 SYNOPSIS
 
+    my $idset = CoataGlue::IDset->new(raw => $raw);
+
+    my $cooked = $idset->make_ids;
+
+    for my $newid ( keys %$cooked ) {
+       my $value = $raw->{$cooked->{$newid}};
+       
+       # do something with $newid and $value...
+    }
+
+
+=head DESCRIPTION
 
 A class to convert a set of raw ids into a set of ids which can be
 used as datastream IDs in Fedora, and which are still all unique.
@@ -15,12 +27,19 @@ tries to come up with a set of IDs which conform to that rule, which
 are still all unique, and which preserve anything that looks like a 
 file extension (since this is used to deduce MIME types).
 
+It also truncates from the front of the id, because when IDs are very
+long path names, the front is the least interesting, and the back has
+information we want to preserve, like the filename, or the user
+directory it was found in, etc.
+
 The raw ids are passed in as a hashref with the ids as keys.  The values
 of this hashref are ignored.
 
 The make_ids method returns a hashref of newid => oldid (or undef in
 the unlikely event that you tried this with 10^64 ids and there was a
 collision).
+
+
 
 =cut
 
@@ -30,6 +49,18 @@ use XML::RegExp;
 our $MAX_DSID_LENGTH = 64;
 our $MAX_DSID_EXTENSION = 4;
 our $MAX_DSID_SUFFIX = 1000000;
+
+
+=head1 METHODS
+
+=over 4
+
+=item new(raw => $raw)
+
+Create a new IDset, with $raw as the hash with ids as keys.
+
+=cut
+
 
 sub new {
     my ( $class, %params ) = @_;
@@ -49,7 +80,10 @@ sub new {
 
 =item make_ids()
 
-Return a set of clean, unique IDs, or undef if this failed.
+Return a hashref whose keys are clean and unique, and whose values are
+the old ids they map to.
+
+If unique creation failed, return undef.
 
 =cut
 
@@ -184,3 +218,8 @@ sub dsid {
 	return $dsid;
 }
 
+=back
+
+=cut
+
+1;

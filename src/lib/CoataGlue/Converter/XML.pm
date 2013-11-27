@@ -13,12 +13,27 @@ my @MANDATORY_FIELDS =  qw(basedir metadatafile datastreams);
 
 CoataGlue::Converter::XML
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
-Generic converter for XML metadata
+Generic converter for XML metadata.
+
+=head1 METHODS
+
+=over 4
+
+=item init(%params)
+
+Parameters (from DataSource.cf):
+
+=over 4
+
+=item basedir: directory to scan for XML documents
+=item metadatafile: pattern to match metadata XML files
+=item datastreams: XML tag in which files of datastreams are stored
+
+=back
 
 =cut
-
 
 
 sub init {
@@ -37,6 +52,7 @@ sub init {
             $self->{log}->error("Missing field $field");
             $missing = 1;
         }
+
 	}
 
 	if( $missing ) {
@@ -47,6 +63,12 @@ sub init {
 }
 
 
+
+=item scan()
+
+Scans basedir and returns Datasets
+
+=cut
 
 
 sub scan {
@@ -94,6 +116,21 @@ sub scan {
 	closedir($dh);
 	return @datasets ;
 }
+
+
+=item parse_metadata(path => $path, shortpath => $shortpath [, basedir => $basedir ])
+
+Parse a metadata file, returns a hashref with:
+
+	{
+		file => $path,
+		location => $path,
+		metadata => $md,
+		datastreams => $datastreams
+	}
+
+
+=cut
 
 
 sub parse_metadata {
@@ -198,5 +235,11 @@ sub parse_metadata {
 		datastreams => $datastreams
 	};
 }
+
+
+=back
+
+=cut
+
 
 1;

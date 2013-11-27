@@ -2,7 +2,39 @@ package CoataGlue::Test;
 
 use strict;
 
-# Buildup routines for the tests
+=head1 NAME
+
+CoataGlue::Test
+
+=head1 SYNOPSIS
+
+    use CoataGlue::Test qw(setup_tests is_fedora_up);
+
+    my $LOG4J = "$Bin/log4j.properties";
+    my $LOGGER = "CoataGlue.tests.006_fedora";
+    Log::Log4perl->init($LOG4J);
+    my $log = Log::Log4perl->get_logger($LOGGER);
+
+    my $fixtures = setup_tests(log => $log);
+
+    my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
+
+    ok($CoataGlue, "Initialised CoataGlue object");
+
+    my $repo = $CoataGlue->repository;
+
+    ok($repo, "Connected to Fedora Commons");
+
+    if( !is_fedora_up(log => $log, repository => $repo) ) {
+        die("Fedora is down.\n");
+    }
+
+=head1 DESCRIPTION
+
+Utility routines to build up test fixtures and confirm that Fedora is 
+open for business.
+
+=cut
 
 use parent qw(Exporter);
 
@@ -30,6 +62,18 @@ my $EXISTING_PID = 'RDC:1';
 
 
 my $COUNTS = {};
+
+=head1 METHODS
+
+=over 4
+
+=item setup_tests(log => $log)
+
+Copies the test fixtures into the test directory.  Returns a data
+structure containing the parsed fixture information so that it can be
+used for comparisons in tests.
+
+=cut
 
 
 sub setup_tests {
@@ -105,6 +149,12 @@ sub setup_tests {
 
 	return $fhash
 }
+
+=item load_file(file => $file)
+
+Load a text file and return the contents as a single scalar
+
+=cut
 
 sub load_file {
 	my ( %params ) = @_;
@@ -238,6 +288,13 @@ sub teardown {
 
 }
 
+
+=item is_fedora_up(log => $log, repository => $repo)
+
+Tries to connect to the repository: returns 0 if it can't.
+
+=cut
+
 sub is_fedora_up {
 	my ( %params ) = @_;
 	
@@ -263,7 +320,9 @@ sub is_fedora_up {
 }
 
 
+=back
 
+=cut
 
 
 1;

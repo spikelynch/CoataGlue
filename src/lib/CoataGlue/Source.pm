@@ -20,15 +20,6 @@ use CoataGlue::Person;
 
 CoataGlue::Source
 
-=head1 DESCRIPTION
-
-Basic object describing a data source
-
-name      - unique id
-converter - A CoataGlue::Converter object (passed in by CoataGlue)
-settings  - the config settings (some of which depend on the Converter)
-store     - the directory where the source histories are kept 
-
 =head1 SYNOPSIS
 
     my @sources = $CoataGlue->sources;
@@ -45,13 +36,26 @@ store     - the directory where the source histories are kept
     	}
     }
     
+
+=head1 DESCRIPTION
+
+Basic object describing a data source
+
+=over 4
+
+=item name      - unique id
+
+=item converter - A CoataGlue::Converter object (passed in by CoataGlue)
+
+=item settings  - the config settings (some of which depend on the Converter)
+
+=item store     - the directory where the source histories are kept 
+
 =head1 STATUS
 
 Each source has a history file in the store/ directory which keeps
 track of the status of each dataset which has been scanned. The
 process works like this:
-
-
 
 - The $source->scan() function uses the Converter object to 
   scan whatever it scans (a directory within a directory, in
@@ -74,8 +78,7 @@ process works like this:
 - At the end of this process, the calling code 
   should call $source->close - which writes the history file
   and releases the lock
-  
-- 
+   
 
 =cut
 
@@ -106,6 +109,30 @@ our %MONTHS = (
     nov => 10,
     dec => 11
     );
+
+=head1 METHODS
+
+=item new(%params)
+
+Create a new Source. Parameters:
+
+=over 4
+
+=item coataglue - the CoataGlue object
+
+=item name - unique name of this Source
+
+=item converter - the CoataGlue::Converter class
+
+=item ids - the ID uniquifier
+
+=item settings - the settings hash from the config file
+
+=item store - the directory where store files are written
+
+=back
+
+=cut
 
 
 sub new {
@@ -141,7 +168,6 @@ sub new {
 
 	$self->{converter}{source} = $self;
 
-    $self->{log}->debug("### converter skip $self->{name} = $self->{converter}{skip} ###");
 
 	$self->{ids} = $self->{ids}->new(source => $self);
 	
@@ -153,7 +179,7 @@ sub new {
 }
 
 
-=item open
+=item open()
 
 This reads the Source's history file with an exclusive lock, 
 so if any other processes try to scan this source, they'll have
@@ -174,7 +200,7 @@ sub open {
 	return $self->{history};
 }
 
-=item close
+=item close()
 
 Saves the source's history hash to the store file and releases the
 lock.
@@ -192,7 +218,7 @@ sub close {
 }
 
 
-=item get_status 
+=item get_status(dataset => $dataset)
 
 Looks up the status of a dataset in this source's history.  Returns the
 'new' status if it's not there.
@@ -223,6 +249,12 @@ sub get_status {
 	}
 }
 
+
+=item set_status(dataset => $dataset, status => $status)
+
+Set the dataset's status in the history file.
+
+=cut
 
 sub set_status {
 	my ( $self, %params ) = @_;
@@ -271,10 +303,6 @@ sub skip {
         return 0;
     }
 }
-
-
-
-
 
 =item scan([test => 1])
 
@@ -338,6 +366,7 @@ sub scan {
 	return @datasets;
 }
 
+
 =item test_scan
 
 Test version of scan.  I broke this out into its own subroutine because
@@ -389,9 +418,22 @@ sub test_scan {
 
 
 
-=item dataset()
+=item dataset(%params)
 
-Creates a new dataset.
+Creates a new dataset based on the parameters:
+
+=over 4
+
+=item metadata - metadata hash
+
+=item file - the actual metadata file
+
+=item location - the file's location (usually a dir)
+
+=item datastreams - a hashref of datastreams
+
+=back
+
 =cut
 
 
@@ -811,9 +853,9 @@ sub repository {
 	return $self->{coataglue}->repository;
 }
 
-=item repository_crosswalk
+=item repository_crosswalk(%metadata)
 
-Crosswalks a standard metadata hashref into a DC hashref to
+Crosswalks a standard metadata hash into a DC hashref to
 be added to the Fedora repository
 
 =cut
@@ -837,9 +879,9 @@ sub conf {
 }
 
 
-=item make_handler
+=item make_handler(expr => $expr, field => $field)
 
-This might be a bit half-baked: 
+Generates a handler function for a field, based on $expr.
 
 =cut
 
@@ -863,21 +905,22 @@ sub make_handler {
 }
 
 
-=item date_handler
+=item date_handler(field => $field, expr => $expr)
 
-date($RE, $f1, $f2, $f3)
+   date($RE, $f1, $f2, $f3)
 
 Where $RE is a regular expression matching groups for date
 components, and the $f1... are YEAR MON DAY HOUR MIN SEC.
 
-For example.
+For example,
 
-date((\d+)\/(\d+)\/(\d+), DAY, MON, YEAR)
+    date((\d+)\/(\d+)\/(\d+), DAY, MON, YEAR)
 
 will match and convert dates like 31/12/1969
 
-It's assumed that MON is 1..12 and the year is four digits:
-other years will throw an error.
+It's assumed that MON is either 1..12 or a string which matches
+(jan|feb|mar...) and the year is four digits: other years will throw
+an error.
 
 =cut
 
@@ -1044,6 +1087,9 @@ sub MIME_overrides {
     }
 }
 
+=back
+
+=cut
 
 
 1;
