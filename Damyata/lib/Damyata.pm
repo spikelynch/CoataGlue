@@ -100,7 +100,7 @@ my $fedora = Catmandu::FedoraCommons->new(
 };
 
 
-=head DANCER PATHS
+=head ROUTES
 
 =over 4
 
@@ -115,7 +115,7 @@ get '/' => sub {
 };
 
 
-=item get about
+=item get /about
 
 About, contact, credits
 
@@ -185,7 +185,7 @@ get '/:id' => sub {
 
 =over 4
 
-=item load_config
+=item load_config()
 
 Loads and validates the app's config variables.  Calls error
 and dies if any are missing or invalid.
@@ -231,7 +231,7 @@ sub load_config {
 	return $conf;
 }
 
-=item find_dataset
+=item find_dataset(%params)
 
 Looks up the dataset by its URI in Solr.  If it's found, also
 looks it up in Fedora to get the list of datastreams.
@@ -349,7 +349,7 @@ sub find_dataset {
 }
 
 
-=item find_datastreams 
+=item find_datastreams(fedora_id => $fedora_id)
 
 Looks the dataset up in Fedora and returns a list of datastreams.
 The list is an arrayref of hashrefs: keys are dsid, mimeType and

@@ -13,3 +13,5 @@ pod2markdown ../src/lib/CoataGlue/Person.pm      > ./pod/CoataGlue/Person.md
 pod2markdown ../src/lib/CoataGlue/Repository.pm      > ./pod/CoataGlue/Repository.md
 pod2markdown ../src/lib/CoataGlue/Source.pm      > ./pod/CoataGlue/Source.md
 pod2markdown ../src/lib/CoataGlue/Test.pm      > ./pod/CoataGlue/Test.md
+
+pod2markdown ../Damyata/lib/Damyata.pm         > ./pod/Damyata.md
