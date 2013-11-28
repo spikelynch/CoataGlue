@@ -400,13 +400,62 @@ sub find_datastreams {
 
 	if( $result->is_ok ) {
 		my $dss = $result->parse_content;
-        my $no_dc = [ grep { $_->{dsid} ne 'DC' } @{$dss->{datastream}} ];
-		return $no_dc;
+
+        my $dshash = {};
+
+        for my $ds ( @{$dss->{datastream}} ) {
+            if( $ds->{dsid} ne 'DC' ) {
+                $dshash->{$ds->{dsid}} = $ds;
+            }
+        }
+        
+        my @ids = ds_sort(files => [ keys %$dshash ]);
+
+        my @streams = map { $dshash->{$_} } @ids;
+
+        return \@streams;
 	} else {
 		debug("Error looking up datastreams in FC: " . $result->error);
 		return []
 	}
 }
+
+=item ds_sort(files => $files)
+
+Sorting function for datastreams: sort by extension, then by filename
+
+=cut
+
+sub ds_sort {
+    my %params = @_;
+    my $files = $params{files};
+
+    my $efiles = {};
+
+    for my $file ( @$files ) {
+        my @bits = split(/\./, $file);
+        if( @bits > 1 ) {
+            my $ext = pop @bits;
+            my $name = join('.', @bits);
+            push @{$efiles->{$ext}}, $name;
+        } else {
+            push @{$efiles->{""}}, $file;
+        }
+    }
+
+    my @sorted = ();
+    for my $ext ( sort keys %$efiles ) {
+        for my $name ( sort @{$efiles->{$ext}} ) {
+            if( $ext ) {
+                push @sorted, join('.', $name, $ext);
+            } else {
+                push @sorted, $name;
+            }
+        }
+    }
+    return @sorted;
+}
+
 
 
 =item request_is_local
@@ -430,6 +479,58 @@ Returns a mock dataset for testing the page templates and css
 
 sub test_dataset {
 
+    # Testing the ds sorting code
+
+    my $unsort_ds =  [
+            {
+                dsid => 'DS2.jpg',
+                label => 'Datastream2.jpg',
+                mimeType => 'image/jpg',
+                url => 'http://localhost/Datastream2.jpg',
+                size => '12K'
+            },
+            {
+                dsid => 'Dataset_tif.tif',
+                label => 'Datastream1.jpg',
+                mimeType => 'image/tiff',
+                url => 'http://localhost/Dataset_tif.tiff',
+                size => '10M'
+            },
+            {
+                dsid => 'DS3.jpg',
+                label => 'Datastream3.jpg',
+                mimeType => 'image/jpg',
+                url => 'http://localhost/Datastream3.jpg',
+                size => '12K'
+            },
+            {
+                dsid => 'DS1.jpg',
+                label => 'Datastream1.jpg',
+                mimeType => 'image/jpg',
+                url => 'http://localhost/Datastream1.jpg',
+                size => '12K'
+            },
+            {
+                dsid => 'No_extension',
+                label => 'No_extension',
+                mimeType => 'application/octet-stream',
+                url => 'http://localhost/No_extension',
+                size => '12K'
+            },
+        ];
+
+    my $dshash = {};
+    
+    for my $ds ( @$unsort_ds ) {
+        if( $ds->{dsid} ne 'DC' ) {
+            $dshash->{$ds->{dsid}} = $ds;
+        }
+    }
+
+    my @ids = ds_sort(files => [ keys %$dshash ]);
+
+    my @streams = map { $dshash->{$_} } @ids;
+
     return {
         title => 'Test Dataset',
         description => '<p>This is a placeholder</p><p>For testing</p>',
@@ -440,22 +541,7 @@ sub test_dataset {
         creator_givenname => 'Jane',
         creator_email => 'Jane.Smith@institution',
         creator_url => 'http://www.uts.edu.au/~jane.smith',
-        datastreams => [
-            {
-                dsid => 'DS1',
-                label => 'Datastream1.jpg',
-                mimeType => 'image/jpg',
-                url => 'http://localhost/Datastream1.jpg',
-                size => '10M'
-            },
-            {
-                dsid => 'DS2',
-                label => 'Datastream2.jpg',
-                mimeType => 'image/jpg',
-                url => 'http://localhost/Datastream1.jpg',
-                size => '12K'
-            }
-            ]
+        datastreams => \@streams
     };
 }
 
