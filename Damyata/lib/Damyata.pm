@@ -1,15 +1,15 @@
 package Damyata;
 
-=head NAME
+=head1 NAME
 
 Damyata
 
-=head DESCRIPTION
+=head1 DESCRIPTION
 
 Dancer module to control access to datasets in Fedora Commons 
 based on their settings in the Research Data Catalogue (RDC)
 
-=head SYNOPSIS
+=head1 SYNOPSIS
 
 All datasets in the RDC are assigned a digital object in Fedora,
 whether they're being published on the web or not.  For a given
@@ -100,7 +100,7 @@ my $fedora = Catmandu::FedoraCommons->new(
 };
 
 
-=head ROUTES
+=head1 ROUTES
 
 =over 4
 
@@ -117,7 +117,7 @@ get '/' => sub {
 
 =item get /about
 
-About, contact, credits
+Display an about/contacts/credits page
 
 =cut
 
@@ -181,7 +181,7 @@ get '/:id' => sub {
 
 =back
 
-=head METHODS
+=head1 METHODS
 
 =over 4
 
@@ -241,8 +241,11 @@ Parameters:
 =over 4
 
 =item uri
+
 =item fedora_id 
+
 =item solr_field
+
 =item redbox_map
 
 =back
@@ -252,12 +255,19 @@ The return value is a hash as follows:
 =over 4
 
 =item title
+
 =item description
+
 =item access
+
 =item created
+
 =item creator_title
+
 =item creator_familyname
+
 =item creator_givenname
+
 =item datastreams
 
 =back
@@ -273,8 +283,11 @@ arrayref of hashes as follows:
 =over 4
 
 =item dsid
+
 =item label
+
 =item mimeType
+
 =item url
 
 =back
@@ -412,31 +425,6 @@ sub request_is_local {
 =item test_dataset
 
 Returns a mock dataset for testing the page templates and css
-
-=over 4
-
-=item title
-=item description
-=item access
-=item created
-=item creator_title
-=item creator_familyname
-=item creator_givenname
-=item datastreams
-
-=back
-
-
-=over 4
-
-=item dsid
-=item label
-=item mimeType
-=item url
-
-=back
-
-
 
 =cut
 

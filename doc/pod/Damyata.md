@@ -1,7 +1,13 @@
+# NAME
+
 Damyata
+
+# DESCRIPTION
 
 Dancer module to control access to datasets in Fedora Commons 
 based on their settings in the Research Data Catalogue (RDC)
+
+# SYNOPSIS
 
 All datasets in the RDC are assigned a digital object in Fedora,
 whether they're being published on the web or not.  For a given
@@ -24,17 +30,21 @@ Damyata generates the landing page based on the metadata values
 returned from the RDC, and by looking up the Fedora record to 
 find the datastreams.
 
+# ROUTES
+
 - get /
 
     A placeholder.  
 
 - get /about
 
-    About, contact, credits
+    Display an about/contacts/credits page
 
 - get /:id
 
     The landing page for a dataset
+
+# METHODS
 
 - load\_config()
 
@@ -49,20 +59,20 @@ find the datastreams.
     Parameters:
 
     - uri
-    =item fedora\_id 
-    =item solr\_field
-    =item redbox\_map
+    - fedora\_id 
+    - solr\_field
+    - redbox\_map
 
     The return value is a hash as follows:
 
     - title
-    =item description
-    =item access
-    =item created
-    =item creator\_title
-    =item creator\_familyname
-    =item creator\_givenname
-    =item datastreams
+    - description
+    - access
+    - created
+    - creator\_title
+    - creator\_familyname
+    - creator\_givenname
+    - datastreams
 
     FIXME: this needs to get more info from ReDBox
 
@@ -73,9 +83,9 @@ find the datastreams.
     arrayref of hashes as follows:
 
     - dsid
-    =item label
-    =item mimeType
-    =item url
+    - label
+    - mimeType
+    - url
 
 
 
@@ -102,23 +112,3 @@ find the datastreams.
 - test\_dataset
 
     Returns a mock dataset for testing the page templates and css
-
-    - title
-    =item description
-    =item access
-    =item created
-    =item creator\_title
-    =item creator\_familyname
-    =item creator\_givenname
-    =item datastreams
-
-
-
-    - dsid
-    =item label
-    =item mimeType
-    =item url
-
-
-
-
