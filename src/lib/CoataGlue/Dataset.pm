@@ -687,8 +687,14 @@ sub write_redbox {
 	}
 
     $self->{log}->info("Writing redbox metadata to $file");
+
+    my $badchar = ( $xml =~ s/\P{ASCII}//g );
+
+    if( $badchar ) {
+        $self->{log}->warn("Removed $badchar non-ASCII characters before writing $file");
+    }
 	
-	open(XMLFILE, ">$file") || do {
+	open(XMLFILE, ">:encoding(UTF-8)", $file) || do {
 		$self->{log}->error("Could not open $file for writing: $!");
 		return undef;
 	};
