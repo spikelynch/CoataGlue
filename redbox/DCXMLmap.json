@@ -1,9 +1,5 @@
-// DCXMLmap.json version 1.2 - 29 November 2013
-//
-// Maps repositoryURL to bibo:DataLocation.n.dc:location
-
 {
-    "comment": "XML mapping to work with the standard metadata ingest format which CoataGlue generates from data capture sources.",
+    "comment": "Data Capture XML mapper v1.2 29 Nov 2013",
     "mappings": {
         "//title":       [ "title", 
                            "dc:title",
