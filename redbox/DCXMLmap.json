@@ -1,7 +1,6 @@
-# DCXMLmap.json version 1.1 - 22 November 2013
-#
-# Maps repositoryURL to vivo:Location.vivo:webaddress
-
+// DCXMLmap.json version 1.2 - 29 November 2013
+//
+// Maps repositoryURL to bibo:DataLocation.n.dc:location
 
 {
     "comment": "XML mapping to work with the standard metadata ingest format which CoataGlue generates from data capture sources.",
@@ -9,30 +8,30 @@
         "//title":       [ "title", 
                            "dc:title",
                            "redbox:submissionProcess.dc:title" ],
-
+        
         "//description": [ "description",
                            "dc:description",
                            "redbox:submissionProcess.dc:description" ],
 
-        "//source":       "workflow_source",
-
-        "//creator/mintid":     "dc:creator.foaf:Person.0.dc:identifier",
-	"//creator/givenname":  "dc:creator.foaf:Person.0.foaf:givenName",
-	"//creator/familyname": "dc:creator.foaf:Person.0.foaf:familyName",
-        "//creator/honorific":  "dc:creator.foaf:Person.0.foaf:title",
-
-        "//header/repositoryURL": "vivo:Location.vivo:webaddress",
-	"//header/location":      "skos:note",
-
-	"//header/access":       "dc:accessRights.skos:prefLabel",
-        "//project":         "swrc:ResearchProject.dc:title",
-	
-	"//service/serviceid":		"dc:relation.vivo:Service.0.dc:identifier",
-	"//service/servicetitle":      "dc:relation.vivo:Service.0.dc:title",
-        "//service/relation":   "dc:relation.vivo:Service.0.vivo:Relationship.rdf:PlainLiteral",
-	"//service/relationlabel": "dc:relation.vivo:Service.0.vivo:Relationship.skos:prefLabel"
- 
-
+        "//source":                "workflow_source",
+        
+        "//creator/mintid":        "dc:creator.foaf:Person.0.dc:identifier",
+	    "//creator/givenname":     "dc:creator.foaf:Person.0.foaf:givenName",
+	    "//creator/familyname":    "dc:creator.foaf:Person.0.foaf:familyName",
+        "//creator/honorific":     "dc:creator.foaf:Person.0.foaf:title",
+        
+        "//header/repositoryURL":  "bibo:DataLocation.0.dc:location",
+	    "//header/location":       "skos:note",
+        
+	    "//header/access":         "dc:accessRights.skos:prefLabel",
+        "//project":               "swrc:ResearchProject.dc:title",
+	    
+	    "//service/serviceid":	   "dc:relation.vivo:Service.0.dc:identifier",
+	    "//service/servicetitle":  "dc:relation.vivo:Service.0.dc:title",
+        "//service/relation":      "dc:relation.vivo:Service.0.vivo:Relationship.rdf:PlainLiteral",
+	    "//service/relationlabel": "dc:relation.vivo:Service.0.vivo:Relationship.skos:prefLabel"
+        
+        
     },
     "exceptions": {
         "output": "skos:note.0.dc:description",
