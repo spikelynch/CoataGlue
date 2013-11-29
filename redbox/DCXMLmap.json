@@ -1,3 +1,8 @@
+# DCXMLmap.json version 1.1 - 22 November 2013
+#
+# Maps repositoryURL to vivo:Location.vivo:webaddress
+
+
 {
     "comment": "XML mapping to work with the standard metadata ingest format which CoataGlue generates from data capture sources.",
     "mappings": {
