@@ -1,5 +1,5 @@
 {
-    "comment": "Data Capture XML mapper v1.2 29 Nov 2013",
+    "comment": "Data Capture XML mapper v1.3 - 3 Dec 2013",
     "mappings": {
         "//title":       [ "title", 
                            "dc:title",
@@ -21,6 +21,8 @@
         
 	    "//header/access":         "dc:accessRights.skos:prefLabel",
         "//project":               "swrc:ResearchProject.dc:title",
+     
+        "//spatial":               "dc:coverage.vivo:GeographicLocation.0.gn:name",
 	    
 	    "//service/serviceid":	   "dc:relation.vivo:Service.0.dc:identifier",
 	    "//service/servicetitle":  "dc:relation.vivo:Service.0.dc:title",
