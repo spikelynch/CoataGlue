@@ -87,6 +87,7 @@ sub scan {
 	};
 	
 	my @datasets = ();
+    my $required = $self->{required} || undef;
 	
 	ITEM: for my $item ( readdir($dh) ) {
 		next ITEM if $item =~ /^\./;
@@ -98,6 +99,10 @@ sub scan {
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
+            if( $required ) {
+                next ITEM if( !$md->{$required} );
+            }
+
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
 				location => $md->{location},
