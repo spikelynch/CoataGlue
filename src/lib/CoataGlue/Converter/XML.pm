@@ -99,8 +99,9 @@ sub scan {
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
-            if( $required ) {
-                next ITEM if( !$md->{$required} );
+            if( $required && !$md->{metadata}{$required} ) {
+                $self->{log}->debug("Skipping $short - no <$required> tag");
+                next ITEM;
             }
 
 			my $dataset = $self->{source}->dataset(

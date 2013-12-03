@@ -87,7 +87,7 @@ sub scan {
             );
 		
 		if( $md ) {
-            if( $required && !$md->{$required} ) {
+            if( $required && !$md->{metadata}{$required} ) {
                 $self->{log}->debug("Skipping $short - no <$required> tag");
                 next ITEM;
             }
