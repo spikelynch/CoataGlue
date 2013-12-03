@@ -914,7 +914,7 @@ sub xml_filename {
 
 	my $filepath = join('/', $dir, $filename);
     $self->{log}->debug("xml_filename = $filepath");
-	return $filename;
+	return $filepath;
 }
 
 =item add_to_repository()
