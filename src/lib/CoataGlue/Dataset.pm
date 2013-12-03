@@ -888,6 +888,8 @@ sub xml_filename {
 	
 	my $ext = $self->conf('Redbox', 'extension');
 
+    my $prefix = $self->conf('Redbox', 'prefix');
+
     my $dir;
 
     if( $params{test} ) {
@@ -903,8 +905,15 @@ sub xml_filename {
         $self->{log}->debug("Dir is array: " . join(', ', @$dir));
     }
 
-	my $filename = join('/', $dir, $self->global_id . '.' . $ext);
-    $self->{log}->debug("xml_filename = $filename");
+    my $filename;
+    if( $prefix ) {
+        $filename = join('.', $self->global_id, $prefix, $ext);
+    } else {
+        $filename = join('.', $self->global_id, $ext);
+    }
+
+	my $filepath = join('/', $dir, $filename);
+    $self->{log}->debug("xml_filename = $filepath");
 	return $filename;
 }
 
