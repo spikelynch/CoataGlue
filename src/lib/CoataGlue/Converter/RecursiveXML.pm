@@ -26,7 +26,7 @@ provide a different base_dir for each metadata file.
 
 metadatafile - pattern to match files
 metadatatag -  children of this tag read as metadata. Default is root
-require -      if this tag is empty, ignore this record
+require -      if this tag is empty or missing ignore this record
 
 =head1 NOTES
 
@@ -62,8 +62,13 @@ sub scan {
     $self->recursive_scan(dir => $basedir);
 
     my @datasets = ();
+    my $required = $self->{required} || undef;
 
-    for my $path ( @{$self->{xmlfiles}} ) {
+    if( $required ) {
+        $self->{log}->warn("Skipping all XML files without <$required> tag");
+    }
+
+    ITEM: for my $path ( @{$self->{xmlfiles}} ) {
         $self->{log}->debug("Path $path");
 
         my @spath = split('/', $path);
@@ -82,6 +87,11 @@ sub scan {
             );
 		
 		if( $md ) {
+            if( $required && !$md->{$required} ) {
+                $self->{log}->debug("Skipping $short - no <$required> tag");
+                next ITEM;
+            }
+            
 			my $dataset = $self->{source}->dataset(
 				metadata => $md->{metadata},
 				location => $md->{location},
