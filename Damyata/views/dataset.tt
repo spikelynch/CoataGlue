@@ -29,15 +29,34 @@
    </div>
 
    <div class="row">
-      <div class="col-md-2">&nbsp;</div>
+      <div class="field_label col-md-2">Access Rights</div>
       <div class="col-md-8">
+      <% IF access_rights_id %>
+          <a class="licence" href="<% access_rights_id %>"><% access_rights %></a>
+      <% ELSE %>      
+          <% access_rights %>
+      <% END %>
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="field_label col-md-2">Licence</div>
+      <div class="col-md-8">
+      <% IF licence_id %>
+          <a class="licence" href="<% licence_id %>"><% licence %></a>
+      <% ELSE %>      
+          <% licence %>
+      <% END %>
+      </div>
+   </div>
+
+
 
 <% IF datastreams.size > 0 %>
    
    <div id="datastreams">
    <div class="row">
-     <div class="col-md-8">Name</div>
-     <div class="col-md-2">Type</div>
+     <div class="col-md-10">Name</div>
      <div class="col-md-1">Size</div>
      <div class="col-md-1">Download</div>
    </div>
@@ -45,8 +64,8 @@
   <% FOREACH ds IN datastreams %>
 
    <div class="datastream row">
-     <div class="col-md-8"><% ds.dsid %></div>
-     <div class="col-md-2"><% ds.mimeType %></div>
+     <div class="col-md-10"><div class="dsid"><% ds.dsid %></div>
+     <div><% ds.mimeType %></div></div>
      <div class="col-md-1"><% ds.size %></div>
      <div class="col-md-1">
    <a class="download" href="<% ds.url %>"><i class="icon-download-alt"></i></a>
