@@ -8,14 +8,20 @@ project: 	    activity
 creator: 		creator
 supervisor:     supervisor
 datecreated:    finished date (\d+)\s(\w+)\s(\d+) DAY MON YEAR
-description:	description
+description:	Osiris.description.tt
 service:		"au.edu.uts/services/MARSSERVICE00001"
-access:         access
+access:         map _access
 share:          share
 datastreams:    to
+spatial:        coverage
 keywords:       "space mars"
 
 # overrides for cub files, which get chemical/x-gaussian-cube
 
 [_MIME]
 cub:             application/octet-stream
+
+
+[_access]
+true:   public
+"":     private
