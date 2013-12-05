@@ -337,11 +337,13 @@ sub find_dataset {
 	# build a url for each datastream.. also hackily look up the
     # file size in the web hosting directory
 	
-    my $access = $dataset->{access};
+    #my $access = $dataset->{access};
 
-    if( !$access ) {
-        $access = 'public';
-    }
+    #if( !$access ) {
+    #    $access = 'public';
+    #}
+
+    my $access = 'public';
 
     for my $ds ( @{$dataset->{datastreams}} ) {
         $ds->{url} = join(
