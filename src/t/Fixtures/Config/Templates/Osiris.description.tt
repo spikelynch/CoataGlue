@@ -1,3 +1,4 @@
-<% description %>
+[% description %]
 
-Mars coordinates <% coverage %>
+
+Mars coordinates [% coverage %]
