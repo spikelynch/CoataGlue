@@ -1,5 +1,5 @@
 {
-    "comment": "Data Capture XML mapper v1.3 - 3 Dec 2013",
+    "comment": "Data Capture XML mapper v1.4 - 5 Dec 2013",
     "mappings": {
         "//title":       [ "title", 
                            "dc:title",
@@ -17,10 +17,11 @@
         "//creator/honorific":     "dc:creator.foaf:Person.0.foaf:title",
         
         "//header/repositoryURL":  "bibo:DataLocation.0.dc:location",
-	    "//header/location":       "skos:note",
         
 	    "//header/access":         "dc:accessRights.skos:prefLabel",
         "//project":               "swrc:ResearchProject.dc:title",
+
+        "//header/location":        "skos:note.0.dc:description",
      
         "//spatial":               "dc:coverage.vivo:GeographicLocation.0.gn:name",
 	    
