@@ -1,5 +1,5 @@
 {
-    "comment": "Data Capture XML mapper v1.4 - 5 Dec 2013",
+    "comment": "Data Capture XML mapper v1.5 - 6 Dec 2013",
     "mappings": {
         "//title":       [ "title", 
                            "dc:title",
@@ -9,6 +9,7 @@
                            "dc:description",
                            "redbox:submissionProcess.dc:description" ],
 
+	"//header/handle":  "dc:identifier.rdf:PlainLiteral",
         "//source":                "workflow_source",
         
         "//creator/mintid":        "dc:creator.foaf:Person.0.dc:identifier",
@@ -22,7 +23,7 @@
         "//project":               "swrc:ResearchProject.dc:title",
 
         "//header/location":        "skos:note.0.dc:description",
-     
+	"//header/manifest":       "dc:extent",     
         "//spatial":               "dc:coverage.vivo:GeographicLocation.0.gn:name",
 	    
 	    "//service/serviceid":	   "dc:relation.vivo:Service.0.dc:identifier",
