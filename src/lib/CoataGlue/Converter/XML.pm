@@ -154,6 +154,8 @@ sub parse_metadata {
 	
 	if( $@ ) {
 		$self->{log}->error("XML parse error on $path: $@");
+        $self->{twig} = undef;
+        $self->{twig} = XML::Twig->new();
 		return undef;
 	}
 	
