@@ -96,6 +96,8 @@ sub scan {
 		my $path = "$basedir/$item";
 		next ITEM unless -f $path;
 
+        $self->{log}->info("Parsing metadata file $path");
+
 		my $md = $self->parse_metadata(path => $path, shortpath => $item);
 		
 		if( $md ) {
