@@ -327,11 +327,11 @@ sub scan {
     my $test = $params{test} || undef;
     my $id = $params{id} || undef;
 
-    $self->{log}->warn(Dumper({ params => \%params}));
-	
     if( $test ) {
         return $self->test_scan(%params);
     }
+
+    my $raw_keys = {};
 
    	my @datasets = ();
 	
@@ -349,6 +349,9 @@ sub scan {
         }
 		if( $status->{status} eq 'new' ) {
 			my $id = $self->{ids}->create_id();
+            for my $key ( keys %{$dataset->{raw_metadata}} ) {
+                $raw_keys->{$key} = 1;
+            }
 			if( $id ) {
 				$dataset->{id} = $id;
                 $self->set_status(
@@ -364,6 +367,13 @@ sub scan {
 			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
 		}
 	}
+
+    $self->{log}->debug("Raw metadata keys for $self->{name}");
+    for my $key ( sort keys %$raw_keys ) {
+        $self->{log}->debug(": $key");
+    }
+
+
     if( $id ) {
         $self->{log}->error("Couldn't find dataset with id $id");
         return ();
@@ -396,6 +406,9 @@ sub test_scan {
 
     my $tid = $self->{ids}->create_id;
 
+    my $raw_keys = {};
+
+
 	for my $dataset ( $self->{converter}->scan ) {
 		my $status = $self->get_status(dataset => $dataset);
         if( $id && $dataset->{id} eq $id ) {
@@ -404,6 +417,9 @@ sub test_scan {
         }
 
 		if( $status->{status} eq 'new' || $redo ) {
+            for my $key ( keys %{$dataset->{raw_metadata}} ) {
+                $raw_keys->{$key} = 1;
+            }
             $dataset->{id} = $tid;
             push @datasets, $dataset;
             $self->{log}->info("New id for dataset $dataset->{file}: $tid");
@@ -415,6 +431,11 @@ sub test_scan {
     if( $id ) {
         $self->{log}->error("Couldn't find dataset with id $id");
         return ();
+    }
+
+    $self->{log}->debug("Raw metadata keys for $self->{name}");
+    for my $key ( sort keys %$raw_keys ) {
+        $self->{log}->debug(": $key");
     }
 
 	return @datasets;
