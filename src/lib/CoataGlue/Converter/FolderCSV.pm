@@ -255,6 +255,8 @@ sub parse_metadata_file {
 	
 	$metadata->{dateconverted} = $self->timestamp;
 
+    $self->{log}->debug("*** metadata " . Dumper({m => $metadata}));
+
 	return $metadata;	
 }
 
