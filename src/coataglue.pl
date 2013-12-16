@@ -15,6 +15,7 @@ coataglue.pl
     ./coataglue.pl -l SOURCE
     ./coataglue.pl -d DATASET_ID -s SOURCE
     ./coataglue.pl -d METADATA_FILE
+    ./coataglue.pl -m [-s SOURCE]
 
 =head1 DESCRIPTION
 
@@ -52,6 +53,11 @@ id, regardless of its status in the history.  Can be used with -t: if
 it is, the dataset's status will be reset to 'new'.
 
 If using id, also needs the -s SOURCE argument
+
+=item -r 
+
+Redo - in test mode, this makes the script regenerate metadata for datasets
+which it has already flagged in the history.
 
 =head1 CONFIGURATION
 
@@ -129,7 +135,7 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 my %opts;
 
-getopts('htgls:d:', \%opts) || do {
+getopts('htglrs:d:', \%opts) || do {
     $log->error("Invalid command line option");
     usage();
     exit;
@@ -322,7 +328,7 @@ sub harvest_source {
                 return undef;
             }
         } else {
-            @datasets = $source->scan(test => $opts{t});
+            @datasets = $source->scan(test => $opts{t}, 'redo' => $opts{r});
         }
 
 		DATASET: for my $dataset ( @datasets ) {

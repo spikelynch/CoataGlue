@@ -304,13 +304,16 @@ sub skip {
     }
 }
 
-=item scan([test => 1])
+=item scan([test => 1, redo => 1])
 
 Calls scan on this source's converter and returns all datasets 
 which haven't been ingested on a previous pass.
 
 If a true value is passed in for 'test', this will output metadata
-files to the test metadata directory but not touch the history
+files to the test metadata directory but not touch the history.
+
+If running in test mode and redo is true, this will rewrite the
+metadata files for all datasets, not just the new ones.
 
 =cut
 
@@ -323,6 +326,8 @@ sub scan {
 
     my $test = $params{test} || undef;
     my $id = $params{id} || undef;
+
+    $self->{log}->warn(Dumper({ params => \%params}));
 	
     if( $test ) {
         return $self->test_scan(%params);
@@ -342,7 +347,7 @@ sub scan {
             $self->{log}->info("Returning single dataset with id $id");
             return ( $dataset );
         }
-		if( $status->{status} eq 'new') {
+		if( $status->{status} eq 'new' ) {
 			my $id = $self->{ids}->create_id();
 			if( $id ) {
 				$dataset->{id} = $id;
@@ -380,8 +385,9 @@ sub test_scan {
     my ( $self, %params ) = @_;
 
     $self->{log}->info("Running in test mode");
-    my $id = $params{id};
-   	my @datasets = ();
+    my $id = $params{id}; 
+    my $redo = $params{'redo'} || undef;
+  	my @datasets = ();
 	
 	if( !$self->{locked} ) {
 		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
@@ -397,7 +403,7 @@ sub test_scan {
             return ( $dataset );
         }
 
-		if( $status->{status} eq 'new') {
+		if( $status->{status} eq 'new' || $redo ) {
             $dataset->{id} = $tid;
             push @datasets, $dataset;
             $self->{log}->info("New id for dataset $dataset->{file}: $tid");
