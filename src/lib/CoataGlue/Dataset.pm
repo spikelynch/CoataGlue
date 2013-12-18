@@ -331,10 +331,12 @@ sub handle_request {
         return undef;
     };
 
+    my $prefix = $self->{source}->conf('Redbox', 'datasethandle');
     my $handle_t = $self->{source}->conf('Redbox', 'handlerequest');
 
     my $values = {
-        url => $self->url, 
+        url => $self->url,
+        prefix => $prefix,
         id => $self->{handle_hash}
     };
 
