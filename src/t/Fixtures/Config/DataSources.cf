@@ -36,4 +36,4 @@ datastreams:  to
 datastream_delimiter: \s+
 metadatatag:  metadata
 require:      title
-skip:         1
+

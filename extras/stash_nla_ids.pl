@@ -31,7 +31,7 @@ for my $hdl ( @$handles ) {
             my $family_name = $doc->content('Family_Name');
             my $given_name = $doc->content('Given_Name');
 
-            print "$handle,$family_name,given_name,$nla\n";
+            print "$handle,$family_name,$given_name,$nla\n";
         }
     } else {
         print "$hdl,noresults\n";
