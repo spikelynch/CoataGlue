@@ -179,9 +179,14 @@
             </rif:name>
 
 	    ## Data Item locations
+        
+        ## Was building an array of locationNote which were then added
+        ## as <rif:description type="note"> elements - I've commented these
+        ## out as ANDS don't like them.  -ML 14/1/14
+
 		<rif:location>
 
-			#set($locationNotes = [])
+			## #set($locationNotes = [])
 
 			#set($valueMap = $util.getList($item, "bibo:DataLocation"))
 			#foreach($key in $valueMap.keySet())
@@ -211,8 +216,8 @@
 					#else
 					#end
 
-				    #set($locationNote = $location + " -- " + $note)
-				    #set($dataAdded = $locationNotes.add($locationNote))
+##				    #set($locationNote = $location + " -- " + $note)
+##				    #set($dataAdded = $locationNotes.add($locationNote))
 				#end
 			#end
 		</rif:location>
@@ -293,9 +298,11 @@
             <rif:description type="full" $lang>$util.encodeXml($value)</rif:description>
         #end
 
-        #foreach($locationNote in $locationNotes)
-			<rif:description type="note" $lang>$locationNote</rif:description>
-        #end
+## Removed as ANDS rejected them -ML 14/1/14
+
+##        #foreach($locationNote in $locationNotes)
+##			<rif:description type="note" $lang>$locationNote</rif:description>
+##        #end
 
         #################
         ## Rights
@@ -341,8 +348,14 @@
 
         #showRelatedInfo("dc:relation.swrc:Publication", "publication", "uri")
         #showRelatedInfo("dc:relation.bibo:Website", "website", "uri")
-        #showRelatedInfo("dc:relation.vivo:Service", "service", "uri")
-		#showRelatedObject("dc:relation.vivo:Service", "service", "local")
+
+##### Commented out the following because ANDS told us to: the Service has already
+##    been included up above in the main relatedObjects loop, and doesn't need to
+##    also be included as a relatedInfo object as well.
+##
+##      #showRelatedInfo("dc:relation.vivo:Service", "service", "uri")
+##		#showRelatedObject("dc:relation.vivo:Service", "service", "local")
+
         #set($showCitation = $util.get($item, "dc:biblioGraphicCitation.redbox:sendCitation"))
         #if ("$!showCitation" != "" && $showCitation == "on")
             #set($doiProperty = $systemConfig.getString($defaultOnError, "andsDoi", "doiProperty"))
