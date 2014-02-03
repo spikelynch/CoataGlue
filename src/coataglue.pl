@@ -297,9 +297,13 @@ sub list_datasets {
                 my $ds = $history->{$file};
                 my @t = localtime($ds->{details}{timestamp});
                 my $time = strftime($tf, @t);
+                my $handle = CoataGlue::Dataset::hash_from_id(
+                    source => $source->{name},
+                    id => $ds->{id}
+                );
                 print join(',',
                            $source->{name}, $ds->{id},
-                           $ds->{status}, $time, $file
+                           $ds->{status}, $time, $file, $handle
                     ) . "\n";
                 $any = 1;
             }
@@ -384,7 +388,9 @@ coataglue.pl [-t -l WHAT -s SOURCE -d DATASET -g]
 -l            List all sources
 -l -s SOURCE  List all datasets (you have to specify the source)
 -s SOURCE     Only scan a single source.  Can be used with -t
--d DATASET    Only scan a single dataset.  Can be used with -t.  Will
+-s SOURCE -d DATASET   
+
+              Only scan a single dataset.  Can be used with -t.  Will
               reharvest even if the dataset has already been processed.
 EOTXT
 }

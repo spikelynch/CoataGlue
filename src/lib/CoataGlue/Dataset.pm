@@ -308,8 +308,25 @@ sub handle {
     my $hash = sha1_hex($self->{global_id});
     $self->{handle_hash} = $hash;
     $self->{handle} = $prefix . $hash;
-    $self->{log}->debug("Created handle: $self->{handle}");
+    $self->{log}->trace("Created handle: $self->{handle}");
     return $self->{handle};
+}
+
+=item hash_from_id(source => $source, id => $id)
+
+Hack to reconstruct a handle when we don't have the dataset object.
+
+=cut
+
+sub hash_from_id {
+    my %params = @_;
+
+    my $source = $params{source};
+    my $id = $params{id};
+
+    my $globalid = join('.', $source, $id);
+
+    return sha1_hex($globalid);
 }
 
 
