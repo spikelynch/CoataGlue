@@ -288,7 +288,6 @@ undef if connection fails.
 
 sub repository {
 	my ( $self ) = @_;
-	
 	if( !$self->{repository} ) {
 		my $conf = $self->{conf}{global}{Repository};
 		$self->{repository} = CoataGlue::Repository->new(

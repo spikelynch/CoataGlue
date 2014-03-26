@@ -6,7 +6,7 @@ use Catmandu::FedoraCommons;
 use Data::Dumper;
 
 my %PARAMS = (
-	baseurl => 'http://localhost:8080/fedora',
+	baseurl => 'http://namba.itd.uts.edu.au:8080/',
 	usename => 'fedoraAdmin',
 	password => 'hce39alp'
 );

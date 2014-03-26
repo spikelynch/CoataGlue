@@ -27,11 +27,11 @@ May one day be used by Damyata to look things up.
 	    baseurl => $url,
 	    usename => $username,
 	    password => $password
-    );
+        );
     
-    my $id = $repo->add_object(dataset => $dataset);
+        my $id = $repo->add_object(dataset => $dataset);
 
-	$repo->set_datastream(
+        $repo->set_datastream(
 		id => $id,
 		dsid => $dsid,
 		file => $datafile
@@ -222,6 +222,73 @@ sub set_datastream {
 
 }
 
+=item get_object(pid => $pid)
+
+Look up an object by its PID, and returns a hash of datasets by dsid.
+The core metadata will be in $hash->{DC}
+
+=cut
+
+sub get_object {
+    my ( $self, %params ) = @_;
+
+    my $pid = $params{pid} || die ("Need a pid");
+
+
+    my $repo = $self->repository;
+    
+    return undef unless $repo;
+
+    my $result = $repo->listDatastreams(pid => $pid);
+
+    if( $result->is_ok ) {
+        my $dss = $result->parse_content;
+
+        my $dshash = {};
+        
+        for my $ds ( @{$dss->{datastream}} ) {
+            $dshash->{$ds->{dsid}} = $ds;
+        }
+
+        return $dshash;
+    } else {
+        return undef;
+    }
+}
+
+
+=item purge_datastream(pid => $pid, dsid => $dsid)
+
+Permanently remove a datastream from the repository
+
+=cut
+
+
+sub purge_datastream {
+    my ( $self, %params ) = @_;
+    
+    my $fc_params = {
+        dsID => $params{dsid},
+        pid => $params{pid}
+    };
+    
+	
+    my $repo = $self->repository;
+    
+    return undef unless $repo;
+    
+    my $result = $repo->purgeDatastream(%$fc_params);		
+    
+    if( $result->is_ok ) {
+        my $content = $result->parse_content;
+        return 1;
+    } else {
+        $self->{log}->error("Error purging datastream: " . $result->error);
+        return 0;
+    }
+    
+}
+
 
 =item store
 
@@ -260,6 +327,7 @@ sub repository {
 	my ( $self ) = @_;
 	
 	if( !$self->{repository} ) {
+            $self->{log}->info("Logging to Fedora $self->{baseurl} $self->{username} $self->{password}");
 		$self->{repository} = Catmandu::FedoraCommons->new(
 			$self->{baseurl},
 			$self->{username},

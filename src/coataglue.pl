@@ -13,7 +13,7 @@ coataglue.pl
     ./coataglue.pl -s Labshare
     ./coataglue.pl -l
     ./coataglue.pl -l SOURCE
-    ./coataglue.pl -d DATASET_ID -s SOURCE
+    ./coataglue.pl -s SOURCE -d ID [-n]
     ./coataglue.pl -d METADATA_FILE
     ./coataglue.pl -m [-s SOURCE]
 
@@ -31,7 +31,7 @@ folders
 
 Run a complete harvest
 
-=item -t 
+=item -t
 
 Run in test mode.  Doesn't flag any of the datasets as 'scanned' in the
 history, and writes the harvest file to Redbox.testdirectory rather than
@@ -44,7 +44,7 @@ Otherwise, lists all sources by name.
 
 =item -s SOURCE_NAME
 
-Only scan a single data source.  Can be used with -t 
+Only scan a single data source.  Can be used with -t
 
 =item -d DATASET_ID
 
@@ -54,10 +54,16 @@ it is, the dataset's status will be reset to 'new'.
 
 If using id, also needs the -s SOURCE argument
 
-=item -r 
+=item -r
 
 Redo - in test mode, this makes the script regenerate metadata for datasets
 which it has already flagged in the history.
+
+=item -n
+
+No Datastreams - creates a new Fedora object and adds the DC metadata to it,
+but doesnt publish any datastreams - this is for creating landing pages for
+data-by-request-only.
 
 =head1 CONFIGURATION
 
@@ -73,7 +79,7 @@ If any of these is missing, the script won't run:
 
 =item COATAGLUE_LOG4J - location of the log4j.properties file
 
-=item COATAGLUE_CONFIG - main config file 
+=item COATAGLUE_CONFIG - main config file
 
 =item COATAGLUE_SOURCES - sources config file
 
@@ -85,12 +91,12 @@ If any of these is missing, the script won't run:
 =cut
 
 use strict;
-    
-    
+
+
     my $missing = 0;
-    
+
     for my $ev ( qw(HOME PERLLIB LOG4J CONFIG SOURCES TEMPLATES) ) {
-	my $full_ev = "COATAGLUE_$ev"; 
+	my $full_ev = "COATAGLUE_$ev";
 	if( !$ENV{$full_ev} ) {
 		warn("Missing environment variable $full_ev\n");
 		$missing = 1;
@@ -99,7 +105,7 @@ use strict;
 
 if( $missing ) {
 	die("One or more missing environment variables.\nRun perldoc $0 for more info.\n");
-	
+
 }
 
 use lib $ENV{COATAGLUE_PERLLIB};
@@ -135,12 +141,12 @@ if( !$ENV{COATAGLUE_CONFIG} ) {
 
 my %opts;
 
-getopts('htglrs:d:', \%opts) || do {
+getopts('htglrns:d:', \%opts) || do {
     $log->error("Invalid command line option");
     usage();
     exit;
 };
-        
+
 
 if( $opts{h} || ! keys %opts ) {
     usage();
@@ -162,7 +168,7 @@ if( !$CoataGlue ) {
 
 
 if( $opts{t} ) {
-     
+
     if( my $testdir = $CoataGlue->conf('Redbox', 'testdirectory') ) {
         $log->info("Running in test mode.");
         $log->info("Metadata files written to $testdir");
@@ -233,7 +239,7 @@ sub harvest_one_dataset {
             $log->error("Source '$source' not found.");
             list_sources();
             exit;
-        } 
+        }
         $source = $sources{$sname};
         $source->open;
         $id = $ds;
@@ -250,7 +256,7 @@ sub harvest_one_dataset {
             return undef;
         }
     }
-        
+
     harvest_source(source => $source, id => $id);
 
 }
@@ -264,7 +270,7 @@ sub list_sources {
         print "   $name\n";
     }
 }
-    
+
 
 sub list_datasets {
     my %params = @_;
@@ -273,7 +279,7 @@ sub list_datasets {
 
     my $source = $params{source};
     my @sources;
-    
+
     if( $source ) {
         if( $sources{$source} ) {
             @sources = ( $sources{$source} );
@@ -340,18 +346,20 @@ sub harvest_source {
             if( ! $opts{t} ) {
                 if( $dataset->add_to_repository ) {
                     $log->info("Added $dataset->{id} to repository: $dataset->{repository_id}");
-                    
+
                     if( my $hdl = $dataset->handle_request ) {
                         $log->info("Wrote handle request: $hdl");
                     } else {
                         $log->warn("Couldn't write handle request");
                     }
-
-
-                    if( $dataset->publish ) {
-                        $log->info("Published to " . $dataset->access);
+                    if( $opts{n} ) {
+                        $log->info("Not adding datastreams to object $dataset->{global_id}");
                     } else {
-                        $log->warn("Dataset not published to " . $dataset->access);
+                        if( $dataset->publish ) {
+                            $log->info("Published to " . $dataset->access);
+                        } else {
+                            $log->warn("Dataset not published to " . $dataset->access);
+                        }
                     }
                 } else {
                     $log->error("Couldn't add $dataset->{global_id} to repository");
@@ -361,7 +369,7 @@ sub harvest_source {
                 $log->info("Test mode, not adding to repository");
 			}
 			my $file = $dataset->write_redbox(test => $opts{t});
-			
+
 			if( $file ) {
 				$log->info("Wrote $dataset->{global_id} as ReDBox alert $file");
                 if( !$opts{t} ) {
@@ -382,19 +390,18 @@ sub harvest_source {
 sub usage {
     print<<EOTXT;
 coataglue.pl [-t -l WHAT -s SOURCE -d DATASET -g]
-        
+
 -t            Test mode: doesn't update history store and writes metadata
               to the test Redbox directory
 -l            List all sources
 -l -s SOURCE  List all datasets (you have to specify the source)
 -s SOURCE     Only scan a single source.  Can be used with -t
--s SOURCE -d DATASET   
+-s SOURCE -d DATASET
 
               Only scan a single dataset.  Can be used with -t.  Will
               reharvest even if the dataset has already been processed.
+-s SOURCE -f DATASET
+              Scan a single dataset, create a new Fedora record for it
+              but don't add any datastreams to it.
 EOTXT
 }
-
-
-
-
