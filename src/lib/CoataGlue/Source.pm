@@ -341,6 +341,7 @@ sub scan {
 	}
 
 	for my $dataset ( $self->{converter}->scan ) {
+        #my $handle = $dataset->handle();
 		my $status = $self->get_status(dataset => $dataset);
         if( $id && $status->{id} eq $id ) {
             $dataset->{id} = $id;

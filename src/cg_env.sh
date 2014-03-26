@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export COATAGLUE_HOME=./
 export COATAGLUE_CONFIG=./t/Test/Config/CoataGlue.cf
 export COATAGLUE_FIXTURES=./t/Fixtures
 export COATAGLUE_LOG4J=./t/log4j.properties
