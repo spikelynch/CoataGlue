@@ -13,8 +13,9 @@ my %PARAMS = (
 
 
 
-my $PID = 'RDC:1';
-my $FILE = '/home/mike/workspace/RDC Data Capture/src/t/Fixtures/Capture/20130404_P1_E1/200_Noctiluca_scintillans_unica.jpg';
+my $PID = 'au.edu.uts:771';
+my $BASEDIR = '/home/mikelynch/CoataGlue';
+my $FILE = "$BASEDIR/src/t/Fixtures/Capture/MIF/20130404_P1_E1/200_Noctiluca_scintillans_unica.jpg";
 my $URL = 'http://localhost:8080/repository/local/RDC:115/Paramecium.jpg';
 my $REAL_URL = 'https://www.dropbox.com/s/3yq83vjaozg16p9/Terra.tif';
 
@@ -26,27 +27,20 @@ my $fc = Catmandu::FedoraCommons->new(
 
 
 add_datastream(
-	'pid' => 'RDC:45',
+	'pid' => $PID,
  	'file' => $FILE,
  	'dsLabel' => 'Noctiluca',
- 	'mimeType' => 'image/jpeg',
-    'dsID' => "Datastream1"
-);
-
-add_datastream(
-	'pid' => 'RDC:45',
- 	'url' => $URL,
- 	'dsLabel' => 'Paramecium',
  	'mimeType' => 'image/jpeg',
     'dsID' => "Datastream2"
 );
 
+
 add_datastream(
-	'pid' => 'RDC:45',
+	'pid' => $PID,
  	'url' => $REAL_URL,
  	'dsLabel' => 'FSVO',
  	'mimeType' => 'image/tiff',
-    'dsID' => "Datastream3"
+    'dsID' => "Datastream4"
 );
 
 sub add_datastream {

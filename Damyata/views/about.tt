@@ -20,7 +20,6 @@
       <p>This repository is maintained and supported by the <a
       href="http://eresearch.uts.edu.au/">Research Support Group</a>
       of the Information Technology Division of UTS.</p>
-
       </div>
    </div>
 
@@ -32,9 +31,10 @@
    </div>
 
    <div class="row">
-      <div class="field_label col-md-2">Credits</div>
+      <div class="field_label col-md-2">Credits and Licence</div>
       <div class="col-md-8">
-      This data repository was created with funds from the <a href="http://www.ands.org.au">Australian National Data Service</a>
+      <p>Development of this data repository was funded by the <a href="http://www.ands.org.au">Australian National Data Service</a> as part of the <a href="https://projects.ands.org.au/id/DC18">UTS DC18 Data Capture</a> and <a href="https://projects.ands.org.au/id/MS22">MS22 Metadata Stores</a> projects.</p>
+      <p>UTS components of this repository are open source software published under the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Licence v3</a>.  These components are part of the <a href="https://github.com/spikelynch/CoataGlue/wiki">CoataGlue</a> metadata toolkit.</p>
       </div>
    </div>
 

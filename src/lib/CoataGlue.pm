@@ -115,10 +115,10 @@ sub new {
 	$self->{globalcf} = $params{global};
 	$self->{sourcescf} = $params{sources};
 	$self->{templates} = $params{templates};
-	$self->{log}->debug("Reading config from $self->{conffile}");
 
 	for my $conf ( qw(global sources) ) {
 		my $file = $self->{$conf . 'cf'};
+		$self->{log}->debug("Reading $conf config from $file");
 		if( !-f $file ) {
 			$self->{log}->error("Config file $file not found");
 			die;

@@ -15,7 +15,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 72;
+use Test::More tests => 80;
 use Data::Dumper;
 use XML::Twig;
 use Text::Diff;
@@ -36,6 +36,8 @@ my $log = Log::Log4perl->get_logger($LOGGER);
 my $fixtures = setup_tests(log => $log);
 
 my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
+
+$log->warn("HELLO");
 
 ok($CoataGlue, "Initialised CoataGlue object");
 
@@ -63,10 +65,12 @@ for my $source ( @sources ) {
 	ok(@datasets, "Got at least one dataset");
 
  	DATASET: for my $ds ( @datasets ) {
+		$ds->{metadata}{access} = 'public';
 		my $datastreams = $ds->{datastreams};
 		ok($datastreams && keys %$datastreams, 
 			"Dataset has datastreams") || next DATASET;
-
+		ok($ds->{metadata}{access}, "Dataset has access value $ds->{metadata}{access}");
+		$log->warn("Dataset $ds->{id} has access value $ds->{metadata}{access}");
 		ok($ds->add_to_repository, "Added dataset to Fedora");
 
 		ok($ds->{repository_id}, "Dataset has repostory_id: $ds->{repository_id}") || do {
