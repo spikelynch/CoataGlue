@@ -3,7 +3,7 @@
    <div class="page-header">
       <h1><% title %></h1>
    </div>
-   
+
 
    <div class="row">
       <div class="field_label col-md-2">Description</div>
@@ -33,7 +33,7 @@
       <div class="col-md-8">
       <% IF access_rights_id %>
           <a class="licence" href="<% access_rights_id %>"><% access_rights %></a>
-      <% ELSE %>      
+      <% ELSE %>
           <% access_rights %>
       <% END %>
       </div>
@@ -44,7 +44,7 @@
       <div class="col-md-8">
       <% IF licence_id %>
           <a class="licence" href="<% licence_id %>"><% licence %></a>
-      <% ELSE %>      
+      <% ELSE %>
           <% licence %>
       <% END %>
       </div>
@@ -53,14 +53,14 @@
 
 
 <% IF datastreams.size > 0 %>
-   
+
    <div id="datastreams">
    <div class="row">
      <div class="col-md-10">Name</div>
      <div class="col-md-1">Size</div>
      <div class="col-md-1">Download</div>
    </div>
-      
+
   <% FOREACH ds IN datastreams %>
 
    <div class="datastream row">
@@ -75,8 +75,6 @@
 
   </div>
 
-<% ELSE %>
-   <p>Sorry, an error occurred when retrieving the requested data.</p>
 <% END %>
 
 
