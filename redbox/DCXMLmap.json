@@ -1,5 +1,5 @@
 {
-    "comment": "Data Capture XML mapper v1.5 - 6 Dec 2013",
+    "comment": "Data Capture XML mapper v1.7 - 2 April 2014",
     "mappings": {
         "//title":       [ "title", 
                            "dc:title",
@@ -12,24 +12,40 @@
 	"//header/handle":  "dc:identifier.rdf:PlainLiteral",
         "//source":                "workflow_source",
         
-        "//creator/mintid":        "dc:creator.foaf:Person.0.dc:identifier",
-	    "//creator/givenname":     "dc:creator.foaf:Person.0.foaf:givenName",
-	    "//creator/familyname":    "dc:creator.foaf:Person.0.foaf:familyName",
-        "//creator/honorific":     "dc:creator.foaf:Person.0.foaf:title",
+        "//creator/mintid":        [
+            "dc:creator.foaf:Person.dc:identifier",
+            "locrel:prc.foaf:Person.dc:identifier"
+        ],
+        "//creator/email":         [
+            "dc:creator.foaf:Person.dc:email",
+            "locrel:prc.foaf:Person.dc:email"
+        ],
+        "//creator/givenname":     [
+            "dc:creator.foaf:Person.foaf:givenName",
+            "locrel:prc.foaf:Person.foaf:givenName"
+        ],
+	"//creator/familyname":    [
+            "dc:creator.foaf:Person.foaf:familyName",
+            "locrel:prc.foaf:Person.foaf:familyName"
+        ],
+        "//creator/honorific":     [
+            "dc:creator.foaf:Person.foaf:title",
+            "locrel:prc.foaf:Person.foaf:title"
+        ],
         
         "//header/repositoryURL":  "bibo:DataLocation.0.dc:location",
         
-	    "//header/access":         "dc:accessRights.skos:prefLabel",
+	"//header/access":         "dc:accessRights.skos:prefLabel",
         "//project":               "swrc:ResearchProject.dc:title",
 
         "//header/location":        "skos:note.0.dc:description",
 	"//header/manifest":       "dc:extent",     
         "//spatial":               "dc:coverage.vivo:GeographicLocation.0.gn:name",
-	    
-	    "//service/serviceid":	   "dc:relation.vivo:Service.0.dc:identifier",
-	    "//service/servicetitle":  "dc:relation.vivo:Service.0.dc:title",
+	
+	"//service/serviceid":	   "dc:relation.vivo:Service.0.dc:identifier",
+	"//service/servicetitle":  "dc:relation.vivo:Service.0.dc:title",
         "//service/relation":      "dc:relation.vivo:Service.0.vivo:Relationship.rdf:PlainLiteral",
-	    "//service/relationlabel": "dc:relation.vivo:Service.0.vivo:Relationship.skos:prefLabel"
+	"//service/relationlabel": "dc:relation.vivo:Service.0.vivo:Relationship.skos:prefLabel"
         
         
     },
