@@ -8,12 +8,12 @@
 
 
 [metadata]
-title: 			Experiment_Name timestamp
-project: 	    Project_Name
-creator: 		Project_Creator_Staff_Student_ID
+title:          Experiment_Name timestamp
+project: 	Project_Name
+creator: 	Project_Creator_Staff_Student_ID
 supervisor:     MIF.supervisor.tt
 datecreated:    Experiment_Date date (\d+)\/(\d+)\/(\d+) DAY MON YEAR
 description:	MIF.description.tt
-service:		MIF.instruments.tt
+service:	MIF.instruments.tt
 access:         "public"
 keywords:       "biology microscopy"

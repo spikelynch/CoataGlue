@@ -17,8 +17,8 @@
             "locrel:prc.foaf:Person.dc:identifier"
         ],
         "//creator/email":         [
-            "dc:creator.foaf:Person.dc:email",
-            "locrel:prc.foaf:Person.dc:email"
+            "dc:creator.foaf:Person.foaf:email",
+            "locrel:prc.foaf:Person.foaf:email"
         ],
         "//creator/givenname":     [
             "dc:creator.foaf:Person.foaf:givenName",

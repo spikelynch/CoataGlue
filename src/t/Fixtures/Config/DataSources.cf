@@ -8,12 +8,13 @@
 #   converter - A CoataGlue::Converter subclass
 #   templates - the directory containing XML templates
 #   ids       - A CoataGlue::ID subclass
+#   creator   - Which metadata fi
 # All the other fields depend on the converter class 
 
 [MIF]
 converter:    CoataGlue::Converter::FolderCSV
 ids:          CoataGlue::ID::NaiveSequence
-templates:	  MIF
+templates:    MIF
 basedir:      $COATAGLUE/src/t/Test/Capture/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
