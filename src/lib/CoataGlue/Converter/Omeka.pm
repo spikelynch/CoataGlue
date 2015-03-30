@@ -12,7 +12,7 @@ my @MANDATORY_FIELDS =  qw(url);
 
 =head1 NAME
 
-CoataGlue::Converter::OAIPM
+CoataGlue::Converter::Omeka
 
 =head1 DESCRIPTION
 
@@ -28,7 +28,7 @@ Parameters (from DataSource.cf):
 
 =over 4
 
-=item url: OAI-PMH endpoint
+=item url: Omeka endpoint
 
 =back
 
@@ -53,6 +53,8 @@ sub init {
         }
         
     }
+
+    $self->{log}->error("Called from " . join(":", caller));
     
     if( $missing ) {
         return undef;

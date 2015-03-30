@@ -54,7 +54,7 @@ if( !ok($source, "Got the Omeka source") ) {
 SKIP: {
     skip "Omeka not active", 10 if $source->skip;
 
-ok($source->open, "Opened source $source->{name}") || die;
+    ok($source->open, "Opened source $source->{name}") || die;
 
 }
 # my @datasets = $source->scan;

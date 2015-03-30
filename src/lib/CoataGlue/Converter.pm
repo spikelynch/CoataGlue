@@ -112,20 +112,19 @@ instance.
 
 
 sub new {
-	my ( $class, %params ) = @_;
-	
-	my $self = {};
-	bless $self, $class;
-
-	$self->{log} = Log::Log4perl->get_logger($class);
-	
-	if( $class eq 'CoataGlue::Converter' ) {
-		$self->register_plugins(%params);
-		return $self;
-	} else {
-		$self->init(%params);
-		return $self;
-	}
+    my ( $class, %params ) = @_;
+    
+    my $self = {};
+    bless $self, $class;
+    
+    $self->{log} = Log::Log4perl->get_logger($class);
+    
+    if( $class eq 'CoataGlue::Converter' ) {
+        $self->register_plugins(%params);
+        return $self;
+    } else {
+        return $self->init(%params)
+    }
 }
 
 

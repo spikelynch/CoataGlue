@@ -169,13 +169,18 @@ sub new {
 		my $converter = $self->{converters}->converter(
 			converter => $convclass,
 			settings => \%settings
-		);
+                    );
+                $self->{log}->info("Converter $name: $converter");
+                if( !$converter ) {
+                    $self->{log}->error("Data source $name converter initialisation failed");
+                    next SOURCE;
+                }
 		
 		if( !$settings{ids} ) {
 			$self->{log}->error("Data source $name has no ids (ID generator)");
 			next SOURCE;
 		}
-		
+                
 		my $source = CoataGlue::Source->new(
 			coataglue => $self,
 			name => $name,
