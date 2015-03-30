@@ -582,73 +582,73 @@ if it hasn't yet been built)
 =cut
 
 sub crosswalk {
-	my ( $self, %params ) = @_;
-	
-	my $view = $params{view} || 'metadata';
-
-	my $ds = $params{dataset};
-	
-	if( !$self->{template_cf}{$view} ) {
-		$self->{log}->error("View '$view' not defined in template file for $self->{name}");
-		return undef;
-	}
-	if( !$ds ) {
-		$self->{log}->error("crosswalk needs a dataset");
-		return undef;
-	}
-	my $view_name = $view;
-	my $view = $self->{template_cf}{$view_name};
-	my $handlers = $self->{template_handlers}{$view_name} || undef;
-	
-	my $original;
-	
-	if( $view_name eq 'metadata' ) {
-		$original = $ds->{raw_metadata};
-	} else {
-		if( !defined $ds->{metadata} ) {
-			$self->crosswalk(
-				view => 'metadata',
-				dataset => $ds
-			)
-		}
-		$original = $ds->{metadata};
-	}
-	my $new = {};
-	
+    my ( $self, %params ) = @_;
+    
+    my $view = $params{view} || 'metadata';
+    
+    my $ds = $params{dataset};
+    
+    if( !$self->{template_cf}{$view} ) {
+        $self->{log}->error("View '$view' not defined in template file for $self->{name}");
+        return undef;
+    }
+    if( !$ds ) {
+        $self->{log}->error("crosswalk needs a dataset");
+        return undef;
+    }
+    my $view_name = $view;
+    my $view = $self->{template_cf}{$view_name};
+    my $handlers = $self->{template_handlers}{$view_name} || undef;
+    
+    my $original;
+    
+    if( $view_name eq 'metadata' ) {
+        $original = $ds->{raw_metadata};
+    } else {
+        if( !defined $ds->{metadata} ) {
+            $self->crosswalk(
+                view => 'metadata',
+                dataset => $ds
+                )
+        }
+        $original = $ds->{metadata};
+    }
+    my $new = {};
+    
     $self->{log}->trace("view keys = " . join(' ', keys %$view));
-
-	for my $field ( keys %$view ) {
-		if( $view->{$field} =~ /\.tt$/ ) {
-			$new->{$field} = $self->expand_template(
-				template => $view->{$field},
-				metadata => $original
-			);
-		} else {
-			my $mdfield = $view->{$field};
+    
+    for my $field ( keys %$view ) {
+        if( $view->{$field} =~ /\.tt$/ ) {
+            $new->{$field} = $self->expand_template(
+                template => $view->{$field},
+                metadata => $original
+                );
+        } else {
+            my $mdfield = $view->{$field};
             $self->{log}->trace("mdfield = $mdfield");
             if( $mdfield =~ /^"(.*)"$/ ) {
                 $self->{log}->trace("Expanding literal $field = $1");
                 $new->{$field} = $1;
             } elsif( !defined $original->{$mdfield} ) {
-				$new->{$field} = '';
-			} else {
-				if( $handlers && $handlers->{$field} ) {
-					my $h = $handlers->{$field};
-					$new->{$field} = &$h($original->{$mdfield});
-				} else {
-					$new->{$field} = $original->{$mdfield};
-				}
-			}
+                $new->{$field} = '';
+            } else {
+                if( $handlers && $handlers->{$field} ) {
+                    my $h = $handlers->{$field};
+                    $new->{$field} = &$h($original->{$mdfield});
+                } else {
+                    $new->{$field} = $original->{$mdfield};
+                }
+            }
             $self->{log}->trace(
                 "Crosswalked $mdfield='$original->{$mdfield}' to $field='$new->{$field}'"
                 );
-
-		}
-	}
-	
-	if( $view_name eq 'metadata' ) {
-		$ds->{metadata} = $new;
-		$ds->{datecreated} = $ds->{metadata}{datecreated};
+            
+        }
+    }
+    
+    if( $view_name eq 'metadata' ) {
+        $ds->{metadata} = $new;
+        $ds->{datecreated} = $ds->{metadata}{datecreated};
         my $id = $ds->{metadata}{creator};
         my $creator = {};
         if( my $person = $self->get_person(id => $id) ) {
@@ -659,10 +659,10 @@ sub crosswalk {
                 );
             $ds->{metadata}{creator} = { staffid => $id };
         }
-	} else {
-		$ds->{views}{$view_name} = $new;
-	}
-	return $new;
+    } else {
+        $ds->{views}{$view_name} = $new;
+    }
+    return $new;
 }
 
 =item get_person(id => $id)
@@ -674,10 +674,10 @@ Mint.
 
 
 sub get_person {
- 	my ( $self, %params ) =  @_;
- 	
- 	my $id = $params{id};
-
+    my ( $self, %params ) =  @_;
+    
+    my $id = $params{id};
+    
     my $person = CoataGlue::Person->lookup(
         source => $self,
         id => $id
@@ -691,12 +691,12 @@ sub get_person {
 
 
 =item staff_id_to_handle
-
-This method has been superseded by get_person (above) but I'm leaving it
-in because some of the tests use it.  FIXME
-
+    
+    This method has been superseded by get_person (above) but I'm leaving it
+    in because some of the tests use it.  FIXME
+    
 =cut
-
+    
 sub staff_id_to_handle {
  	my ( $self, %params ) =  @_;
  	
