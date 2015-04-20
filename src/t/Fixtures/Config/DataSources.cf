@@ -44,6 +44,8 @@ require:      title
 [Omeka]
 converter:    CoataGlue::Converter::Omeka
 ids:          CoataGlue::ID::NaiveSequence
+url:          http://localhost/omeka-2.3/oai-pmh-repository/request
+dump:         $COATAGLUE/src/t/Dump
 basedir:      $COATAGLUE/src/t/Test/Capture/Omeka
 templates:    Omeka
 

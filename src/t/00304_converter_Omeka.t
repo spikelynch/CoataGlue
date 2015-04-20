@@ -56,26 +56,24 @@ SKIP: {
 
     ok($source->open, "Opened source $source->{name}") || die;
 
+    my @datasets = $source->scan;
+
+    for my $ds ( @datasets ) {
+        print "Dataset $ds->{file}\n";
+        for my $dsid ( keys %{$ds->{datastreams}} ) {
+            print "   $dsid,$ds->{datastreams}{$dsid}{file}\n";
+        }
+    }
+
+
+    my $n = scalar @datasets;
+
+    cmp_ok($n, '>', 0, "Got $n datasets") || die;
+
+    $source->close;
+
 }
-# my @datasets = $source->scan;
-
-# for my $ds ( @datasets ) {
-#     print "Dataset $ds->{file}\n";
-#     for my $dsid ( keys %{$ds->{datastreams}} ) {
-#         print "   $dsid,$ds->{datastreams}{$dsid}{file}\n";
-#     }
-# }
-
-
-# my $n = scalar @datasets;
-
-
-# my $nf = scalar keys %{$fixtures->{Osiris}};
-
-# cmp_ok($n, '==', $nf, "Got $nf datasets") || die;
-
-# $source->close;
-
+    
 # my $access_map = $source->{template_handlers}{metadata}{access};
 
 # my $osf = $fixtures->{Osiris};
