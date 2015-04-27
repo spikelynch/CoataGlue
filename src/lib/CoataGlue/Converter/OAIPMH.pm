@@ -8,7 +8,11 @@ use Data::Dumper;
 use XML::Twig;
 use Net::OAI::Harvester;
 
+
+
 my @MANDATORY_FIELDS =  qw(basedir url);
+
+my $DEFAULT_METADATA = 'oai_dc';
 
 =head1 NAME
 
@@ -74,7 +78,7 @@ sub init {
         $self->{log}->debug("Called from " . join(":", caller));
         return undef;
     } else {
-        my %oai_params = { baseURL => $self->{url} };
+        my %oai_params = ( baseURL => $self->{url} );
         if( $self->{dump} ) {
             $oai_params{dumpDir} = $self->{dump};
         }
@@ -90,7 +94,7 @@ sub init {
     
 Scans datasets from the OAI-PMH feed, downloading them if the fetch
 parameter has been set
-    
+
 =cut
     
 
@@ -99,8 +103,8 @@ sub scan {
     
     my $records = undef;
     eval {
-        $records = $self->{harvester}->listRecords(
-            metadataPrefix => 'oai_dc'
+        $records = $self->{harvester}->listAllRecords(
+            metadataPrefix => $self->{metadata_prefix}
             );
     };
 
@@ -111,36 +115,66 @@ sub scan {
 
     my @datasets = ();
 
+    $self->{log}->trace("I am a $self");
+
     $self->{log}->trace("Iterating over records: $records");
     while ( my $record = $records->next() ) {
-        my $dataset = $self->fetch_record(record => $record);
-        push @datasets, $dataset
+        if( my $dataset = $self->read_dataset(record => $record ) ) {
+            push @datasets, $dataset
+        }
     }
 
-    return @datasets ;
+    return @datasets;
 }
 
 
-=item fetch_record(record => $record)
+=item read_dataset(record => $record)
 
-Reads the metadata from an OAI-PMH record and downloads files if possible    
-    
-{
-    file => $path,
-    location => $path,
-    metadata => $md,
-    datastreams => $datastreams
-}
+Reads the metadata from an OAI-PMH record and downloads files if required
 
+Net::OAI::Header methods:
 
-=cut
-    
-sub fetch_record    
+=over 4
 
+=item status
+
+=item identifier
+
+=item datestamp
+
+=item sets
 
 =back
 
 =cut
 
+sub read_dataset {
+    my ( $self, %params ) = @_;
+
+    my $record = $params{record};
+
+    my $header = $record->header;
+    my $metadata = $record->metadata;
+
+    my $id = $header->identifier;
+    my $date = $header->datestamp;
+    my $status = $header->status;
+    my $sets = $header->sets;
+
+    $self->{log}->info("id = $id");
+    $self->{log}->info("datestamp = $date");
+    $self->{log}->info("status = $status");
+    $self->{log}->info("sets = $sets");
+
+    $self->{log}->info(Dumper ( { metadata => $metadata } ));
+    
+    my $dataset = $self->{source}->dataset(
+        metadata => $metadata,
+        location => $url,
+        file => $url,
+        datastreams => $datastreams
+        );
+    
+}
 
 1;

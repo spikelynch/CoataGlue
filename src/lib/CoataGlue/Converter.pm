@@ -83,8 +83,9 @@ your converter class.
 
 =cut
 
-use Module::Pluggable search_path => [ 'CoataGlue::Converter' ], require => 1;
-use Log::Log4perl;use Config::Std;
+use Module::Pluggable search_path => [ 'CoataGlue::Converter' ], require => 1, on_require_error => \&plugin_crash;
+
+use Config::Std;
 use Log::Log4perl;
 use Data::Dumper;
 use Catmandu::Store::FedoraCommons;
@@ -94,6 +95,8 @@ use Data::Dumper;
 use POSIX qw(strftime);
 
 use MIME::Types qw(by_suffix);
+
+my $crashed_plugins = {};
 
 =head1 METHODS
 
@@ -143,6 +146,24 @@ sub init {
 	die;
 }
 
+=item plugin_crash($plugin, $error)
+
+Passed to Module::Pluggable's on_require_error parameter - is called if any
+of the plugins fails to compile.
+
+=cut
+    
+sub plugin_crash {
+    my ( $plugin, $error ) = @_;
+
+    my $log = Log::Log4perl->get_logger('CoataGlue::Converter');
+    
+    $log->error("Plugin crash: $plugin");
+    $log->error("Error: $error");
+    $crashed_plugins->{$plugin} = 1;
+    return 0;
+}
+
 =item scan()
 
 Stub method, needs to be provided by the subclass.
@@ -175,15 +196,25 @@ Only called on the base class CoataGlue::Converter.
 
 
 sub register_plugins {
-	my ( $self, %params ) = @_;
-	
-	$self->{log}->debug("Registering plugins...");
-	
-	for my $plugin ( $self->plugins ) {
-		$self->{plugins}{$plugin} = 1;
-	}
+    my ( $self, %params ) = @_;
+    
+    $self->{log}->debug("Registering plugins...");
+
+    my @plugins = $self->plugins; 
+
+#    $self->{log}->debug("Got plugins " . join(' ', @plugins));
+    
+    for my $plugin ( @plugins ) {
+        if( $crashed_plugins->{$plugin} ) {
+            $self->{log}->error("Skipping plugin $plugin");
+        } else {
+            $self->{plugins}{$plugin} = 1;
+        }
+    }
 }
 
+
+    
 
 =item converter(converter => $plugin_class, settings => $settings)
 

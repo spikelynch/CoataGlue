@@ -257,30 +257,30 @@ Set the dataset's status in the history file.
 =cut
 
 sub set_status {
-	my ( $self, %params ) = @_;
+    my ( $self, %params ) = @_;
 	
-	my $dataset = $params{dataset} || do {
-		$self->{log}->error("Can't set status for empty dataset");
-		return undef;
-	};
-	
-	if( !$dataset->{file} || !$dataset->{id} ) {
-		$self->{log}->error("dataset needs 'file' and 'id', can't set status");
-		return undef;
-	}
-	
-	
-	my $status = {
-		status => $params{status},
-		id => $dataset->{id}
-	};
-	
-	
-	if( $params{details} ) {
-		$status->{details} = $params{details};
-	}
-	
-	$self->{history}{$dataset->{file}} = $status;
+    my $dataset = $params{dataset} || do {
+        $self->{log}->error("Can't set status for empty dataset");
+        return undef;
+    };
+    
+    if( !$dataset->{file} || !$dataset->{id} ) {
+        $self->{log}->error("dataset needs 'file' and 'id', can't set status");
+        return undef;
+    }
+    
+    
+    my $status = {
+        status => $params{status},
+        id => $dataset->{id}
+    };
+    
+    
+    if( $params{details} ) {
+        $status->{details} = $params{details};
+    }
+    
+    $self->{history}{$dataset->{file}} = $status;
 }
 
 
