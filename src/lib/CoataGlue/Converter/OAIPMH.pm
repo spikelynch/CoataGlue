@@ -10,7 +10,7 @@ use Net::OAI::Harvester;
 
 
 
-my @MANDATORY_FIELDS =  qw(basedir url);
+my @MANDATORY_FIELDS =  qw(url id_re);
 
 my $DEFAULT_METADATA = 'oai_dc';
 
@@ -34,17 +34,16 @@ Parameters (from DataSource.cf):
 =over 4
 
 =item url: OAI-PMH endpoint
+=item id_re: re matching the identifier to use as this dataset's item id 
 =item metadata_prefix: metadata format (default is oai_dc)
-=item fetch: (optional) metadata field containing download URLs
-=item pattern: (optional) re to select which fetch fields to download 
-=item basedir: (optional) base directory to download files
+=item files: (optional) metadata field containing download URLs
+=item files_re: (mandatory if 'files' is set) re to select which identifiers to download
+=item basedir: (mandatory if 'files' is set) base directory in which to download files
 
 =back
 
-Note that fetch, pattern and basedir are all optional, but if basedir is
-present, then there has to be a value for fetch.  If there is no value for
-pattern, then the converter will try to download everything it finds in
-the fetch elements.
+Note that files, files_re and basedir are all optional, but if files is 
+present files_re and basedir must also be present
 
 =cut
 
@@ -67,9 +66,13 @@ sub init {
 
     $self->{metadata_prefix} ||= $DEFAULT_METADATA;
 
-    if( $self->{fetch} ) {
+    if( $self->{files} ) {
         if( ! $self->{basedir} ) {
-            $self->{log}->error("Error: 'fetch' is set, but 'basedir' is not");
+            $self->{log}->error("Error: 'files' is set, but 'basedir' is not");
+            $invalid = 1;
+        }
+        if( ! $self->{files_re} ) {
+            $self->{log}->error("Error: 'files' is set, but 'files_re' is not");
             $invalid = 1;
         }
     }
@@ -118,6 +121,7 @@ sub scan {
     $self->{log}->trace("I am a $self");
 
     $self->{log}->trace("Iterating over records: $records");
+
     while ( my $record = $records->next() ) {
         if( my $dataset = $self->read_dataset(record => $record ) ) {
             push @datasets, $dataset
@@ -163,18 +167,99 @@ sub read_dataset {
 
     $self->{log}->info("id = $id");
     $self->{log}->info("datestamp = $date");
-    $self->{log}->info("status = $status");
-    $self->{log}->info("sets = $sets");
 
-    $self->{log}->info(Dumper ( { metadata => $metadata } ));
+    my $url = $self->get_item_url(
+        id => $id,
+        values => $metadata->{identifier}
+        );
+
+    return undef unless $url;
+
+    my @files = ();
+    
+    if( $self->{files} ) {
+        if( exists $metadata->{$self->{files}} ) {
+            my $file_idents = $metadata->{$self->{files}};
+            @files = $self->get_file_urls(
+                id => $id, 
+                values => $file_idents
+                );
+            $self->{log}->info("$id has file urls " . join(', ', @files));
+
+            # TODO - create a dir in basedir and download them
+        } else {
+            $self->{log}->warn("Item $id has no $self->{files} metadata field to get file URLs from");
+        }
+    }
+
+    my $files = {};
+        
     
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
         location => $url,
         file => $url,
-        datastreams => $datastreams
+        datastreams => $files
+        
         );
     
+}
+
+
+sub get_item_url {
+    my ( $self, %params ) = @_;
+
+    my $values = $params{values};
+    my $id = $params{id};
+
+    my @urls = $self->filter_re(
+        values => $values,
+        re => $self->{id_re}
+        );
+    if( !@urls ) {
+        $self->{log}->error("Item $id: couldn't find identifier matching $self->{id_re}");
+        return undef;
+    }
+
+    if( @urls > 1 ) {
+        $self->{log}->warn("Item $id has more than one identifier matching $self->{id_re}: using $urls[0]");
+    }
+
+    return $urls[0];
+}
+
+
+sub get_file_urls {
+    my ( $self, %params ) = @_;
+
+    my $values = $params{values};
+    my $id = $params{id};
+    
+    my @urls = $self->filter_re(
+        values => $values,
+        re => $self->{files_re}
+        );
+
+    if( !@urls ) {
+        $self->{log}->warn("Item $id has no files");
+    }
+
+    return @urls;
+}
+
+ 
+sub filter_re {
+    my ( $self, %params ) = @_;
+
+    my $re = $params{re};
+    my $values = $params{values};
+
+    if( ref($values) ne 'ARRAY' ) {
+        $self->warn("Empty or non-array-ref value passed to filter_re");
+        return ();
+    }
+
+    return grep /$re/, @$values;
 }
 
 1;
