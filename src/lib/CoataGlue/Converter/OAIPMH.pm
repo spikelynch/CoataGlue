@@ -7,7 +7,7 @@ use parent 'CoataGlue::Converter';
 use Data::Dumper;
 use XML::Twig;
 use Net::OAI::Harvester;
-
+use File::Fetch;
 
 
 my @MANDATORY_FIELDS =  qw(url id_re);
@@ -176,6 +176,7 @@ sub read_dataset {
     return undef unless $url;
 
     my @files = ();
+    my $datastreams = {};
     
     if( $self->{files} ) {
         if( exists $metadata->{$self->{files}} ) {
@@ -185,8 +186,10 @@ sub read_dataset {
                 values => $file_idents
                 );
             $self->{log}->info("$id has file urls " . join(', ', @files));
-
-            # TODO - create a dir in basedir and download them
+            $datastreams = $self->fetch_files(
+                id => $id,
+                files => \@files
+                );
         } else {
             $self->{log}->warn("Item $id has no $self->{files} metadata field to get file URLs from");
         }
@@ -199,7 +202,7 @@ sub read_dataset {
         metadata => $metadata,
         location => $url,
         file => $url,
-        datastreams => $files
+        datastreams => $datastreams
         
         );
     
@@ -260,6 +263,44 @@ sub filter_re {
     }
 
     return grep /$re/, @$values;
+}
+
+
+sub fetch_files {
+    my ( $self, %params ) = @_;
+
+    my $id = $params{id};
+    my $files = $params{files};
+
+    my $path = join('/', $self->{basedir}, $id);
+
+    if( -d $path ) {
+        $self->{log}->warn("Item $id directory $path already exists");
+    } else {
+        mkdir $path || do {
+            $self->{log}->error("Item $id - couldn't create path $path");
+            return undef;
+        };
+    }
+
+    my $ds = {};
+
+    for my $uri ( @$files ) {
+        my $ff = File::Fetch->new(uri => $uri);
+        my $filepath = $ff->fetch(to => $path);
+        if( $filepath ) {
+            my $mimetype = $self->mime_type(file => $filepath);
+            $ds->{$uri} = {
+                id => $uri,
+                original => $filepath,
+                mimetype => $mimetype
+            };
+            $self->{log}->debug("Item $id downloaded $uri to $filepath");
+        } else {
+            $self->{log}->error("Item $id - download of $uri failed: " . $ff->error);
+        }
+    }
+    return $ds;
 }
 
 1;
