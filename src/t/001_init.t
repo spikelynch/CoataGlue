@@ -16,7 +16,7 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 use Data::Dumper;
 use JSON;
 

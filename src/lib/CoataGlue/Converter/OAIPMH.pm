@@ -196,7 +196,8 @@ sub read_dataset {
     }
 
     my $files = {};
-        
+
+    $metadata->{dateconverted} = $self->timestamp;
     
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
