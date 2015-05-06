@@ -72,6 +72,15 @@ SKIP: {
 
     $source->close;
 
+    for my $dataset ( @datasets ) {
+        my $id = $dataset->{id};
+        my $file = $dataset->{location};
+        my $metadata = $dataset->metadata;
+        print "$id $file\n" . Dumper( { metadata => $metadata } ) . "\n";
+    }
+
+
+
 }
     
 # my $access_map = $source->{template_handlers}{metadata}{access};

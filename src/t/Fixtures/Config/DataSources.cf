@@ -44,7 +44,7 @@ require:      title
 [Omeka]
 converter:       CoataGlue::Converter::OAIPMH
 ids:             CoataGlue::ID::NaiveSequence
-url:             http://localhost/omeka-2.3/oai-pmh-repository/request
+url:             http://dharmae.research.uts.edu.au/oai-pmh-repository/request
 id_re:           items\/show\/\d+
 metadata_prefix: oai_dc
 files:           identifier

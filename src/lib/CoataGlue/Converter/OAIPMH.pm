@@ -39,6 +39,7 @@ Parameters (from DataSource.cf):
 =item files: (optional) metadata field containing download URLs
 =item files_re: (mandatory if 'files' is set) re to select which identifiers to download
 =item basedir: (mandatory if 'files' is set) base directory in which to download files
+=item dump: (optional) directory in which to dump raw OAI records
 
 =back
 
@@ -160,6 +161,10 @@ sub read_dataset {
     my $header = $record->header;
     my $metadata = $record->metadata;
 
+    print Dumper({ "metadata $metadata" => $metadata}) . "\n";
+
+    die;
+    
     my $id = $header->identifier;
     my $date = $header->datestamp;
     my $status = $header->status;
