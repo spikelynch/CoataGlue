@@ -914,22 +914,22 @@ Generates a handler function for a field, based on $expr.
 =cut
 
 sub make_handler {
-	my ( $self, %params ) = @_;
-	
-	my $expr = $params{expr};
+    my ( $self, %params ) = @_;
+    
+    my $expr = $params{expr};
     my $field = $params{field};
-
-	if( $expr->[0] eq 'date' ) {
-		shift @$expr;
-		return $self->date_handler(field => $field, expr => $expr);
-	} elsif( $expr->[0] eq 'map' ) {
+    
+    if( $expr->[0] eq 'date' ) {
+        shift @$expr;
+        return $self->date_handler(field => $field, expr => $expr);
+    } elsif( $expr->[0] eq 'map' ) {
         return $self->map_handler(field => $field, map => $expr->[1]);
     } elsif( $expr->[0] eq 'timestamp' ) {
         return $self->timestamp_handler(field => $field, expt => $expr)
     } else {
-		$self->{log}->error("Unknown handler '$expr->[0]'");
-		return undef;
-	}
+        $self->{log}->error("Unknown handler '$expr->[0]'");
+        return undef;
+    }
 }
 
 

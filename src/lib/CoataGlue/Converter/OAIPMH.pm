@@ -7,10 +7,11 @@ use parent 'CoataGlue::Converter';
 use Data::Dumper;
 use XML::Twig;
 use Net::OAI::Harvester;
+use CoataGlue::Converter::OAIPMH::Omeka_XML;
 use File::Fetch;
 
 
-my @MANDATORY_FIELDS =  qw(url id_re);
+my @MANDATORY_FIELDS =  qw(url id_re metadata_handler);
 
 my $DEFAULT_METADATA = 'oai_dc';
 
@@ -36,6 +37,7 @@ Parameters (from DataSource.cf):
 =item url: OAI-PMH endpoint
 =item id_re: re matching the identifier to use as this dataset's item id 
 =item metadata_prefix: metadata format (default is oai_dc)
+=item metadata_handler: metadata XML::SAX handler, mandatory if a metadata_prefix other than oai_dc is set
 =item files: (optional) metadata field containing download URLs
 =item files_re: (mandatory if 'files' is set) re to select which identifiers to download
 =item basedir: (mandatory if 'files' is set) base directory in which to download files
@@ -60,12 +62,26 @@ sub init {
     
     for my $field ( @MANDATORY_FIELDS ) {
         if( !$self->{$field} ) {
-            $self->{log}->error("Missing field $field");
+            $self->{log}->error("Missing field: '$field'");
             $invalid = 1;
         }
     }
 
-    $self->{metadata_prefix} ||= $DEFAULT_METADATA;
+    if( $self->{metadata_prefix} ) {
+        if( !$self->{metadata_handler} ) {
+            $self->{log}->error("Error: metadata_prefix needs a metadata_handler");
+            $invalid = 1;
+        }
+        $self->{hparams} = {
+            metadataPrefix => $self->{metadata_prefix},
+            metadataHandler => $self->{metadata_handler}
+        };
+    } else {
+        $self->{metadata_prefix} = $DEFAULT_METADATA;
+        $self->{hparams} = {
+            metadataPrefix => $self->{metadata_prefix}
+        };
+    }
 
     if( $self->{files} ) {
         if( ! $self->{basedir} ) {
@@ -82,7 +98,9 @@ sub init {
         $self->{log}->debug("Called from " . join(":", caller));
         return undef;
     } else {
-        my %oai_params = ( baseURL => $self->{url} );
+        my %oai_params = (
+            baseURL => $self->{url}
+);
         if( $self->{dump} ) {
             $oai_params{dumpDir} = $self->{dump};
         }
@@ -107,9 +125,7 @@ sub scan {
     
     my $records = undef;
     eval {
-        $records = $self->{harvester}->listAllRecords(
-            metadataPrefix => $self->{metadata_prefix}
-            );
+        $records = $self->{harvester}->listAllRecords(%{$self->{hparams}});
     };
 
     if( $@ ) {
@@ -119,9 +135,6 @@ sub scan {
 
     my @datasets = ();
 
-    $self->{log}->trace("I am a $self");
-
-    $self->{log}->trace("Iterating over records: $records");
 
     while ( my $record = $records->next() ) {
         if( my $dataset = $self->read_dataset(record => $record ) ) {
@@ -161,10 +174,9 @@ sub read_dataset {
     my $header = $record->header;
     my $metadata = $record->metadata;
 
-    print Dumper({ "metadata $metadata" => $metadata}) . "\n";
+    print Dumper({ "metadata" => $metadata}) . "\n";
 
     die;
-    
     my $id = $header->identifier;
     my $date = $header->datestamp;
     my $status = $header->status;

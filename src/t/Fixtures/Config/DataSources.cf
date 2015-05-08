@@ -46,7 +46,8 @@ converter:       CoataGlue::Converter::OAIPMH
 ids:             CoataGlue::ID::NaiveSequence
 url:             http://dharmae.research.uts.edu.au/oai-pmh-repository/request
 id_re:           items\/show\/\d+
-metadata_prefix: oai_dc
+metadata_prefix: omeka-xml
+metadata_handler:CoataGlue::Converter::OAIPMH::Omeka_XML
 files:           identifier
 files_re:        files\/original
 dump:            $COATAGLUE/src/t/Dump
