@@ -1,4 +1,4 @@
-package CoataGlue::Converter::OAIPMH::Omeka_XML;
+package CoataGlue::Converter::OAIPMH::Omeka_XML_prime;
 
 use strict;
 use base qw( XML::SAX::Base );
@@ -9,9 +9,13 @@ our $VERSION = 'v1.00.0';
 
 =head1 NAME
 
-CoataGlue::Converter::OAIPMH::Omeka_XML - class for parsing Omeka-xml records
+CoataGlue::Converter::OAIPMH::Omeka_XML_prime - trying for a better 
+version
 
 =head1 SYNOPSIS
+
+This one turns the XML tree into an arrayref of arrayrefs where nodes
+are hashes
 
 =head1 DESCRIPTION
 
@@ -24,113 +28,70 @@ CoataGlue::Converter::OAIPMH::Omeka_XML - class for parsing Omeka-xml records
 sub new {
     my ( $class, %opts ) = @_;
     my $self = bless \%opts, ref( $class ) || $class;
+    $self->{root} = { 
+        tag => '_root',
+        children => []
+    };
+    $self->{stack} = [ $self->{root} ];
+
     return( $self );
 }
 
 
+
 sub start_document {
-    my $self->{_collect} = 0;
+    my ( $self ) = @_;
+
+    warn("Start_document");
+    die;
+    
 }
+
 
 
 sub start_element {
     my ( $self, $element ) = @_;
 
     my $name = $element->{Name};
-    warn("Start element $name");
-  SWITCH: {
-      $name eq 'item' && do {
-          $self->{itemId} = $element->{Attributes}{itemId}{value};
-          last SWITCH;
-      };
-
-      $name =~ /^collection|itemType|files/ && do {
-          $self->{section} = $name;
-          last SWITCH;
-      };
-
-      $name =~ /^elementSet$/ && do {
-          $self->{elementSetID} = $element->{Attributes}{elementSetId}{value};
-          if( !$self->{section} ) {
-              $self->{section} = 'item';
-              $self->{values} = {};
-          }
-          last SWITCH;
-      };
-
-      $name =~ /^elementText$/ && do {
-          $self->{element} = [];
-          $self->{_collect} = 1;
-          last SWITCH;
-      };
-
-      $name =~ /^name$/ && do {
-          $self->{name} = '';
-          $self->{text} = [];
-          $self->{_collect} = 1;
-          last SWITCH;
-      };
-
-    }
+    warn("START <$name>\n");
+    $self->{node} = {
+        tag => $name,
+        children => [],
+        atts => $element->{Attributes}{values},
+        text => []
+    };
+    push @{$self->{stack}}, $self->{node};
 }
 
 
 sub end_element {
     my ( $self, $element ) = @_;
 
-    my $name = $element->{Name};
-
-    return unless $self->{section};
+    my $node = pop @{$self->{stack}} || do {
+        die("Stack error");
+    };
     
-  SWITCH: {
-      $name eq 'name' && do {
-          $self->{name} = $self->{characters};
-          $self->{characters} = '';
-          $self->{text} = [];
-          $self->{_collect} = 0;
-          last SWITCH;
-      };
-
-      $name eq 'elementText' && do {
-          push @{$self->{text}}, $self->{characters};
-          $self->{characters} = '';
-          last SWITCH;
-      };
-      
-      $name eq 'element' && do {
-          if( $self->{name} ) {
-              $self->{values}{$self->{name}} = $self->{text};
-              delete $self->{name};
-          }
-          $self->{_collect} = 0;
-          last SWITCH;
-      };
-
-      $name eq 'elementSet' && do {
-          if( $self->{section} ) {
-              my $s = $self->{section};
-              $self->{sections}{$s} = $self->{values};
-              delete $self->{section};
-              delete $self->{values};
-          }
-          last SWITCH;
-      };
-      
+    my $name = $element->{Name};
+    warn("END </$name>\n");
+    warn("Popped node = $node->{tag}\n");
+    if( my $l = scalar @{$self->{stack}} ) {
+        my $parent = $self->{stack}[$l - 1];
+        push @{$parent->{children}}, $node;
+        $self->{node} = $parent;
+    } else {
+        warn("Lost the root of the stack");
     }
+    
+    
 }
 
 
 
-
-# Only bother accumulating characters if we're within an interesting
-# section element
-
 sub characters {
     my ( $self, $chars ) = @_;
-    warn(Dumper({ _collect => $self->{_collect}, text => $self->{text}, section => $self->{section}, elementID => $self->{elementID} })); 
-    if( $self->{_collect} ) {
-        $self->{characters} .= $chars->{Data};
-    }
+
+    $self->{node}{characters} .= $chars->{Data};
+
 }
 
 

@@ -100,7 +100,7 @@ sub init {
     } else {
         my %oai_params = (
             baseURL => $self->{url}
-);
+            );
         if( $self->{dump} ) {
             $oai_params{dumpDir} = $self->{dump};
         }
