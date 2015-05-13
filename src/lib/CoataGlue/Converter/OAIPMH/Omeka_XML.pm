@@ -46,7 +46,23 @@ sub open_item {
     $self->{elementset} = {};
 }
 
+
+sub close_item {
+    my ( $self, $node ) = @_;
+
+    if( ! $self->{item_metadata} ) {
+        warn("No item-level metadata");
+    } else {
+        $self->{md}{item} = $self->{item_metadata};
+    }
+}
+
+
 # close_collection - all we use from collection are the id and Title
+
+sub open_collection {
+    my ( $self, $node ) = @_;
+}
 
 sub close_collection {
     my ( $self, $node ) = @_;
@@ -61,7 +77,7 @@ sub close_collection {
 
 sub open_itemType {
     my ( $self, $node ) = @_;
-    warn("Open itemType");
+
     my $self->{elementset} = {};
 }
 
@@ -88,6 +104,19 @@ sub open_elementSet {
     $self->{elementset} = {};
 }
 
+# if this elementSet is item/elementSetContainer/elementSet, stash
+# the values so that subsequent elementSets don't clobber it
+
+sub close_elementSet {
+    my ( $self, $node ) = @_;
+
+    my $grandparent = @{$self->{stack}}[-2];
+
+    if( $grandparent->{tag} eq 'item' ) {
+        warn("Stashed item metadata");
+        $self->{item_metadata} = $self->{elementset};
+    }
+}
 
 
 
