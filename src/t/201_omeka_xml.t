@@ -15,35 +15,77 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 11;
+use Test::More tests => 1;
 use Data::Dumper;
-use XML::Twig;
-use Text::Diff;
 
+use Net::OAI::Harvester;
 
-use CoataGlue;
-use CoataGlue::Source;
-use CoataGlue::Converter;
-use CoataGlue::Dataset;
-use CoataGlue::Test qw(setup_tests);
+use CoataGlue::Converter::OAIPMH::Omeka_XML;
 
 my $LOG4J = "$Bin/log4j.properties";
-my $LOGGER = "CoataGlue.tests.00304_converter_Omeka.t";
+my $LOGGER = "CoataGlue.tests.201_omeka_xml.t";
 
 Log::Log4perl->init($LOG4J);
 
 my $log = Log::Log4perl->get_logger($LOGGER);
 
-my $fixtures = setup_tests(log => $log);
 
-my $CoataGlue = CoataGlue->new(%{$fixtures->{LOCATIONS}});
 
-ok($CoataGlue, "Initialised CoataGlue object");
 
-my @sources = $CoataGlue->sources;
+my $OAIPMHURL = 'http://dharmae.research.uts.edu.au/oai-pmh-repository/request';
 
-ok(@sources, "Got sources");
+my $harvester = Net::OAI::Harvester->new(
+    baseURL => $OAIPMHURL
+    );
 
-my ( $source ) = grep { $_->{name} eq 'Omeka' } @sources;
 
-if( !ok($source, "Got the Omeka source") ) {
+my $records = undef;
+eval {
+    $records = $harvester->listAllRecords(
+        metadataPrefix => 'omeka-xml',
+        metadataHandler => 'CoataGlue::Converter::OAIPMH::Omeka_XML'
+        );
+};
+
+if( $@ ) {
+    die("OAI-PMH harvest failed: $@");
+} else {
+    ok(@$records > 0, "Got " . scalar(@$records) . " omeka records");
+    
+    my $csv = Text::CSV->new({eol => "\n"}) || die;
+    my $fh;
+    open $fh, ">:encoding(utf8)", "dump.csv" or die("Couldn't open $!");
+
+    while ( my $record = $records->next() ) {
+        my $header = $record->header;
+        my $metadata = $record->metadata;
+        my $md = $metadata->{md};
+
+        $csv->print($fh, [
+                        unwrap($md->{itemType}),
+                        $md->{itemTypeID},
+                        unwrap($md->{item}{Title}),
+                        unwrap($md->{item}{Description}),
+                        unwrap($md->{item}{'Spatial Coverage'}),
+                        unwrap($md->{item}{License}),
+                        unwrap($md->{item}{Creator})
+                    ]);
+    }
+    close $fh;
+    
+}
+
+sub unwrap {
+    my ( $aref ) = @_;
+
+    if( ref($aref) eq 'ARRAY' ) {
+        return join(', ', @$aref);
+    } else {
+        return '-';
+    }
+}
+
+
+
+
+

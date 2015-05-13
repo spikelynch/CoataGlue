@@ -92,6 +92,49 @@ sub close_itemType {
     $self->{md}{itemTypeDetails} = $self->{elementset};
 }
 
+# files
+
+sub open_fileContainer {
+    my ( $self, $node ) = @_;
+
+    $self->{files} = {};
+}
+
+sub close_fileContainer {
+    my ( $self, $node ) = @_;
+
+    if( keys %{$self->{files}} ) {
+        $self->{md}{files} = $self->{files};
+    }
+}
+
+
+sub close_file {
+    my ( $self, $node ) = @_;
+
+    my $file = {
+        id => $self->att($node, 'fileId')
+    };
+
+    my ( $src ) = $self->_nodeChildren($node, 'src');
+
+    if( $src ) {
+        $file->{src} = $self->trim_text($src->{text});
+    } else {
+        warn("file tag without src child ($file->{id})");
+        $file->{src} = '';
+    }
+
+#    print Dumper ( { file => $node } ) ."\n";
+
+    if( keys %{$self->{elementset}} ) {
+        $file->{details} = $self->{elementset};
+        $self->{elementset} = {};
+    }
+    
+    $self->{files}{$file->{id}} = $file;
+}
+        
 
 
 
@@ -113,7 +156,6 @@ sub close_elementSet {
     my $grandparent = @{$self->{stack}}[-2];
 
     if( $grandparent->{tag} eq 'item' ) {
-        warn("Stashed item metadata");
         $self->{item_metadata} = $self->{elementset};
     }
 }
