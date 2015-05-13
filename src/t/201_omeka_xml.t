@@ -15,12 +15,25 @@ use strict;
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
 
-use Test::More tests => 1;
+use Test::More tests => 10;
 use Data::Dumper;
+use Log::Log4perl;
 
 use Net::OAI::Harvester;
 
 use CoataGlue::Converter::OAIPMH::Omeka_XML;
+
+my %ITEM_TYPES = (
+    'Collective noun' => 1,
+    'Hyperlink' => 3,
+    'Oral History' => 110,
+    'Organisation' => 3,
+    'Person' => 4,
+    'Species' => 39,
+    'Still Image' => 44,
+    'Study Region' => 13
+    );
+
 
 my $LOG4J = "$Bin/log4j.properties";
 my $LOGGER = "CoataGlue.tests.201_omeka_xml.t";
@@ -47,31 +60,28 @@ eval {
         );
 };
 
+diag("Warning - the species and region counts in this test are hard coded");
+
 if( $@ ) {
     die("OAI-PMH harvest failed: $@");
 } else {
-    ok(@$records > 0, "Got " . scalar(@$records) . " omeka records");
-    
-    my $csv = Text::CSV->new({eol => "\n"}) || die;
-    my $fh;
-    open $fh, ">:encoding(utf8)", "dump.csv" or die("Couldn't open $!");
+    ok($records, "Harvested OAI-PMH");
+
+    my @datasets = ();
 
     while ( my $record = $records->next() ) {
-        my $header = $record->header;
-        my $metadata = $record->metadata;
-        my $md = $metadata->{md};
-
-        $csv->print($fh, [
-                        unwrap($md->{itemType}),
-                        $md->{itemTypeID},
-                        unwrap($md->{item}{Title}),
-                        unwrap($md->{item}{Description}),
-                        unwrap($md->{item}{'Spatial Coverage'}),
-                        unwrap($md->{item}{License}),
-                        unwrap($md->{item}{Creator})
-                    ]);
+        my $md = $record->metadata->{md};
+        push @datasets, $md;
     }
-    close $fh;
+
+    ok(@datasets, "Got datasets");
+
+    my %count = ();
+    
+    for my $type ( sort keys %ITEM_TYPES ) {
+        $count{$type} = scalar grep { $_->{itemType}->[0] eq $type } @datasets;
+        cmp_ok( $count{$type} , '==', $ITEM_TYPES{$type}, "Got $ITEM_TYPES{$type} of $type");
+    }
     
 }
 
