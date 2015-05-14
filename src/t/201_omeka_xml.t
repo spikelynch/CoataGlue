@@ -72,6 +72,10 @@ if( $@ ) {
     while ( my $record = $records->next() ) {
         my $md = $record->metadata->{md};
         push @datasets, $md;
+        print "$md->{itemType}->[0]: $md->{item}{Title}->[0]\n";
+        if( $md->{tags} ) {
+            print "Tags = " . join(',', @{$md->{tags}}) . "\n";
+        }
     }
 
     ok(@datasets, "Got datasets");

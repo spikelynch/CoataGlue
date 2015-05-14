@@ -108,7 +108,6 @@ sub close_fileContainer {
     }
 }
 
-
 sub close_file {
     my ( $self, $node ) = @_;
 
@@ -125,8 +124,6 @@ sub close_file {
         $file->{src} = '';
     }
 
-#    print Dumper ( { file => $node } ) ."\n";
-
     if( keys %{$self->{elementset}} ) {
         $file->{details} = $self->{elementset};
         $self->{elementset} = {};
@@ -134,7 +131,23 @@ sub close_file {
     
     $self->{files}{$file->{id}} = $file;
 }
-        
+
+
+# tags
+
+sub open_tagContainer {
+    my ( $self, $node ) = @_;
+
+    $self->{md}{tags} = [];
+}
+
+sub close_tag {
+    my ( $self, $node ) = @_;
+
+    my ( $tagname ) = $self->_nodeChildren($node, 'name');
+
+    push @{$self->{md}{tags}}, $self->trim_text($tagname->{text});
+}
 
 
 

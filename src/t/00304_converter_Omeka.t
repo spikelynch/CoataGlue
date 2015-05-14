@@ -76,7 +76,6 @@ SKIP: {
         my $id = $dataset->{id};
         my $file = $dataset->{location};
         my $metadata = $dataset->metadata;
-        print "$id $file\n" . Dumper( { metadata => $metadata } ) . "\n";
     }
 
 

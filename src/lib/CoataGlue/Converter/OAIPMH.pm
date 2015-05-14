@@ -11,7 +11,17 @@ use CoataGlue::Converter::OAIPMH::Omeka_XML;
 use File::Fetch;
 
 
-my @MANDATORY_FIELDS =  qw(url id_re metadata_handler);
+my @MANDATORY_FIELDS =  qw(url item_url);
+
+my @OMEKA_ITEM_FIELDS = (
+    'Title',
+    'CollectionTitle',
+    'Creator',
+    'Date',
+    'Description',
+    'Access Rights',
+    'Spatial Coverage'
+    );
 
 my $DEFAULT_METADATA = 'oai_dc';
 
@@ -35,11 +45,11 @@ Parameters (from DataSource.cf):
 =over 4
 
 =item url: OAI-PMH endpoint
-=item id_re: re matching the identifier to use as this dataset's item id 
+=item item_url: Omeka item endpoint
 =item metadata_prefix: metadata format (default is oai_dc)
 =item metadata_handler: metadata XML::SAX handler, mandatory if a metadata_prefix other than oai_dc is set
-=item files: (optional) metadata field containing download URLs
-=item files_re: (mandatory if 'files' is set) re to select which identifiers to download
+=item filter: a metadata field and a regexp    (optional)
+=item files: (optional) 
 =item basedir: (mandatory if 'files' is set) base directory in which to download files
 =item dump: (optional) directory in which to dump raw OAI records
 
@@ -65,6 +75,11 @@ sub init {
             $self->{log}->error("Missing field: '$field'");
             $invalid = 1;
         }
+    }
+
+    if( $self->{filter} ) {
+        my ( $field, $re ) = split(/ /, $self->{filter});
+        $self->{filter} = [ $field, qr/$re/o ];
     }
 
     if( $self->{metadata_prefix} ) {
@@ -114,8 +129,7 @@ sub init {
 
 =item scan()
     
-Scans datasets from the OAI-PMH feed, downloading them if the fetch
-parameter has been set
+Scans datasets from the OAI-PMH feed.
 
 =cut
     
@@ -138,7 +152,9 @@ sub scan {
 
     while ( my $record = $records->next() ) {
         if( my $dataset = $self->read_dataset(record => $record ) ) {
-            push @datasets, $dataset
+            if( $dataset ) {
+                push @datasets, $dataset
+            }
         }
     }
 
@@ -172,11 +188,14 @@ sub read_dataset {
     my $record = $params{record};
 
     my $header = $record->header;
-    my $metadata = $record->metadata;
+    my $md = $record->metadata->{md};
 
-    print Dumper({ "metadata" => $metadata}) . "\n";
-
-    die;
+    if( $self->{filter} ) {
+        if( $md->{$self->{filter}[0]} !~ /$self->{filter}[1]/ ) {
+            return undef;
+        }
+    }
+    
     my $id = $header->identifier;
     my $date = $header->datestamp;
     my $status = $header->status;
@@ -185,42 +204,33 @@ sub read_dataset {
     $self->{log}->info("id = $id");
     $self->{log}->info("datestamp = $date");
 
-    my $url = $self->get_item_url(
-        id => $id,
-        values => $metadata->{identifier}
-        );
+    my $metadata = {
+        dateconverted => $self->timestamp,
+    };
 
-    return undef unless $url;
+    my $item = $md->{item};
 
-    my @files = ();
-    my $datastreams = {};
-    
-    if( $self->{files} ) {
-        if( exists $metadata->{$self->{files}} ) {
-            my $file_idents = $metadata->{$self->{files}};
-            @files = $self->get_file_urls(
-                id => $id, 
-                values => $file_idents
-                );
-            $self->{log}->info("$id has file urls " . join(', ', @files));
-            $datastreams = $self->fetch_files(
-                id => $id,
-                files => \@files
-                );
+    for my $field ( @OMEKA_ITEM_FIELDS ) {
+        my $cvt_field = lc($field);
+        $cvt_field =~ s/\s/_/;
+        if( $item->{$field} && ref($item->{$field}) eq 'ARRAY' ) {
+            $metadata->{$cvt_field} = join(' ', @{$item->{$field}});
         } else {
-            $self->{log}->warn("Item $id has no $self->{files} metadata field to get file URLs from");
+            $metadata->{$cvt_field} = '';
         }
     }
 
-    my $files = {};
+    if( $md->{tags} && ref($md->{tags}) eq 'ARRAY' ) {
+        $metadata->{tags} = join(' ', @{$md->{tags}});
+    }
 
-    $metadata->{dateconverted} = $self->timestamp;
+    my $url = join('', $self->{item_url}, $md->{itemID}); 
     
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
         location => $url,
         file => $url,
-        datastreams => $datastreams
+        datastreams => [] #$datastreams
         
         );
     
