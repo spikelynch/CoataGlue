@@ -226,7 +226,7 @@ sub read_dataset {
             };
         }
     }
-    
+
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
         location => $url,

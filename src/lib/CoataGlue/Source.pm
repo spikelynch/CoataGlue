@@ -650,14 +650,18 @@ sub crosswalk {
         $ds->{metadata} = $new;
         $ds->{datecreated} = $ds->{metadata}{datecreated};
         my $id = $ds->{metadata}{creator};
-        my $creator = {};
-        if( my $person = $self->get_person(id => $id) ) {
-            $ds->{metadata}{creator} = $person->creator;
+        if( ! $id ) {
+            $self->{log}->warn("Dataset with no creator id");
         } else {
-            $self->{log}->error(
-                "Warning: dataset $ds->{id} creator $id not found"
-                );
-            $ds->{metadata}{creator} = { staffid => $id };
+            my $creator = {};
+            if( my $person = $self->get_person(id => $id) ) {
+                $ds->{metadata}{creator} = $person->creator;
+            } else {
+                $self->{log}->error(
+                    "Warning: dataset $ds->{id} creator $id not found"
+                    );
+                $ds->{metadata}{creator} = { staffid => $id };
+            }
         }
     } else {
         $ds->{views}{$view_name} = $new;
