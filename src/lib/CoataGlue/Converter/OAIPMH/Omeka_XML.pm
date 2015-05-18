@@ -20,6 +20,76 @@ CoataGlue::Converter::OAIPMH::Omeka_XML - XML::SAX handler for Omeka-xml
 
 =head2 new()
 
+=head1 METADATA
+
+Converted metadata is stored in the {md} member, as follows
+
+=over 4
+
+=item itemID - the item's Omeka ID
+
+=item collectionID - the collection ID, if item belongs to a collection
+
+=item collectionTitle - the collection title
+
+=item itemType - the item type
+
+=item itemTypeID - 
+
+=item itemTypeDetails - some items have contextual info here
+
+=item item - the main metadata for the item, as a hashref.  Not all
+items will have a value for every field.
+
+=over 4
+
+=item Title
+
+=item Creator
+
+=item Description
+
+=item Subject
+
+=item Format
+
+=item License
+
+=item Date
+
+=item Contributor
+
+=item Spatial Coverage
+
+=item Language
+
+=item Access Rights
+
+=item Publisher
+
+=item 
+
+=back
+
+=item tags - arrayref of tags
+
+=item files - hashref of files by file ID: each file is represented by
+
+=over 4
+
+=item src (the URL of the file)
+
+=item details
+
+=over 4
+
+=item Title
+
+=back
+
+=back
+
+
 =cut
     
 
@@ -107,6 +177,8 @@ sub close_fileContainer {
         $self->{md}{files} = $self->{files};
     }
 }
+
+
 
 sub close_file {
     my ( $self, $node ) = @_;

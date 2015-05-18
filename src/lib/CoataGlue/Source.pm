@@ -318,68 +318,68 @@ metadata files for all datasets, not just the new ones.
 =cut
 
 sub scan {
-	my ( $self, %params ) = @_;
-	
-	$self->{log}->info(
+    my ( $self, %params ) = @_;
+    
+    $self->{log}->info(
         "Scanning $self->{name} [" . ref($self->{converter}) . "]"
         );
-
+    
     my $test = $params{test} || undef;
     my $id = $params{id} || undef;
-
+    
     if( $test ) {
         return $self->test_scan(%params);
     }
-
+    
     my $raw_keys = {};
-
-   	my @datasets = ();
-	
-	if( !$self->{locked} ) {
-		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
-		return ();
-	}
-
-	for my $dataset ( $self->{converter}->scan ) {
+    
+    my @datasets = ();
+    
+    if( !$self->{locked} ) {
+        $self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
+        return ();
+    }
+    
+    for my $dataset ( $self->{converter}->scan ) {
         #my $handle = $dataset->handle();
-		my $status = $self->get_status(dataset => $dataset);
+        my $status = $self->get_status(dataset => $dataset);
         if( $id && $status->{id} eq $id ) {
             $dataset->{id} = $id;
             $self->{log}->info("Returning single dataset with id $id");
             return ( $dataset );
         }
-		if( $status->{status} eq 'new' ) {
-			my $id = $self->{ids}->create_id();
+        if( $status->{status} eq 'new' ) {
+            my $id = $self->{ids}->create_id();
             for my $key ( keys %{$dataset->{raw_metadata}} ) {
                 $raw_keys->{$key} = 1;
             }
-			if( $id ) {
-				$dataset->{id} = $id;
+            if( $id ) {
+                $dataset->{id} = $id;
                 $self->set_status(
                     dataset => $dataset,
                     status => 'new'
                     );
-				push @datasets, $dataset;
-				$self->{log}->info("New id for dataset: $id");
-			} else {
-				$self->{log}->error("New id for dataset $dataset->{file} failed");
-			}
-		} else {
-			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
-		}
-	}
-
+                push @datasets, $dataset;
+                $self->{log}->info("New id for dataset: $id");
+            } else {
+                $self->{log}->error("New id for dataset $dataset->{file} failed");
+            }
+        } else {
+            $self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
+        }
+    }
+    
     $self->{log}->debug("Raw metadata keys for $self->{name}");
     for my $key ( sort keys %$raw_keys ) {
         $self->{log}->debug(": $key");
     }
-
-
+    
+    
     if( $id ) {
         $self->{log}->error("Couldn't find dataset with id $id");
         return ();
     }
-	return @datasets;
+    return @datasets;
 }
 
 

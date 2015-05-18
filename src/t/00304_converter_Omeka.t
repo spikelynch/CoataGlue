@@ -2,12 +2,15 @@
 
 =head1 NAME
 
-00304_converter_Cmeka.t
+00304_converter_Omeka.t
 
 =head1 DESCRIPTION
 
 Test of a converter which reads the OAIPMH feed from Omeka as a data and
 metadata source
+
+TODO: this needs a mock OAI-PMH interface so that it can run without
+an Omeka to point to
 
 =cut
 
@@ -47,8 +50,11 @@ ok(@sources, "Got sources");
 
 my ( $source ) = grep { $_->{name} eq 'Omeka' } @sources;
 
+
+
 if( !ok($source, "Got the Omeka source") ) {
-	die("Can't continue");
+#    diag(Dumper ( { sources => \@sources }));
+    die("Can't continue");
 }
 
 SKIP: {

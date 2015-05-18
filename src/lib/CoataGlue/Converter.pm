@@ -79,7 +79,15 @@ file, which maps file extensions to the correct types.
 Or, if this is not enough, you can override the mime_type method in
 your converter class.
 
+=head1 FIXME
 
+Document the data structures to be fed in by child classes.
+
+    $datastreams->{$file} = {
+        id => $file,
+        original => $file,
+        mimetype => $mimetype
+    }
 
 =cut
 

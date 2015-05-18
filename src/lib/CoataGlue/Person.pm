@@ -88,54 +88,54 @@ sub lookup {
     my $self = $class->new(%params);
 
     if( !$self ) { 
-
+        
         warn("Need a source and id for lookup");
         return undef;
     }
-
+    
     my $solr = $self->{source}{coataglue}->mint;
-
+    
     my $handle = $self->encrypt_id;
-
+    
     # colons need to be escaped in solr queries
-
-	$handle =~ s/:/\\:/g;
-
+    
+    $handle =~ s/:/\\:/g;
+    
     my $query = join(':', 'dc_identifier', $handle);
-
+    
     $self->{log}->debug("Solr query: $query");
-
-	my $results = $solr->select(q => $query);
+    
+    my $results = $solr->select(q => $query);
     my $n = undef;
     eval {
         $n = $results->nrSelected;
     };
-
+    
     if( $@ ) {
         $self->{log}->error("Apache::Solr lookup failed: $@");
         $self->{log}->error("Check that Mint is running and/or the URL is correct");
         return undef;
     };
-    	
-	if( !$n ) {
-		$self->{log}->warn("Staff handle $handle not found");
-		return undef;
-	}
-
-	if( $n > 1 ) {
-		$self->{log}->warn("More than one Solr index with handle $handle");
-	} else {
-		$self->{log}->debug("Found a result for $handle");
-	}
-	
-	my $doc = $results->selected(0);
-
-
-	for my $field ( sort keys %{$self->{crosswalk}} ) {
+    
+    if( !$n ) {
+        $self->{log}->warn("Staff handle $handle not found");
+        return undef;
+    }
+    
+    if( $n > 1 ) {
+        $self->{log}->warn("More than one Solr index with handle $handle");
+    } else {
+        $self->{log}->debug("Found a result for $handle");
+    }
+    
+    my $doc = $results->selected(0);
+    
+    
+    for my $field ( sort keys %{$self->{crosswalk}} ) {
         my $solrf = $doc->field($self->{crosswalk}->{$field});
         $self->{$field} = $solrf->{content} || '';
-	}
-	
+    }
+    
     return $self;
 }
 

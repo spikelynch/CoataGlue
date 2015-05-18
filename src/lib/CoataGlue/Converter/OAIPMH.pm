@@ -48,15 +48,13 @@ Parameters (from DataSource.cf):
 =item item_url: Omeka item endpoint
 =item metadata_prefix: metadata format (default is oai_dc)
 =item metadata_handler: metadata XML::SAX handler, mandatory if a metadata_prefix other than oai_dc is set
-=item filter: a metadata field and a regexp    (optional)
-=item files: (optional) 
-=item basedir: (mandatory if 'files' is set) base directory in which to download files
+=item filter: a metadata field and a regexp (optional)
+=item files: (optional) base directory in which to download files
 =item dump: (optional) directory in which to dump raw OAI records
 
 =back
 
-Note that files, files_re and basedir are all optional, but if files is 
-present files_re and basedir must also be present
+
 
 =cut
 
@@ -96,17 +94,6 @@ sub init {
         $self->{hparams} = {
             metadataPrefix => $self->{metadata_prefix}
         };
-    }
-
-    if( $self->{files} ) {
-        if( ! $self->{basedir} ) {
-            $self->{log}->error("Error: 'files' is set, but 'basedir' is not");
-            $invalid = 1;
-        }
-        if( ! $self->{files_re} ) {
-            $self->{log}->error("Error: 'files' is set, but 'files_re' is not");
-            $invalid = 1;
-        }
     }
     
     if( $invalid ) {
@@ -191,7 +178,8 @@ sub read_dataset {
     my $md = $record->metadata->{md};
 
     if( $self->{filter} ) {
-        if( $md->{$self->{filter}[0]} !~ /$self->{filter}[1]/ ) {
+        if( $md->{$self->{filter}[0]}[0] !~ /$self->{filter}[1]/ ) {
+            $self->{log}->warn("Skipping record $md->{item}{itemID}: $self->{filter}[0] = $md->{$self->{filter}[0]}[0]");
             return undef;
         }
     }
@@ -224,13 +212,26 @@ sub read_dataset {
         $metadata->{tags} = join(' ', @{$md->{tags}});
     }
 
-    my $url = join('', $self->{item_url}, $md->{itemID}); 
+    my $url = join('', $self->{item_url}, $md->{itemID});
+
+    my $datastreams = {};
+    
+    if( $md->{files} ) {
+        for my $id ( keys %{$md->{files}} ) {
+            my ( $mimetype, $encoding ) = $self->mime_type(file => $md->{files}{$id}{src});
+            $datastreams->{$id} = {
+                id => $id,
+                original => $md->{files}{$id}{src},
+                mimetype => $mimetype
+            };
+        }
+    }
     
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
         location => $url,
         file => $url,
-        datastreams => [] #$datastreams
+        datastreams => $datastreams
         
         );
     
