@@ -22,7 +22,7 @@ use lib "$Bin/../lib";
 
 # Note: count = 2 + $NUMBER_OF_SOURCES * 14;
 
-use Test::More tests => 2 + 3 * 14;
+use Test::More tests => 2 + 4 * 14;
 
 use Data::Dumper;
 
