@@ -34,6 +34,22 @@ CoataGlue::Test
 Utility routines to build up test fixtures and confirm that Fedora is 
 open for business.
 
+Some explanation which I wish I'd written in 2013 when I set all this up:
+
+=over 4
+
+=item src/t/Fixtures is the version-controlled set of test fixtures and config files
+
+=item At the start of each test script which needs them, src/t/Fixures is copied to src/t/Test
+
+=item The fixtures contain metadata files in various formats, under /Capture.  Each Capture directory has a Test subdirectory (ie Capture/MIF/Test/) which holds the reference values which the tests expect the capture process to fetch.
+
+=back
+
+Note that the reference values have not been updated to reflect the
+test fixtures, which is why a lot of the tests fail.
+
+
 =cut
 
 use parent qw(Exporter);

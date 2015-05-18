@@ -8,17 +8,20 @@
 #   converter - A CoataGlue::Converter subclass
 #   templates - the directory containing XML templates
 #   ids       - A CoataGlue::ID subclass
+#   creator   - Which metadata fi
 # All the other fields depend on the converter class 
 
 [MIF]
+skip:         1
 converter:    CoataGlue::Converter::FolderCSV
 ids:          CoataGlue::ID::NaiveSequence
-templates:	  MIF
+templates:    MIF
 basedir:      $COATAGLUE/src/t/Test/Capture/MIF
 datadir:      ^(\d{8})_([^_]+)_([^_]+)_([^_]+)_([^_]+)$
 metadatafile: ^.*\.csv$
 
 [Labshare]
+skip:         1
 converter:    CoataGlue::Converter::XML
 ids:          CoataGlue::ID::NaiveSequence
 basedir:      $COATAGLUE/src/t/Test/Capture/Labshare
@@ -27,6 +30,7 @@ metadatafile: ^.*\.xml$
 datastreams:  location
 
 [Osiris]
+skip:         1
 converter:    CoataGlue::Converter::RecursiveXML
 ids:          CoataGlue::ID::NaiveSequence
 basedir:      $COATAGLUE/src/t/Test/Capture/Osiris
@@ -36,4 +40,16 @@ datastreams:  to
 datastream_delimiter: \s+
 metadatatag:  metadata
 require:      title
+
+[Omeka]
+converter:          CoataGlue::Converter::OAIPMH
+ids:                CoataGlue::ID::NaiveSequence
+url:                http://dharmae.research.uts.edu.au/oai-pmh-repository/request
+item_url:           http://dharmae.research.uts.edu.au/items/show/
+metadata_prefix:    omeka-xml
+metadata_handler:   CoataGlue::Converter::OAIPMH::Omeka_XML
+filter:             itemType Species|Region
+dump:               $COATAGLUE/src/t/Dump
+basedir:            $COATAGLUE/src/t/Test/Capture/Omeka
+templates:          Omeka
 

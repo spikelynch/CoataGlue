@@ -37,13 +37,13 @@ sub do_search {
     
     my $n = $results->nrSelected;
     
-    print "Got $n results.";
+    print "Got $n results.\n";
     
     my $doc = $results->selected(0);
     
     if( $doc ) {
         
-        print "Title: " . $doc->content('dc_title') . "\n";
+        print "\n\nTitle: " . $doc->content('dc_title') . "\n";
         print "Access: " . $doc->content('dc_accessRights') . "\n";
         
         my @names = $doc->fieldNames();

@@ -978,21 +978,21 @@ See Dataset::IDset for the details of how IDs are converted.
 =cut
 
 sub create_datastreams {
-	my ( $self, %params ) = @_;
-	
-	my $raw = $params{raw} || return undef;
-	
-	$self->{datastreams} = {};
-
+    my ( $self, %params ) = @_;
+    
+    my $raw = $params{raw} || return undef;
+    
+    $self->{datastreams} = {};
+    
     my $idset = CoataGlue::IDset->new(raw => $raw);
-
+    
     my $cooked = $idset->make_ids;
-
+    
     if( !$cooked ) {
         $self->{log}->debug("Couldn't create unique datastream IDs");
         return undef;
     }
-
+    
     for my $dsid ( sort keys %$cooked ) {
         my $oid = $cooked->{$dsid};
         $self->{datastreams}{$dsid} = CoataGlue::Datastream->new(
@@ -1007,8 +1007,8 @@ sub create_datastreams {
             return undef;
         }
     }
-
-	return $self->{datastreams};
+    
+    return $self->{datastreams};
 }
 
 

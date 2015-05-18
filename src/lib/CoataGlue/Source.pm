@@ -257,30 +257,30 @@ Set the dataset's status in the history file.
 =cut
 
 sub set_status {
-	my ( $self, %params ) = @_;
+    my ( $self, %params ) = @_;
 	
-	my $dataset = $params{dataset} || do {
-		$self->{log}->error("Can't set status for empty dataset");
-		return undef;
-	};
-	
-	if( !$dataset->{file} || !$dataset->{id} ) {
-		$self->{log}->error("dataset needs 'file' and 'id', can't set status");
-		return undef;
-	}
-	
-	
-	my $status = {
-		status => $params{status},
-		id => $dataset->{id}
-	};
-	
-	
-	if( $params{details} ) {
-		$status->{details} = $params{details};
-	}
-	
-	$self->{history}{$dataset->{file}} = $status;
+    my $dataset = $params{dataset} || do {
+        $self->{log}->error("Can't set status for empty dataset");
+        return undef;
+    };
+    
+    if( !$dataset->{file} || !$dataset->{id} ) {
+        $self->{log}->error("dataset needs 'file' and 'id', can't set status");
+        return undef;
+    }
+    
+    
+    my $status = {
+        status => $params{status},
+        id => $dataset->{id}
+    };
+    
+    
+    if( $params{details} ) {
+        $status->{details} = $params{details};
+    }
+    
+    $self->{history}{$dataset->{file}} = $status;
 }
 
 
@@ -318,68 +318,68 @@ metadata files for all datasets, not just the new ones.
 =cut
 
 sub scan {
-	my ( $self, %params ) = @_;
-	
-	$self->{log}->info(
+    my ( $self, %params ) = @_;
+    
+    $self->{log}->info(
         "Scanning $self->{name} [" . ref($self->{converter}) . "]"
         );
-
+    
     my $test = $params{test} || undef;
     my $id = $params{id} || undef;
-
+    
     if( $test ) {
         return $self->test_scan(%params);
     }
-
+    
     my $raw_keys = {};
-
-   	my @datasets = ();
-	
-	if( !$self->{locked} ) {
-		$self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
-		return ();
-	}
-
-	for my $dataset ( $self->{converter}->scan ) {
+    
+    my @datasets = ();
+    
+    if( !$self->{locked} ) {
+        $self->{log}->error("Source $self->{name} hasn't been opened: can't scan");
+        return ();
+    }
+    
+    for my $dataset ( $self->{converter}->scan ) {
         #my $handle = $dataset->handle();
-		my $status = $self->get_status(dataset => $dataset);
+        my $status = $self->get_status(dataset => $dataset);
         if( $id && $status->{id} eq $id ) {
             $dataset->{id} = $id;
             $self->{log}->info("Returning single dataset with id $id");
             return ( $dataset );
         }
-		if( $status->{status} eq 'new' ) {
-			my $id = $self->{ids}->create_id();
+        if( $status->{status} eq 'new' ) {
+            my $id = $self->{ids}->create_id();
             for my $key ( keys %{$dataset->{raw_metadata}} ) {
                 $raw_keys->{$key} = 1;
             }
-			if( $id ) {
-				$dataset->{id} = $id;
+            if( $id ) {
+                $dataset->{id} = $id;
                 $self->set_status(
                     dataset => $dataset,
                     status => 'new'
                     );
-				push @datasets, $dataset;
-				$self->{log}->info("New id for dataset: $id");
-			} else {
-				$self->{log}->error("New id for dataset $dataset->{file} failed");
-			}
-		} else {
-			$self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
-		}
-	}
-
+                push @datasets, $dataset;
+                $self->{log}->info("New id for dataset: $id");
+            } else {
+                $self->{log}->error("New id for dataset $dataset->{file} failed");
+            }
+        } else {
+            $self->{log}->info("Skipping $dataset->{file}: status = $status->{status}");
+        }
+    }
+    
     $self->{log}->debug("Raw metadata keys for $self->{name}");
     for my $key ( sort keys %$raw_keys ) {
         $self->{log}->debug(": $key");
     }
-
-
+    
+    
     if( $id ) {
         $self->{log}->error("Couldn't find dataset with id $id");
         return ();
     }
-	return @datasets;
+    return @datasets;
 }
 
 
@@ -582,87 +582,91 @@ if it hasn't yet been built)
 =cut
 
 sub crosswalk {
-	my ( $self, %params ) = @_;
-	
-	my $view = $params{view} || 'metadata';
-
-	my $ds = $params{dataset};
-	
-	if( !$self->{template_cf}{$view} ) {
-		$self->{log}->error("View '$view' not defined in template file for $self->{name}");
-		return undef;
-	}
-	if( !$ds ) {
-		$self->{log}->error("crosswalk needs a dataset");
-		return undef;
-	}
-	my $view_name = $view;
-	my $view = $self->{template_cf}{$view_name};
-	my $handlers = $self->{template_handlers}{$view_name} || undef;
-	
-	my $original;
-	
-	if( $view_name eq 'metadata' ) {
-		$original = $ds->{raw_metadata};
-	} else {
-		if( !defined $ds->{metadata} ) {
-			$self->crosswalk(
-				view => 'metadata',
-				dataset => $ds
-			)
-		}
-		$original = $ds->{metadata};
-	}
-	my $new = {};
-	
+    my ( $self, %params ) = @_;
+    
+    my $view = $params{view} || 'metadata';
+    
+    my $ds = $params{dataset};
+    
+    if( !$self->{template_cf}{$view} ) {
+        $self->{log}->error("View '$view' not defined in template file for $self->{name}");
+        return undef;
+    }
+    if( !$ds ) {
+        $self->{log}->error("crosswalk needs a dataset");
+        return undef;
+    }
+    my $view_name = $view;
+    my $view = $self->{template_cf}{$view_name};
+    my $handlers = $self->{template_handlers}{$view_name} || undef;
+    
+    my $original;
+    
+    if( $view_name eq 'metadata' ) {
+        $original = $ds->{raw_metadata};
+    } else {
+        if( !defined $ds->{metadata} ) {
+            $self->crosswalk(
+                view => 'metadata',
+                dataset => $ds
+                )
+        }
+        $original = $ds->{metadata};
+    }
+    my $new = {};
+    
     $self->{log}->trace("view keys = " . join(' ', keys %$view));
-
-	for my $field ( keys %$view ) {
-		if( $view->{$field} =~ /\.tt$/ ) {
-			$new->{$field} = $self->expand_template(
-				template => $view->{$field},
-				metadata => $original
-			);
-		} else {
-			my $mdfield = $view->{$field};
+    
+    for my $field ( keys %$view ) {
+        if( $view->{$field} =~ /\.tt$/ ) {
+            $new->{$field} = $self->expand_template(
+                template => $view->{$field},
+                metadata => $original
+                );
+        } else {
+            my $mdfield = $view->{$field};
             $self->{log}->trace("mdfield = $mdfield");
             if( $mdfield =~ /^"(.*)"$/ ) {
                 $self->{log}->trace("Expanding literal $field = $1");
                 $new->{$field} = $1;
             } elsif( !defined $original->{$mdfield} ) {
-				$new->{$field} = '';
-			} else {
-				if( $handlers && $handlers->{$field} ) {
-					my $h = $handlers->{$field};
-					$new->{$field} = &$h($original->{$mdfield});
-				} else {
-					$new->{$field} = $original->{$mdfield};
-				}
-			}
+                $new->{$field} = '';
+            } else {
+                if( $handlers && $handlers->{$field} ) {
+                    my $h = $handlers->{$field};
+                    $new->{$field} = &$h($original->{$mdfield});
+                } else {
+                    $new->{$field} = $original->{$mdfield};
+                }
+            }
             $self->{log}->trace(
                 "Crosswalked $mdfield='$original->{$mdfield}' to $field='$new->{$field}'"
                 );
-
-		}
-	}
-	
-	if( $view_name eq 'metadata' ) {
-		$ds->{metadata} = $new;
-		$ds->{datecreated} = $ds->{metadata}{datecreated};
-        my $id = $ds->{metadata}{creator};
-        my $creator = {};
-        if( my $person = $self->get_person(id => $id) ) {
-            $ds->{metadata}{creator} = $person->creator;
-        } else {
-            $self->{log}->error(
-                "Warning: dataset $ds->{id} creator $id not found"
-                );
-            $ds->{metadata}{creator} = { staffid => $id };
+            
         }
-	} else {
-		$ds->{views}{$view_name} = $new;
-	}
-	return $new;
+    }
+    
+    if( $view_name eq 'metadata' ) {
+        $ds->{metadata} = $new;
+        $ds->{datecreated} = $ds->{metadata}{datecreated};
+        my $id = $ds->{metadata}{creator};
+        if( ! $id ) {
+            $self->{log}->warn("Dataset with no creator id");
+        } else {
+            my $creator = {};
+            if( my $person = $self->get_person(id => $id) ) {
+                $ds->{metadata}{creator} = $person->creator;
+            } else {
+                $self->{log}->error(
+                    "Warning: dataset $ds->{id} creator $id not found"
+                    );
+                $ds->{metadata}{creator} = { staffid => $id };
+            }
+        }
+    } else {
+        $ds->{views}{$view_name} = $new;
+    }
+    return $new;
 }
 
 =item get_person(id => $id)
@@ -674,10 +678,10 @@ Mint.
 
 
 sub get_person {
- 	my ( $self, %params ) =  @_;
- 	
- 	my $id = $params{id};
-
+    my ( $self, %params ) =  @_;
+    
+    my $id = $params{id};
+    
     my $person = CoataGlue::Person->lookup(
         source => $self,
         id => $id
@@ -691,12 +695,12 @@ sub get_person {
 
 
 =item staff_id_to_handle
-
-This method has been superseded by get_person (above) but I'm leaving it
-in because some of the tests use it.  FIXME
-
+    
+    This method has been superseded by get_person (above) but I'm leaving it
+    in because some of the tests use it.  FIXME
+    
 =cut
-
+    
 sub staff_id_to_handle {
  	my ( $self, %params ) =  @_;
  	
@@ -914,22 +918,22 @@ Generates a handler function for a field, based on $expr.
 =cut
 
 sub make_handler {
-	my ( $self, %params ) = @_;
-	
-	my $expr = $params{expr};
+    my ( $self, %params ) = @_;
+    
+    my $expr = $params{expr};
     my $field = $params{field};
-
-	if( $expr->[0] eq 'date' ) {
-		shift @$expr;
-		return $self->date_handler(field => $field, expr => $expr);
-	} elsif( $expr->[0] eq 'map' ) {
+    
+    if( $expr->[0] eq 'date' ) {
+        shift @$expr;
+        return $self->date_handler(field => $field, expr => $expr);
+    } elsif( $expr->[0] eq 'map' ) {
         return $self->map_handler(field => $field, map => $expr->[1]);
     } elsif( $expr->[0] eq 'timestamp' ) {
         return $self->timestamp_handler(field => $field, expt => $expr)
     } else {
-		$self->{log}->error("Unknown handler '$expr->[0]'");
-		return undef;
-	}
+        $self->{log}->error("Unknown handler '$expr->[0]'");
+        return undef;
+    }
 }
 
 
