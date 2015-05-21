@@ -1,0 +1,14 @@
+# Crosswalk config file for Omeka metadata
+
+# metadata maps: standard_field: local_field
+
+[metadata]
+title: 		title
+project: 	collection
+creator:        creator
+datecreated:    date (\d+)-(\d+)-(\d+) YEAR MON DAY
+description:	description
+service:	"omeka"
+access:         access
+spatial:        spatial
+keywords:       tags
