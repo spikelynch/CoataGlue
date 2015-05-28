@@ -140,7 +140,7 @@ sub scan {
     while ( my $record = $records->next() ) {
         if( my $dataset = $self->read_dataset(record => $record ) ) {
             if( $dataset ) {
-                push @datasets, $dataset
+                push @datasets, $dataset;
             }
         }
     }
@@ -177,6 +177,9 @@ sub read_dataset {
     my $header = $record->header;
     my $md = $record->metadata->{md};
 
+#    $self->{log}->debug(Dumper({ md => $md }));
+
+    
     if( $self->{filter} ) {
         if( $md->{$self->{filter}[0]}[0] !~ /$self->{filter}[1]/ ) {
             $self->{log}->warn("Skipping record $md->{item}{itemID}: $self->{filter}[0] = $md->{$self->{filter}[0]}[0]");

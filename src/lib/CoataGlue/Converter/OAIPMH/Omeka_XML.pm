@@ -128,17 +128,20 @@ sub close_item {
 }
 
 
-# close_collection - all we use from collection are the id and Title
+# Getting the full DC metadata out of the collection so it can be
+# used as the creator for items which don't have one at the top level
 
 sub open_collection {
     my ( $self, $node ) = @_;
+
+    $self->{md}{collectionID} = $self->att($node, 'collectionId');
 }
 
 sub close_collection {
     my ( $self, $node ) = @_;
 
-    $self->{md}{collectionID} = $self->att($node, 'collectionId');
-    $self->{md}{collectionTitle} = $self->{elementset}{Title};
+    $self->{md}{collection} = $self->{elementset};
+
     $self->{elementset} = {};
 }
 
@@ -270,8 +273,6 @@ sub close_element {
         warn("<element> without <name> and <elementTextContainer>");
     }
 }
-
-
 
 
 

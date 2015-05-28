@@ -477,6 +477,8 @@ sub dataset {
 		$self->{log}->error("New dataset needs metadata, location and file");
 		return undef;
 	}
+
+        $self->{log}->warn(Dumper( { metadata => $metadata } ));
 	
 	my $dataset = CoataGlue::Dataset->new(
 		source => $self,
@@ -740,36 +742,41 @@ Returns the resulting XML.
 =cut
 
 sub render_view {
-	my ( $self, %params ) = @_;
-	
-	my $view = $params{view} || 'metadata';
-	my $dataset = $params{dataset};
+    my ( $self, %params ) = @_;
+    
+    my $view = $params{view} || 'metadata';
+    my $dataset = $params{dataset};
     my $subtt_args = $self->{template_args}{$view} || undef;
-
-	
-	if( !$dataset ) {
-		$self->{log}->error("render_view needs a dataset");
-		return undef;
-	}
-
-	my $elements = $self->crosswalk(
-		view => $view,
-		dataset => $dataset
+    
+    
+    if( !$dataset ) {
+        $self->{log}->error("render_view needs a dataset");
+        return undef;
+    }
+    
+    my $elements = $self->crosswalk(
+        view => $view,
+        dataset => $dataset
 	);
-	
-	my $output;
-	
-	my $writer = XML::Writer->new(
+    
+    my $output;
+    
+    my $writer = XML::Writer->new(
         OUTPUT => \$output,
         DATA_MODE => 1,
         DATA_INDENT => 4,
         UNSAFE => 1       # required for passing raw XML through
         
         );
-	$writer->startTag($view);
-	$self->write_header_XML(
-		writer => $writer,
-		dataset => $dataset
+
+    my $md = $dataset->metadata();
+
+    $self->{log}->info(Dumper ( { md => $md } ) );
+    
+    $writer->startTag($view);
+    $self->write_header_XML(
+        writer => $writer,
+        dataset => $dataset
 	);
     if( $view eq 'metadata' ) {
         $self->write_creator_XML(
@@ -777,23 +784,23 @@ sub render_view {
             dataset => $dataset
             );
     }
-
+    
     # CREATEXML
     
-
-	for my $tag ( sort keys %$elements ) {
+    
+    for my $tag ( sort keys %$elements ) {
         next if( $view eq 'metadata' && $tag =~ /access|creator/ );
-		$writer->startTag($tag);
+        $writer->startTag($tag);
         if( $subtt_args && $subtt_args->{$tag} && $subtt_args->{$tag}[0] eq 'raw' ) {
             $writer->raw($elements->{$tag});
         } else {
             $writer->characters($elements->{$tag});
         }
-		$writer->endTag();
-	}
-	$writer->endTag();
-	
-	return $output;
+        $writer->endTag();
+    }
+    $writer->endTag();
+    
+    return $output;
 }
 
 
@@ -829,20 +836,29 @@ Add the standard creator tag
 =cut
 
 sub write_creator_XML {
-	my ( $self, %params ) = @_;
-	
-	my $dataset = $params{dataset};
-	my $writer = $params{writer};
-	
-	my $creator = $dataset->metadata()->{creator};
+    my ( $self, %params ) = @_;
+    
+    my $dataset = $params{dataset};
+    my $writer = $params{writer};
+    
+    my $creator = $dataset->metadata()->{creator};
 
-	$writer->startTag('creator');	
-	for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
-		$writer->startTag($field);
-		$writer->characters($creator->{$field});
-		$writer->endTag();
-	}
-	$writer->endTag();
+    $self->{log}->info(Dumper( { creator => $creator } ) );
+
+    $writer->startTag('creator');	
+
+    if( $creator ) {
+    
+        for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
+            $writer->startTag($field);
+            $writer->characters($creator->{$field});
+            $writer->endTag();
+        }
+    } else {
+        $self->{log}->error("No creator for dataset");
+    }
+    $writer->endTag();
+
 }
 
 
