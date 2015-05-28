@@ -652,8 +652,9 @@ sub crosswalk {
         $ds->{metadata} = $new;
         $ds->{datecreated} = $ds->{metadata}{datecreated};
         my $id = $ds->{metadata}{creator};
-        if( ! $id ) {
-            $self->{log}->warn("Dataset with no creator id");
+        if( $id !~ /^\d+$/ ) {
+            $self->{log}->warn("Creator is not a staff id");
+            $ds->{metadata}{creator} = $id;
         } else {
             my $creator = {};
             if( my $person = $self->get_person(id => $id) ) {
@@ -704,20 +705,20 @@ sub get_person {
 =cut
     
 sub staff_id_to_handle {
- 	my ( $self, %params ) =  @_;
- 	
- 	my $id = $params{id};
- 	
-	my $p = CoataGlue::Person->new(source => $self, id => $id) || do {
-		$self->{log}->error("Couldn't create CoataGlue::Person");
-		die;
-	};
-
-	my $handle = $p->encrypt_id;
-
-	$self->{log}->debug("Staff id $id => handle $handle");
-
-	return $handle;
+    my ( $self, %params ) =  @_;
+    
+    my $id = $params{id};
+    
+    my $p = CoataGlue::Person->new(source => $self, id => $id) || do {
+        $self->{log}->error("Couldn't create CoataGlue::Person");
+        die;
+    };
+    
+    my $handle = $p->encrypt_id;
+    
+    $self->{log}->debug("Staff id $id => handle $handle");
+    
+    return $handle;
 }
 
 
@@ -790,13 +791,23 @@ sub render_view {
     
     for my $tag ( sort keys %$elements ) {
         next if( $view eq 'metadata' && $tag =~ /access|creator/ );
-        $writer->startTag($tag);
         if( $subtt_args && $subtt_args->{$tag} && $subtt_args->{$tag}[0] eq 'raw' ) {
+            $writer->startTag($tag);
             $writer->raw($elements->{$tag});
+            $writer->endTag();
         } else {
-            $writer->characters($elements->{$tag});
+            if( ref($elements->{$tag}) eq 'ARRAY' ) {
+                for my $chars ( @{$elements->{$tag}} ) {
+                    $writer->startTag($tag);
+                    $writer->characters($chars);
+                    $writer->endTag();
+                }
+            } else {
+                $writer->startTag($tag);
+                $writer->characters($elements->{$tag});
+                $writer->endTag();
+            }
         }
-        $writer->endTag();
     }
     $writer->endTag();
     
@@ -845,19 +856,23 @@ sub write_creator_XML {
 
     $self->{log}->info(Dumper( { creator => $creator } ) );
 
-    $writer->startTag('creator');	
-
-    if( $creator ) {
-    
+    if( ref($creator) eq 'HASH' ) {
+        $writer->startTag('creator');	
         for my $field ( qw(staffid mintid name givenname familyname honorific jobtitle groupid) ) {
             $writer->startTag($field);
             $writer->characters($creator->{$field});
             $writer->endTag();
         }
+        $writer->endTag();
+    } elsif( ref($creator) eq 'ARRAY' ) {
+        for my $c ( @$creator ) {
+            $writer->startTag('creator');
+            $writer->characters($c);
+            $writer->endTag();
+        }
     } else {
         $self->{log}->error("No creator for dataset");
     }
-    $writer->endTag();
 
 }
 
@@ -1019,9 +1034,9 @@ sub date_handler {
                 return undef;
             }
 			return strftime(
-				$timefmt, $val->{SEC}, $val->{MIN}, $val->{HOUR},
-				$val->{DAY}, $val->{MON} - 1, $val->{YEAR} - 1900
- 				);
+                            $timefmt, $val->{SEC}, $val->{MIN}, $val->{HOUR},
+                            $val->{DAY}, $val->{MON} - 1, $val->{YEAR} - 1900
+                            );
 		} else {
 			$self->{log}->error("Invalid date '$value'");
 			$self->{log}->debug(Dumper(

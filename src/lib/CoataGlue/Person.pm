@@ -39,39 +39,39 @@ It needs a staff ID and a CoataGlue::Source, at least.
 =cut
 
 sub new {
-	my ( $class, %params ) = @_;
-	
-	my $self = {};
-	bless $self, $class;
-	
-	$self->{log} = Log::Log4perl->get_logger($class);
-
+    my ( $class, %params ) = @_;
+    
+    my $self = {};
+    bless $self, $class;
+    
+    $self->{log} = Log::Log4perl->get_logger($class);
+    
     for my $key ( %params ) {
         $self->{$key} = $params{$key};
     }
-
+    
     my $error = undef;
-
+    
     for my $field ( @MANDATORY_PARAMS ) {
         if( !$self->{$field} ) {
             $self->{log}->error("$class requires an id");
             $self->{log}->error("Miscreant responsible: " . join(' ', caller));
             $error = 1;
         }
-	}
-
+    }
+    
     if( $error ) {
         return undef;
     }
-
+    
     my $cg = $self->{source}{coataglue};
-
+    
     $self->{key} = $cg->conf('Redbox', 'cryptkey');
     $self->{prefix} = $cg->conf('General', 'handles' )
         . $cg->conf('Redbox', 'staffhandle');
     $self->{crosswalk} = $cg->conf('PersonCrosswalk');
-
-	return $self;
+    
+    return $self;
 }
 
 
@@ -182,7 +182,7 @@ sub creator {
             $self->{honorific}, $self->{givenname}, $self->{familyname}
             )
     };
-
+    
     return $creator;
 }
 
@@ -200,31 +200,31 @@ Encrypt a staff ID to put in a handle
 
 
 sub encrypt_id {
-	my ( $self, %params ) = @_;
-	
-	if( $self->{key} !~ /^[0-9A-F]{20}$/ ) {
-		$self->{log}->error("cryptKey must be a 20-digit hexadecimal number.");
-		die("Invalid cryptKey - must be 20-digit hex");
-	}
-
-	my $id = $self->{id};	
-	
-	my $keybytes = pack("H20", $self->{key});
-	
-	my $cypher = Crypt::Skip32->new($keybytes);
-	
-	my $plaintext = pack("N", $id);
-	my $encrypted = $cypher->encrypt($plaintext);
-	$self->{encrypted_id} = unpack("H8", $encrypted);
+    my ( $self, %params ) = @_;
+    
+    if( $self->{key} !~ /^[0-9A-F]{20}$/ ) {
+        $self->{log}->error("cryptKey must be a 20-digit hexadecimal number.");
+        die("Invalid cryptKey - must be 20-digit hex");
+    }
+    
+    my $id = $self->{id};	
+    
+    my $keybytes = pack("H20", $self->{key});
+    
+    my $cypher = Crypt::Skip32->new($keybytes);
+    
+    my $plaintext = pack("N", $id);
+    my $encrypted = $cypher->encrypt($plaintext);
+    $self->{encrypted_id} = unpack("H8", $encrypted);
     if( $self->{prefix} ne 'none' ) {
         $self->{encrypted_id} = $self->{prefix} . $self->{encrypted_id};
     }
-	$self->{log}->trace("Encrypted $id to $self->{encrypted_id}");
-	return $self->{encrypted_id};
+    $self->{log}->trace("Encrypted $id to $self->{encrypted_id}");
+    return $self->{encrypted_id};
 }	
 
 =back
-
+    
 =cut
 
 1;

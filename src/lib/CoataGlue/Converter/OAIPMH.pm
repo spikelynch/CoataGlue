@@ -13,14 +13,12 @@ use File::Fetch;
 
 my @MANDATORY_FIELDS =  qw(url item_url);
 
-my @OMEKA_ITEM_FIELDS = (
+my @OMEKA_SIMPLE_FIELDS = (
     'Title',
     'CollectionTitle',
-    'Creator',
     'Date',
     'Description',
-    'Access Rights',
-    'Spatial Coverage'
+    'Access Rights'
     );
 
 my $DEFAULT_METADATA = 'oai_dc';
@@ -201,15 +199,43 @@ sub read_dataset {
 
     my $item = $md->{item};
 
-    for my $field ( @OMEKA_ITEM_FIELDS ) {
+    for my $field ( @OMEKA_SIMPLE_FIELDS ) {
         my $cvt_field = lc($field);
         $cvt_field =~ s/\s/_/;
-        if( $item->{$field} && ref($item->{$field}) eq 'ARRAY' ) {
-            $metadata->{$cvt_field} = join(' ', @{$item->{$field}});
+        if ( ref($item->{$field}) eq 'ARRAY' && @{$item->{$field}} ) {
+            if( @{$item->{$field}} > 1 ) {
+                $self->{log}->error("More than one value for $field");
+            }   
+            $metadata->{$cvt_field} = $item->{$field}[0];
         } else {
-            $metadata->{$cvt_field} = '';
+            $self->{log}->warn("No value found for $field");
         }
     }
+
+    if( $item->{Creator} && scalar(@{$item->{Creator}}) ) {
+        $metadata->{creator} = $item->{Creator};
+    }  elsif( my $collection = $md->{collection} ) {
+        if( $collection->{Creator} && scalar(@{$collection->{Creator}}) ) {
+            $metadata->{creator} = $collection->{Creator};
+        } else {
+            $self->{log}->warn("Could not get a creator from collection");
+        }
+    } else {
+        $self->{log}->warn("Item has no creator or collection");
+    } 
+
+    
+    if( my $raw_spatial = $item->{'Spatial Coverage'} ) {
+        #$self->{log}->warn("VVVVVV spatial = $raw_spatial");
+        if( ref($raw_spatial) ) {
+            $metadata->{spatial_coverage} = $raw_spatial;
+        } else {
+            $metadata->{spatial_coverage} = [ $raw_spatial ];
+        }
+    } else {
+        #$self->{log}->warn("VVVVVV empty spatial");
+    }
+
 
     if( $md->{tags} && ref($md->{tags}) eq 'ARRAY' ) {
         $metadata->{tags} = join(' ', @{$md->{tags}});
@@ -229,6 +255,8 @@ sub read_dataset {
             };
         }
     }
+
+    $self->{log}->debug(Dumper( { metadata => $metadata }));
 
     my $dataset = $self->{source}->dataset(
         metadata => $metadata,
